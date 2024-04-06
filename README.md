@@ -1,5 +1,5 @@
 # nand2tetris solutions for the 12 projects to build the Hack computer
-1. Logic gates where each gate uses the previous implementation of gates going all the way back to the primitive nand gate
+1. Logic gates
 2. ALU and memory units using the logic gates from 1
 3. Part 2 of ALU and memory units
 4. Assembly programs for the Hack computer
