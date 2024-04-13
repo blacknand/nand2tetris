@@ -1,1 +1,1 @@
-readme is cringe and so is this readme 
+https://www.nand2tetris.org/
