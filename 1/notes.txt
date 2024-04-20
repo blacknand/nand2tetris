@@ -1,0 +1,3 @@
+- ^ represents AND
+	x ^ Y
+- OR is the opposite of AND
