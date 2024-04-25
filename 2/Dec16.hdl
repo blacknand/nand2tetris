@@ -1,0 +1,16 @@
+// Not part of nand2tetris, I made it by accident
+
+/**
+ * 16-bit decrementer:
+ * out = in - 1
+ */
+
+CHIP Dec16 {
+    IN in[16];
+    OUT out[16];
+
+    PARTS:
+    Not16(in=in[0..15], out=notOut);
+    Add16(a=notOut, b=in[0..15], out=addOut1);
+    Add16(a=addOut1, b=in[0..15], out=out[0..15]);
+}
