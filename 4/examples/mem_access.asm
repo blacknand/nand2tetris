@@ -1,3 +1,6 @@
+// Figure 4.3 in Machine Language chapter
+
+
 // D = 17
 @17
 D=A

@@ -1,3 +1,6 @@
+// Figure 4.3 in Machine Language chapter
+
+
 // goto 29
 @29
 0;JMP

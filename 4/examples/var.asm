@@ -1,3 +1,6 @@
+// Figure 4.3 in Machine Language chapter
+
+
 // X = -1
 @X
 M=-1
