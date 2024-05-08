@@ -7,4 +7,19 @@
 // (R0, R1, R2 refer to RAM[0], RAM[1], and RAM[2], respectively.)
 // The algorithm is based on repetitive addition.
 
-//// Replace this comment with your code.
+
+    @R0
+
+    @R1
+    
+
+(LOOP)
+
+    @R2
+
+
+(END)
+
+    // Terminate program
+    @END
+    0;JMP
