@@ -8,31 +8,43 @@
 // The algorithm is based on repetitive addition.
 
 // Pseudocode
-// For i in R1
-    // if (counter > R1)
+// For i in R0
+    // if (counter > R0)
         // goto STOP
     // R2 = R1 + R0
     // counter = counter + 1
-    // if (counter < R1)
+    // if (counter < R0)
         // GOTO beginning of for loop
 
 (LOOP)
 
-    // TODO: if counter > R0 goto END
+    // If (counter > R0) goto END
+    @counter
+    D=M
+    @R0
+    D=D-M           // R0 = counter - R0
+    @END
+    D;JGT
 
-    // TODO: implement counter for each iteration in LOOP
+    // counter++ for i in R0
     @counter
     M=M+1
 
-    // TODO: assign R2 = R1 + R0
+    // R2 = R1 + R0
     @R1
     D=M
     @R0
     D=D+M
     @R2
     M=D
-
-    // TODO: if counter < R0 goto LOOP
+ 
+    // if (counter < R0) goto LOOP
+    @R0
+    D=M
+    @counter
+    D=D+M
+    @LOOP
+    D;JLT
 
 (END)
 
