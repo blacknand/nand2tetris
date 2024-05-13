@@ -18,21 +18,21 @@
 
 (LOOP)
 
-    // If (count > R1)
-    @END
-    R1;JGT
+    // TODO: if counter > R0 goto END
 
-    // Counter for i in R1
-    @count
+    // TODO: implement counter for each iteration in LOOP
+    @counter
     M=M+1
 
-    // R2 = R1 + R2
+    // TODO: assign R2 = R1 + R0
+    @R1
+    D=M
+    @R0
+    D=D+M
     @R2
-    M=R1+R2
+    M=D
 
-    // If (count < R1)
-    @LOOP
-    R1;JLT
+    // TODO: if counter < R0 goto LOOP
 
 (END)
 
