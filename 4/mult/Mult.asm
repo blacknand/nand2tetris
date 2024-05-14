@@ -13,8 +13,7 @@
         // Terminate program
     // R2 = R2 + R1
     // counter = counter + 1
-    // if (counter < R0)
-        // Go back to beginning of for loop
+    // goto beginning of for loop
 
     // Initalise counter, R0, R1, R2 to 0
     @counter
@@ -31,7 +30,7 @@
 
 (LOOP)
 
-    // if (counter > R0)
+    // if (counter > R0) goto TERMINATE
     @counter
     D=M
     @R0
@@ -51,16 +50,15 @@
     @counter
     M=M+1
 
-    // if (counter < R0)
-    @R0
-    D=M
-    @counter
-    D=D-M                                   // Difference between R0 and counter; R0 - counter
+    // goto LOOP
     @LOOP
-    D;JGT
+    D;JLT
 
 
 (TERMINATE)
 
+    // Terminate program by getting
+    // intentionally stuck in an infinite loop
+    // and letting the assembler deal with it
     @TERMINATE
     0;JMP
