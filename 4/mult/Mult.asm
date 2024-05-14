@@ -8,47 +8,59 @@
 // The algorithm is based on repetitive addition.
 
 // Pseudocode
-// For i in R0
+// for i in R0
     // if (counter > R0)
-        // goto STOP
-    // R2 = R1 + R0
+        // Terminate program
+    // R2 = R2 + R1
     // counter = counter + 1
     // if (counter < R0)
-        // GOTO beginning of for loop
+        // Go back to beginning of for loop
+
+    // Initalise counter, R0, R1, R2 to 0
+    @counter
+    M=0
+
+    @R0
+    M=0
+
+    @R1
+    M=0
+
+    @R2
+    M=0
 
 (LOOP)
 
-    // If (counter > R0) goto END
+    // if (counter > R0)
     @counter
     D=M
     @R0
-    D=D-M           // R0 = counter - R0
-    @END
+    D=D-M                                   // Difference between counter and R0; counter - R0
+    @TERMINATE
     D;JGT
 
-    // counter++ for i in R0
-    @counter
-    M=M+1
-
-    // R2 = R1 + R0
-    @R1
+    // R2 = R2 + R1
+    @R2
     D=M
-    @R0
+    @R1
     D=D+M
     @R2
     M=D
- 
-    // if (counter < R0) goto LOOP
+
+    // counter++
+    @counter
+    M=M+1
+
+    // if (counter < R0)
     @R0
     D=M
     @counter
-    D=D+M
+    D=D-M                                   // Difference between R0 and counter; R0 - counter
     @LOOP
-    D;JLT
+    D;JGT
 
-(END)
 
-    // Terminate program
-    // by intentionally getting stuck in infinite loop
-    @END
+(TERMINATE)
+
+    @TERMINATE
     0;JMP
