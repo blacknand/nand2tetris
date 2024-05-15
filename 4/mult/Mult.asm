@@ -15,14 +15,8 @@
     // counter = counter + 1
     // goto beginning of for loop
 
-    // Initalise counter, R0, R1, R2 to 0
+    // Initalise counter and R2 to 0
     @counter
-    M=0
-
-    @R0
-    M=0
-
-    @R1
     M=0
 
     @R2
