@@ -8,7 +8,7 @@
 // The algorithm is based on repetitive addition.
 
 // Pseudocode
-// for i in R0
+// for i in R0 (sequence of 1s)
     // if (counter > R0)
         // Terminate program
     // R2 = R2 + R1
@@ -24,13 +24,13 @@
 
 (LOOP)
 
-    // if (counter > R0) goto TERMINATE
+    // if (counter >= R0) goto TERMINATE
     @counter
     D=M
     @R0
     D=D-M                                   // Difference between counter and R0; counter - R0
     @TERMINATE
-    D;JGT
+    D;JGE
 
     // R2 = R2 + R1
     @R2
@@ -44,9 +44,9 @@
     @counter
     M=M+1
 
-    // goto LOOP
+    // if (R0 != 0) goto LOOP
     @LOOP
-    D;JLT
+    0;JMP
 
 
 (TERMINATE)
