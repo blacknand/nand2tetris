@@ -8,4 +8,22 @@
 // i.e. writes "black" in every pixel. When no key is pressed, 
 // the screen should be cleared.
 
-//// Replace this comment with your code.
+(LOOP)
+
+    @KBD
+    D=M
+    @BLACK
+    D;JGT
+  
+(BLACK)
+
+    @SCREEN
+    M=-1
+
+(WHITE)
+
+    @SCREEN
+    M=0
+
+    @LOOP
+    0;JMP
