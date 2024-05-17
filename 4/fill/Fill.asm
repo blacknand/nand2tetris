@@ -8,22 +8,39 @@
 // i.e. writes "black" in every pixel. When no key is pressed, 
 // the screen should be cleared.
 
+    @counter
+    M=0
+
 (LOOP)
 
     @KBD
     D=M
-    @BLACK
+    // If key is pressed
+    @FILL_SCREEN
     D;JGT
-  
-(BLACK)
+    // If no key is pressed
+    @CLEAR_SCREEN
+    D;JEQ
 
+(FILL_SCREEN)
+
+    // *(SCREEN + counter) = -1
     @SCREEN
+    D=M
+    @counter
+    A=D+M
+    @LOOP
     M=-1
 
-(WHITE)
+(CLEAR_SCREEN)
 
+    // *(SCREEN + counter) = 0
     @SCREEN
+    A=M+1
     M=0
 
+    // TODO: find some way to limit the accessible ram
     @LOOP
     0;JMP
+
+
