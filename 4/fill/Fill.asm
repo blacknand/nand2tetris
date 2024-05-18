@@ -13,74 +13,64 @@
 // else if KBD == 0 then loop to CLEAR_SCREEN
 // and increment a pointer to the adresses starting from SCREEN. 
 
-    // Initalise counter to 0
+    // Initialise
     @counter
     M=0
-
-    @var
+    @limit
     M=0
-    D=M
 
-    // var = 24576 - 16384 
-    // if var == 0 then stop
+    // limit = 24576 - 16384 
+    // 24576 == address of KBD
+    // 16384 == address of SCREEN
+    @limit
+    D=M
     @KBD
     D=A
-    @var
+    @limit
     D=D+M
     @SCREEN
     D=D-A
-    @var
+    @limit
     M=D
-
-    // if counter - var == -1
-    // stop
-
-    // or if counter - var == 0
-    // stop
-
-    // or if counter - var == 1
-    // stop
 
 (LOOP)
 
-// (FILL_SCREEN)
-
-    // if counter - var == 1 stop to prevent from touching illegal memory
+    // if (counter - limit == 1) goto LOOP
     @counter
     D=M
-    @var
+    @limit
     D=D-M
     @LOOP
     D;JGT
 
-    @var
+    @KBD
     D=M
-    @END
+    // If any key is being pressed
+    @FILL_SCREEN
+    D;JGT
+    // If no key is being pressed
+    @CLEAR_SCREEN
     D;JEQ
 
+    @counter
+    M=M+1
+
+(FILL_SCREEN)
     // *(SCREEN + counter) = -1
     @SCREEN
     D=A
     @counter
     A=D+M
     M=-1
-
-// (CLEAR_SCREEN)
-
-    // *(SCREEN + counter) = 0
-    // @SCREEN
-    // D=A
-    // @counter
-    // A=D+M
-    // M=0
-
-    @counter
-    M=M+1
-
     @LOOP
     0;JMP
 
-(END)
-
-    @END
+(CLEAR_SCREEN)
+    // *(SCREEN + counter) = 0
+    @SCREEN
+    D=A
+    @counter
+    A=D+M
+    M=0
+    @LOOP
     0;JMP
