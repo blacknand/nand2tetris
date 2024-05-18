@@ -8,39 +8,79 @@
 // i.e. writes "black" in every pixel. When no key is pressed, 
 // the screen should be cleared.
 
+// evaluate if KBD is > 0 then a key has been pressed, 
+// then loop to FILL_SCREEN and increment a pointer to the adresses starting from SCREEN 
+// else if KBD == 0 then loop to CLEAR_SCREEN
+// and increment a pointer to the adresses starting from SCREEN. 
+
+    // Initalise counter to 0
     @counter
     M=0
+
+    @var
+    M=0
+    D=M
+
+    // var = 24576 - 16384 
+    // if var == 0 then stop
+    @KBD
+    D=A
+    @var
+    D=D+M
+    @SCREEN
+    D=D-A
+    @var
+    M=D
+
+    // if counter - var == -1
+    // stop
+
+    // or if counter - var == 0
+    // stop
+
+    // or if counter - var == 1
+    // stop
 
 (LOOP)
 
-    @KBD
-    D=M
-    // If key is pressed
-    @FILL_SCREEN
-    D;JGT
-    // If no key is pressed
-    @CLEAR_SCREEN
-    D;JEQ
+// (FILL_SCREEN)
 
-(FILL_SCREEN)
+    // if counter - var == 1 stop to prevent from touching illegal memory
+    @counter
+    D=M
+    @var
+    D=D-M
+    @LOOP
+    D;JGT
+
+    @var
+    D=M
+    @END
+    D;JEQ
 
     // *(SCREEN + counter) = -1
     @SCREEN
-    D=M
+    D=A
     @counter
     A=D+M
-    @LOOP
     M=-1
 
-(CLEAR_SCREEN)
+// (CLEAR_SCREEN)
 
     // *(SCREEN + counter) = 0
-    @SCREEN
-    A=M+1
-    M=0
+    // @SCREEN
+    // D=A
+    // @counter
+    // A=D+M
+    // M=0
 
-    // TODO: find some way to limit the accessible ram
+    @counter
+    M=M+1
+
     @LOOP
     0;JMP
 
+(END)
 
+    @END
+    0;JMP
