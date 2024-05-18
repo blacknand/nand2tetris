@@ -35,12 +35,12 @@
 
 (LOOP)
 
-    // if (counter - limit == 1) goto LOOP
+    // if (counter > limit) goto RESET 
     @counter
     D=M
     @limit
     D=D-M
-    @LOOP
+    @RESET
     D;JGT
 
     @KBD
@@ -52,9 +52,7 @@
     @CLEAR_SCREEN
     D;JEQ
 
-    @counter
-    M=M+1
-
+// Make every pixel 1 (black)
 (FILL_SCREEN)
     // *(SCREEN + counter) = -1
     @SCREEN
@@ -62,9 +60,14 @@
     @counter
     A=D+M
     M=-1
+    // counter++
+    @counter
+    M=M+1
+    // goto LOOP
     @LOOP
     0;JMP
 
+// Make every pixel 0 (white)
 (CLEAR_SCREEN)
     // *(SCREEN + counter) = 0
     @SCREEN
@@ -72,5 +75,17 @@
     @counter
     A=D+M
     M=0
+    // counter++
+    @counter
+    M=M+1
+    // goto LOOP 
+    @LOOP
+    0;JMP
+
+// Reset so every pixel is white
+(RESET)
+    @counter
+    M=0
+    // goto LOOP
     @LOOP
     0;JMP
