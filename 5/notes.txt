@@ -1,0 +1,7 @@
+MSB (left most)
+LSB (right most)
+24,576 (keyboard + up) -- > 0110000000000000
+24,575 (upper screen) -- > 0101111111111111
+16,384 (lower screen) -- > 0100000000000000
+16,383 (upper ram16k) -- > 0011111111111111
+0 (lower ram16k) -- > 0000000000000000

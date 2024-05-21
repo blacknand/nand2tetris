@@ -24,6 +24,19 @@ CHIP Memory {
     IN in[16], load, address[15];
     OUT out[16];
 
+    // if (address[13..14] == 11)
+        // keyboard
+    // if (address[13..14] == 10)
+        // screen
+    // if (address[13..14] == 01)
+        // ram16k
+    // if (address[13..14] == 00)
+        // ram16k
+
     PARTS:
-	//// Replace this comment with your code.
+    DMux(in=load, sel=address[14], a=loadRam, b=loadScreen);
+    Screen(in=in, load=loadScreen, address=address[0..12], out=screenOut);
+    Keyboard(out=kbdOut);
+    RAM16K(in=in, load=loadRam, address=address[0..13], out=ramOut);
+    Mux4Way16(a=ramOut, b=ramOut, c=screenOut, d=kbdOut, sel=address[13..14], out=out);
 }
