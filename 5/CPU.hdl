@@ -43,9 +43,26 @@ CHIP CPU {
     Mux16(a=false, b=true, sel=instruction[3], out=writeM);
 
     // TODO: Control logic
-    PC(in=aRegOut, load=false, inc=true, reset=false, out=incPCout);
-    PC(in=aRegOut, load=false, inc=false, reset=true, out=resetPCout);
-    PC(in=aRegOut, load=true, inc=false, reset=false, out=loadPCout);
-    PC(in=aRegOut, load=false, inc=false, reset=false, out=pcOut);
-    Mux4Way16(a=, b=, c=, d=, sel=, out=pc);
+
+    // TODO: Control logic for no jump [000]
+
+    // TODO: JGT [001]
+    Or(a=zr, b=ng, out=orOut);
+    Mux16(a=true, b=false, sel=orOut, out=jgt);
+
+    // TODO: JEQ [010]
+    Mux16(a=false, b=true, sel=zr, out=jeq);
+
+    // TODO: JGE [011]
+    
+
+    // TODO: JLT [100]
+    Mux16(a=false, b=true, sel=ng, out=jlt);
+
+    // TODO: JNE [101]
+    Mux16(a=true, b=false, sel=zr, out=);
+
+    // TODO: JLE [110]
+
+    // TODO: JMP [111]
 }
