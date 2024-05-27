@@ -43,26 +43,30 @@ CHIP CPU {
     Mux16(a=false, b=true, sel=instruction[3], out=writeM);
 
     // TODO: Control logic
+    // Any conditional, if condition true: PC = aRegOut else PC++
 
     // TODO: Control logic for no jump [000]
+    // PC++
 
     // TODO: JGT [001]
-    Or(a=zr, b=ng, out=orOut);
-    Mux16(a=true, b=false, sel=orOut, out=jgt);
-
+    Or(a=zr, b=ng, out=orOut1);
+    Mux(a=true, b=false, sel=orOut1, out=pos, out=jgt);
+    
     // TODO: JEQ [010]
-    Mux16(a=false, b=true, sel=zr, out=jeq);
+    Mux(a=false, b=true, sel=zr, out=jeq);
 
     // TODO: JGE [011]
+    Or(a=pos, b=zr, out=jge);
     
-
     // TODO: JLT [100]
-    Mux16(a=false, b=true, sel=ng, out=jlt);
+    Mux(a=false, b=true, sel=ng, out=jlt);
 
     // TODO: JNE [101]
-    Mux16(a=true, b=false, sel=zr, out=);
+    Mux(a=true, b=false, sel=zr, out=jne);
 
     // TODO: JLE [110]
+    Or(a=zr, b=ng, out=jle);
 
     // TODO: JMP [111]
+    // PC = aRegOut
 }
