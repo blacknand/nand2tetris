@@ -32,51 +32,54 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // TODO: Workout current instruction
+    // Workout current instruction
     Mux16(a=instruction, b=aluOut, sel=instruction[15], out=muxOut1);
-    Register(in=muxOut1, load=instruction[5], out=aRegOut, out[0..14]=addressM);
+    ARegister(in=muxOut1, load=instruction[5], out=aRegOut, out[0..14]=addressM);
 
-    // TODO: Operation of the ALU
+    // Operation of the ALU
     Mux16(a=aRegOut, b=inM, sel=instruction[12], out=muxOut2);
-    Register(in=aluOut, load=instruction[4], out=dRegOut);
+    DRegister(in=aluOut, load=instruction[4], out=dRegOut);
     ALU(x=dRegOut, y=muxOut2, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outM, out=aluOut, zr=zr, ng=ng);
-    Mux(a=false, b=true, sel=instruction[3], out=writeM);
+    Mux(a=false, b=true, sel=instruction[3], out=writeMout);
+    And(a=writeMout, b=instruction[15], out=writeM);
 
-    // TODO: Control logic
+    // SHOULD NOT MATTER WHAT ALU COMPUTERS DURING A INSTRUCTION
+
     // Any conditional, if condition true: PC = aRegOut else PC++
-
-    // TODO: Control logic for no jump [000]
-    // PC++
     PC(in=aRegOut, load=false, inc=true, reset=reset, out=incPC);
     PC(in=aRegOut, load=true, inc=false, reset=reset, out=loadPC);
 
-    // TODO: JGT [001]
+    // JGT [001]
     Or(a=zr, b=ng, out=orOut1);
     Mux(a=true, b=false, sel=orOut1, out=pos, out=jgt);
-    Mux16(a=incPC, b=loadPC, sel=jgt, out=jgtCond);
+    And(a=jgt, b=instruction[15], out=jgtC);
+    Mux16(a=incPC, b=loadPC, sel=jgtC, out=jgtCond);
     
-    // TODO: JEQ [010]
+    // JEQ [010]
     Mux(a=false, b=true, sel=zr, out=jeq);
-    Mux16(a=incPC, b=loadPC, sel=jeq, out=jeqCond);
+    And(a=jeq, b=instruction[15], out=jeqC);
+    Mux16(a=incPC, b=loadPC, sel=jeqC, out=jeqCond);
 
-    // TODO: JGE [011]
+    // JGE [011]
     Or(a=pos, b=zr, out=jge);
-    Mux16(a=incPC, b=loadPC, sel=jge, out=jgeCond);
+    And(a=jge, b=instruction[15], out=jgeC);
+    Mux16(a=incPC, b=loadPC, sel=jgeC, out=jgeCond);
     
-    // TODO: JLT [100]
+    // JLT [100]
     Mux(a=false, b=true, sel=ng, out=jlt);
-    Mux16(a=incPC, b=loadPC, sel=jlt, out=jltCond);
+    And(a=jlt, b=instruction[15], out=jltC);
+    Mux16(a=incPC, b=loadPC, sel=jltC, out=jltCond);
 
-    // TODO: JNE [101]
+    // JNE [101]
     Mux(a=true, b=false, sel=zr, out=jne);
-    Mux16(a=incPC, b=loadPC, sel=jne, out=jneCond);
+    And(a=jne, b=instruction[15], out=jneC);
+    Mux16(a=incPC, b=loadPC, sel=jneC, out=jneCond);
 
-    // TODO: JLE [110]
+    // JLE [110]
     Or(a=zr, b=ng, out=jle);
-    Mux16(a=incPC, b=loadPC, sel=jle, out=jleCond);
+    And(a=jle, b=instruction[15], out=jleC);
+    Mux16(a=incPC, b=loadPC, sel=jleC, out=jleCond);
 
-    // TODO: JMP [111]
-    // PC = aRegOut
 
-    Mux8Way16(a=incPC, b=jgtCond, c=jeqCond, d=jgeCond, e=jltCond, f=jneCond, g=jleCond, h=loadPC, sel=instruction[0..2], out=PC);
+    Mux8Way16(a=incPC, b=jgtCond, c=jeqCond, d=jgeCond, e=jltCond, f=jneCond, g=jleCond, h=loadPC, sel=instruction[0..2], out[0..14]=pc);
 }
