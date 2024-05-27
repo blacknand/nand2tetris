@@ -47,26 +47,37 @@ CHIP CPU {
 
     // TODO: Control logic for no jump [000]
     // PC++
+    PC(in=aRegOut, load=false, inc=true, reset=false, out=incPC);
+    PC(in=aRegOut, load=true, inc=false, reset=false, out=loadPC);
+    PC(in=aRegOut, load=false, inc=false, reset=true, out=resetPC);
 
     // TODO: JGT [001]
     Or(a=zr, b=ng, out=orOut1);
     Mux(a=true, b=false, sel=orOut1, out=pos, out=jgt);
+    Mux16(a=incPC, b=loadPC, sel=jgt, out=jgtCond);
     
     // TODO: JEQ [010]
     Mux(a=false, b=true, sel=zr, out=jeq);
+    Mux16(a=incPC, b=loadPC, sel=jeq, out=jeqCond);
 
     // TODO: JGE [011]
     Or(a=pos, b=zr, out=jge);
+    Mux16(a=incPC, b=loadPC, sel=jge, out=jgeCond);
     
     // TODO: JLT [100]
     Mux(a=false, b=true, sel=ng, out=jlt);
+    Mux16(a=incPC, b=loadPC, sel=jlt, out=jltCond);
 
     // TODO: JNE [101]
     Mux(a=true, b=false, sel=zr, out=jne);
+    Mux16(a=incPC, b=loadPC, sel=jne, out=jneCond);
 
     // TODO: JLE [110]
     Or(a=zr, b=ng, out=jle);
+    Mux16(a=incPC, b=loadPC, sel=jle, out=jleCond);
 
     // TODO: JMP [111]
     // PC = aRegOut
+
+    Mux8Way16(a=incPC, b=jgtCond, c=jeqCond, d=jgeCond, e=jltCond, f=jneCond, g=jleCond, h=loadPC, sel=instruction[0..2], out=PC);
 }
