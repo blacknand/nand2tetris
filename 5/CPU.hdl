@@ -34,22 +34,21 @@ CHIP CPU {
     PARTS:
     // TODO: Workout current instruction
     Mux16(a=instruction, b=aluOut, sel=instruction[15], out=muxOut1);
-    Register(in=muxOut1, load=instruction[5], out=aRegOut, out=addressM);
+    Register(in=muxOut1, load=instruction[5], out=aRegOut, out[0..14]=addressM);
 
     // TODO: Operation of the ALU
     Mux16(a=aRegOut, b=inM, sel=instruction[12], out=muxOut2);
     Register(in=aluOut, load=instruction[4], out=dRegOut);
-    ALU(x=dRegOut, y=muxOut2, zx=zx, nx=nx, zy=zy, ny=ny, f=f, no=no, out=outM, out=aluOut, zr=zr, ng=ng);
-    Mux16(a=false, b=true, sel=instruction[3], out=writeM);
+    ALU(x=dRegOut, y=muxOut2, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outM, out=aluOut, zr=zr, ng=ng);
+    Mux(a=false, b=true, sel=instruction[3], out=writeM);
 
     // TODO: Control logic
     // Any conditional, if condition true: PC = aRegOut else PC++
 
     // TODO: Control logic for no jump [000]
     // PC++
-    PC(in=aRegOut, load=false, inc=true, reset=false, out=incPC);
-    PC(in=aRegOut, load=true, inc=false, reset=false, out=loadPC);
-    PC(in=aRegOut, load=false, inc=false, reset=true, out=resetPC);
+    PC(in=aRegOut, load=false, inc=true, reset=reset, out=incPC);
+    PC(in=aRegOut, load=true, inc=false, reset=reset, out=loadPC);
 
     // TODO: JGT [001]
     Or(a=zr, b=ng, out=orOut1);
