@@ -43,11 +43,9 @@ CHIP CPU {
     Mux(a=false, b=true, sel=instruction[3], out=writeMout);
     And(a=writeMout, b=instruction[15], out=writeM);
 
-    // SHOULD NOT MATTER WHAT ALU COMPUTERS DURING A INSTRUCTION
-
     // Any conditional, if condition true: PC = aRegOut else PC++
     PC(in=aRegOut, load=false, inc=true, reset=reset, out=incPC);
-    PC(in=aRegOut, load=true, inc=false, reset=reset, out=loadPC);
+    PC(in=aRegOut, load=instruction[3], inc=false, reset=reset, out=loadPC);
 
     // JGT [001]
     Or(a=zr, b=ng, out=orOut1);
