@@ -34,14 +34,18 @@ CHIP CPU {
     PARTS:
     // Workout current instruction
     Mux16(a=instruction, b=aluOut, sel=instruction[15], out=muxOut1);
-    ARegister(in=muxOut1, load=instruction[5], out=aRegOut, out[0..14]=addressM);
+    Mux(a=true, b=false, sel=instruction[15], out=cinstruct);
+    Or(a=instruction[5], b=cinstruct, out=loadAreg);
+    ARegister(in=muxOut1, load=loadAreg, out=aRegOut, out[0..14]=addressM);
+
+    // $$ INTERNAL TEST PINS $$
+    And(a=instruction[3], b=instruction[3], out=instructionAt3);
 
     // Operation of the ALU
     Mux16(a=aRegOut, b=inM, sel=instruction[12], out=muxOut2);
     DRegister(in=aluOut, load=instruction[4], out=dRegOut);
     ALU(x=dRegOut, y=muxOut2, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outM, out=aluOut, zr=zr, ng=ng);
-    Mux(a=false, b=true, sel=instruction[3], out=writeMout);
-    And(a=writeMout, b=instruction[15], out=writeM);
+    And(a=instruction[3], b=instruction[15], out=writeM);
 
     // Any conditional, if condition true: PC = aRegOut else PC++
     PC(in=aRegOut, load=false, inc=true, reset=reset, out=incPC);
@@ -77,7 +81,6 @@ CHIP CPU {
     Or(a=zr, b=ng, out=jle);
     And(a=jle, b=instruction[15], out=jleC);
     Mux16(a=incPC, b=loadPC, sel=jleC, out=jleCond);
-
 
     Mux8Way16(a=incPC, b=jgtCond, c=jeqCond, d=jgeCond, e=jltCond, f=jneCond, g=jleCond, h=loadPC, sel=instruction[0..2], out[0..14]=pc);
 }
