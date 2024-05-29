@@ -40,7 +40,8 @@ CHIP CPU {
 
     // Operation of the ALU
     Mux16(a=aRegOut, b=inM, sel=instruction[12], out=muxOut2);
-    DRegister(in=aluOut, load=instruction[4], out=dRegOut);
+    And(a=instruction[4], b=instruction[15], out=loadDreg);
+    DRegister(in=aluOut, load=loadDreg, out=dRegOut);
     ALU(x=dRegOut, y=muxOut2, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outM, out=aluOut, zr=zr, ng=ng);
     And(a=instruction[3], b=instruction[15], out=writeM);
 
