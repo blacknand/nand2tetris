@@ -77,7 +77,7 @@ CHIP CPU {
     And(a=jleCond, b=instruction[0], out=jmpCond);
     Mux(a=false, b=true, sel=jmpCond, out=jmp);
 
-    // Conditional logic d
+    // Conditional logic
     Or8Way(in[0]=loadJGT, in[1]=loadJEQ, in[2]=loadJGE, in[3]=loadJLT, in[4]=loadJNE, in[5]=loadJLE, in[6]=jmp, in[7]=false, out=orConds);
     And(a=orConds, b=instruction[15], out=loadBit);
     Not(in=loadBit, out=incBit);
