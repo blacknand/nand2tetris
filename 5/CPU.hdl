@@ -32,14 +32,13 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
+    // I LOVE WATCHING YOUNG SHELDON IN PORTUGESE !!!!
+
     // Workout current instruction
     Mux16(a=instruction, b=aluOut, sel=instruction[15], out=muxOut1);
     Mux(a=true, b=false, sel=instruction[15], out=cinstruct);
     Or(a=instruction[5], b=cinstruct, out=loadAreg);
     ARegister(in=muxOut1, load=loadAreg, out=aRegOut, out[0..14]=addressM);
-
-    // $$ INTERNAL TEST PINS $$
-    And(a=instruction[3], b=instruction[3], out=instructionAt3);
 
     // Operation of the ALU
     Mux16(a=aRegOut, b=inM, sel=instruction[12], out=muxOut2);
@@ -48,39 +47,50 @@ CHIP CPU {
     And(a=instruction[3], b=instruction[15], out=writeM);
 
     // Any conditional, if condition true: PC = aRegOut else PC++
-    PC(in=aRegOut, load=false, inc=true, reset=reset, out=incPC);
-    PC(in=aRegOut, load=instruction[3], inc=false, reset=reset, out=loadPC);
+ 
+    // if out = 0 zr = 1 else zr = 0
+    // if out < 0 ng = 1 else ng = 0
 
     // JGT [001]
-    Or(a=zr, b=ng, out=orOut1);
-    Mux(a=true, b=false, sel=orOut1, out=pos, out=jgt);
-    And(a=jgt, b=instruction[15], out=jgtC);
-    Mux16(a=incPC, b=loadPC, sel=jgtC, out=jgtCond);
+    And(a=zr, b=ng, out=zrng);
+    Mux(a=true, b=false, sel=zrng, out=pos);
+    And(a=pos, b=instruction[0], out=loadJGT);
     
     // JEQ [010]
     Mux(a=false, b=true, sel=zr, out=jeq);
-    And(a=jeq, b=instruction[15], out=jeqC);
-    Mux16(a=incPC, b=loadPC, sel=jeqC, out=jeqCond);
+    And(a=jeq, b=instruction[1], out=loadJEQ);
 
     // JGE [011]
     Or(a=pos, b=zr, out=jge);
-    And(a=jge, b=instruction[15], out=jgeC);
-    Mux16(a=incPC, b=loadPC, sel=jgeC, out=jgeCond);
+    And(a=instruction[0], b=instruction[1], out=jgeCond);
+    And(a=jge, b=jgeCond, out=loadJGE);
     
     // JLT [100]
     Mux(a=false, b=true, sel=ng, out=jlt);
-    And(a=jlt, b=instruction[15], out=jltC);
-    Mux16(a=incPC, b=loadPC, sel=jltC, out=jltCond);
+    And(a=instruction[2], b=jlt, out=loadJLT);
 
     // JNE [101]
     Mux(a=true, b=false, sel=zr, out=jne);
-    And(a=jne, b=instruction[15], out=jneC);
-    Mux16(a=incPC, b=loadPC, sel=jneC, out=jneCond);
+    And(a=instruction[2], b=instruction[0], out=jneCond);
+    And(a=jne, b=jneCond, out=loadJNE);
 
     // JLE [110]
     Or(a=zr, b=ng, out=jle);
-    And(a=jle, b=instruction[15], out=jleC);
-    Mux16(a=incPC, b=loadPC, sel=jleC, out=jleCond);
+    And(a=instruction[2], b=instruction[1], out=jleCond);
+    And(a=jle, b=jleCond, out=loadJLE);
 
-    Mux8Way16(a=incPC, b=jgtCond, c=jeqCond, d=jgeCond, e=jltCond, f=jneCond, g=jleCond, h=loadPC, sel=instruction[0..2], out[0..14]=pc);
+    // JMP [111]
+    And(a=jleCond, b=instruction[0], out=jmpCond);
+    Mux(a=false, b=true, sel=jmpCond, out=jmp);
+
+    Or8Way(in[0]=loadJGT, in[1]=loadJEQ, in[2]=loadJGE, in[3]=loadJLT, in[4]=loadJNE, in[5]=loadJLE, in[6]=jmp, in[7]=false, out=orConds);
+    And(a=orConds, b=instruction[15], out=loadBit);
+    Not(in=loadBit, out=incBit);
+
+    // Mux16(a=false, b=true, sel=jleC, out=jleCond);
+    // Mux8Way16(a=false, b=jgtC, c=jeqC, d=jgeC, e=jltC, f=jneC, g=jleC, h=true, sel=instruction[0..2], out=pcMux);
+    // Mux16(a=false, b=true, sel=instruction[3], out=instrct3);
+    // And16(a=instrct3, b=pcMux, out=andPCmux);
+    // Not16(in=andPCmux, out=notPCmux);
+    PC(in=aRegOut, load=loadBit, inc=incBit, reset=reset, out[0..14]=pc);
 }
