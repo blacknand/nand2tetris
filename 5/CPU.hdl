@@ -44,7 +44,7 @@ CHIP CPU {
     ALU(x=dRegOut, y=muxOut2, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outM, out=aluOut, zr=zr, ng=ng);
     And(a=instruction[3], b=instruction[15], out=writeM);
 
-    // Any conditional, if condition true: PC = aRegOut else PC++
+    // Any conditional, if condition true PC = aRegOut else PC++
     // JGT [001]
     Or(a=zr, b=ng, out=zrng);
     Mux(a=true, b=false, sel=zrng, out=pos);
