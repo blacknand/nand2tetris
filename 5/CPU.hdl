@@ -32,8 +32,6 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // I LOVE WATCHING YOUNG SHELDON IN PORTUGESE !!!!
-
     // Workout current instruction
     Mux16(a=instruction, b=aluOut, sel=instruction[15], out=muxOut1);
     Mux(a=true, b=false, sel=instruction[15], out=cinstruct);
@@ -47,12 +45,8 @@ CHIP CPU {
     And(a=instruction[3], b=instruction[15], out=writeM);
 
     // Any conditional, if condition true: PC = aRegOut else PC++
- 
-    // if out = 0 zr = 1 else zr = 0
-    // if out < 0 ng = 1 else ng = 0
-
     // JGT [001]
-    And(a=zr, b=ng, out=zrng);
+    Or(a=zr, b=ng, out=zrng);
     Mux(a=true, b=false, sel=zrng, out=pos);
     And(a=pos, b=instruction[0], out=loadJGT);
     
@@ -83,14 +77,9 @@ CHIP CPU {
     And(a=jleCond, b=instruction[0], out=jmpCond);
     Mux(a=false, b=true, sel=jmpCond, out=jmp);
 
+    // Conditional logic d
     Or8Way(in[0]=loadJGT, in[1]=loadJEQ, in[2]=loadJGE, in[3]=loadJLT, in[4]=loadJNE, in[5]=loadJLE, in[6]=jmp, in[7]=false, out=orConds);
     And(a=orConds, b=instruction[15], out=loadBit);
     Not(in=loadBit, out=incBit);
-
-    // Mux16(a=false, b=true, sel=jleC, out=jleCond);
-    // Mux8Way16(a=false, b=jgtC, c=jeqC, d=jgeC, e=jltC, f=jneC, g=jleC, h=true, sel=instruction[0..2], out=pcMux);
-    // Mux16(a=false, b=true, sel=instruction[3], out=instrct3);
-    // And16(a=instrct3, b=pcMux, out=andPCmux);
-    // Not16(in=andPCmux, out=notPCmux);
     PC(in=aRegOut, load=loadBit, inc=incBit, reset=reset, out[0..14]=pc);
 }
