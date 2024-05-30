@@ -1,7 +1,10 @@
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <string>
+#include "code.h"
 #include "parser.h"
+#include "symbolTable.h"
 
 int main(int argc, char** argv) {
     Parser parser;
