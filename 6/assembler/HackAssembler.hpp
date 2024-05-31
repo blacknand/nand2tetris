@@ -1,5 +1,8 @@
 #include <string>
 
+#ifndef HACK_ASSEMBLER
+#define HACK_ASSEMBLER
+
 class Parser {
     public:
         void initializer(std::string inputFile);
@@ -25,3 +28,5 @@ class SymbolTable {
         bool contains(std::string);
         int getAddress(std::string);
 };
+
+#endif
