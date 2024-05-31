@@ -8,7 +8,7 @@ class Parser {
     private:
         int lineCount;
         int currentLine;
-        // std::vector<std::vector<std::string>> god;
+        std::vector<std::vector<std::string>> lineVect;
     public:
         void initializer(std::string inputFile);
         void close(std::string inputFile);
@@ -26,12 +26,18 @@ class Parser {
         void setCurrentLine(int num) {
             currentLine = num;
         }
+        void setVect(std::vector<std::vector<std::string>> vect) {
+            lineVect = vect;
+        }
         // Setter
         int getLineCount() {
             return lineCount;
         }
         int getCurrentLine() {
             return currentLine;
+        }
+        std::vector<std::vector<std::string>> getVect() {
+            return lineVect;
         }
 };
 
