@@ -13,8 +13,8 @@ class Parser {
     public:
         void initializer(std::string inputFile);
         void close(std::string inputFile);
-        bool hasMoreLines(int lineCount, int currentLine);
-        void advance(int currentLine);
+        bool hasMoreLines();
+        void advance();
         const std::string instructionType();
         std::string symbol();
         std::string dest();
