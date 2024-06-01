@@ -9,6 +9,7 @@ class Parser {
         int lineCount;
         int currentLine;
         std::vector<std::vector<std::string>> lineVect;
+        std::vector<std::vector<std::string>> strippedVect;
     public:
         void initializer(std::string inputFile);
         void close(std::string inputFile);
@@ -29,6 +30,9 @@ class Parser {
         void setVect(std::vector<std::vector<std::string>> vect) {
             lineVect = vect;
         }
+        void setStrippedVect(std::vector<std::vector<std::string>> lineVect) {
+            strippedVect = lineVect;
+        }
         // Setter
         int getLineCount() {
             return lineCount;
@@ -38,6 +42,9 @@ class Parser {
         }
         std::vector<std::vector<std::string>> getVect() {
             return lineVect;
+        }
+        std::vector<std::vector<std::string>> getStrippedVect() {
+            return strippedVect;
         }
 };
 
