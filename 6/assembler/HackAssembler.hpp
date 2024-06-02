@@ -8,6 +8,7 @@ class Parser {
     private:
         int lineCount;
         int currentLine;
+        std::string currentInstruction;
         std::vector<std::vector<std::string>> lineVect;
         std::vector<std::vector<std::string>> strippedVect;
     public:

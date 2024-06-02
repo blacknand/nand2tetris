@@ -84,12 +84,14 @@ bool Parser::hasMoreLines() {
     for (int i = 0; i < lineVect.size(); i++) {
         for (int j = 0; j < lineVect[i].size(); j++) {
             std::size_t foundWhiteSpace = lineVect[i][j].find_first_not_of(' ');
-
             if (foundWhiteSpace != std::string::npos) {
                 if (lineVect[i][j].substr(foundWhiteSpace, foundWhiteSpace + 2) != "//")
                     return true;
-                else 
-                    return false;
+                else
+                    continue;
+                    // return true;
+                // else 
+                //     return false;
             }
         }
     }
@@ -98,5 +100,23 @@ bool Parser::hasMoreLines() {
 }
 
 void Parser::advance() {
+
+    for (int i = 0; i < lineVect.size(); i++) {
+        for (int j = 0; j < lineVect[i].size(); j++) {
+            std::size_t foundWhiteSpace = lineVect[i][j].find_first_not_of(' ');
+            if (foundWhiteSpace != std::string::npos) {
+                if (lineVect[i][j].substr(foundWhiteSpace, foundWhiteSpace + 2) != "//") {
+                    currentLine = i;
+                    currentInstruction = lineVect[i][j];
+                }
+                else    
+                    continue;
+            }
+        }
+    }
+
+}
+
+const std::string Parser::instructionType() {
 
 }
