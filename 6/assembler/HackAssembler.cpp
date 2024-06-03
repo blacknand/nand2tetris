@@ -39,6 +39,18 @@ int main(int argc, char* argv[]) {
     std::cout << currentInstruction << std::endl;
     std::cout << currentLine << std::endl;
 
+    std::string test = parser.instructionType();
+    std::cout << test << std::endl;
+
+
+
+    parser.advance();
+    test = parser.instructionType();
+    std::cout << test << std::endl;
+
+    parser.advance();
+    test = parser.instructionType();
+    std::cout << test << std::endl;
     return 0;
 }
 
@@ -104,7 +116,28 @@ void Parser::advance() {
 
 
 const std::string Parser::instructionType() {
-    return "fuck";
+    // Returns the current type of the instruction
+    std::size_t pos = currentInstruction.find_first_not_of(' ');
+    std::string instruction = currentInstruction.substr(pos);
+    std::string::size_type ch = currentInstruction.find_last_not_of(' ');
+
+    /*
+        A_INSTRUCTION for @xxx, where xxx is a symbol for 
+        either a decimal number or a symbol.
+
+        C_INSTRUCTION for dest=comp;jump
+
+        L_INSTRUCTION for (xxx), where xxx is a symbol.
+    */
+    if (instruction[0] == '@') {
+        return "A_INSTRUCTION";
+    } else if (instruction.find('=') != std::string::npos || instruction.find(';') != std::string::npos) {
+        return "C_INSTRUCTION";
+    } else if (instruction[0] == '(' && instruction[ch] == ')') {
+        return "L_INSTRUCTION";
+    }
+
+    return "Error - const std::string Parser::instructionType(): have encountered errenuous instruction";
 }
 
 
