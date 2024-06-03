@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
 
 
     std::cout << currentInstruction << std::endl;
-    std::string testC = parser.comp();
+    std::string testC = parser.jump();
     std::cout << testC << std::endl;
 
     return 0;
@@ -151,8 +151,8 @@ std::string Parser::symbol() {
 
 std::string Parser::dest() {
     // Returns the dest part of a C-instruction
-
     std::size_t destStr = currentInstruction.find('=');
+
     if (destStr != std::string::npos) {
         std::size_t pos = currentInstruction.find_first_not_of(' ');
         std::string instruction = currentInstruction.substr(pos);
@@ -163,6 +163,7 @@ std::string Parser::dest() {
 
 
 std::string Parser::comp() {
+    // Returns the comp part of a C-instruction
     std::size_t pos = currentInstruction.find_first_not_of(' ');
     std::string instruction = currentInstruction.substr(pos);
     std::size_t destStr = currentInstruction.find('=');
@@ -182,5 +183,13 @@ std::string Parser::comp() {
 
 
 std::string Parser::jump() {
-    return "fuck";
+    // Returns the jump part of a C-instruction
+    std::size_t jumpStr = currentInstruction.find(';');
+    std::string::size_type ch = currentInstruction.find_last_not_of(' ');
+    std::cout << jumpStr << std::endl;
+
+    if (jumpStr != std::string::npos) 
+        return currentInstruction.substr(++jumpStr, ch);
+
+    return "No jump";
 }
