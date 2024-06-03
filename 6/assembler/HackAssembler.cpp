@@ -51,6 +51,16 @@ int main(int argc, char* argv[]) {
     parser.advance();
     test = parser.instructionType();
     std::cout << test << std::endl;
+
+    parser.advance();
+    test = parser.instructionType();
+    std::cout << test << std::endl;
+
+    std::string musk = parser.symbol();
+    std::cout << musk << std::endl;
+
+
+
     return 0;
 }
 
@@ -73,7 +83,14 @@ void Parser::initializer(std::string inputFile) {
 
 bool Parser::hasMoreLines() {
     // Returns if there are any more valid lines (i.e. not a comment line)
-    for (int i = 0; i < lineVect.size(); i++) {
+    int iter;
+    if (currentLine > 0) {
+        iter = currentLine;
+        iter++;
+    } else
+        iter = 0;
+
+    for (int i = iter; i < lineVect.size(); i++) {
         for (int j = 0; j < lineVect[i].size(); j++) {
             std::size_t foundWhiteSpace = lineVect[i][j].find_first_not_of(' ');
             if (foundWhiteSpace != std::string::npos) {
@@ -93,8 +110,7 @@ void Parser::advance() {
     // Reads the next instruction from input and makes current instruction
     int iter;
     if (currentLine > 0) {
-        iter = currentLine;
-        iter++;
+        iter = ++currentLine;
     } else
         iter = 0;
 
@@ -137,12 +153,24 @@ const std::string Parser::instructionType() {
         return "L_INSTRUCTION";
     }
 
-    return "Error - const std::string Parser::instructionType(): have encountered errenuous instruction";
+    return "Error: have encountered erreneous instruction";
 }
 
 
 std::string Parser::symbol() {
-    return "fuck";
+    // Strips the decimal/symbol from the instruction
+    std::size_t pos = currentInstruction.find_first_not_of(' ');
+    std::string instruction = currentInstruction.substr(pos);
+    std::cout << instruction << std::endl;
+    std::string::size_type ch = currentInstruction.find_last_not_of(' ');
+
+    if (instruction[0] == '@') {
+        return instruction.substr(1, ch);
+    } else if (instruction[0] == '(' && instruction[ch] == ')') {
+        return instruction.substr(1, --ch);
+    }
+
+    return "Error: have encountered erreneous instruction";
 }
 
 
