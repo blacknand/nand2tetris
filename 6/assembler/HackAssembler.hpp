@@ -49,9 +49,9 @@ class Parser {
 
 class Code {
     public:
-        std::string dest(std::string command);
-        std::string comp(std::string command);
-        std::string jump(std::string command);
+        std::string dest(std::string destCode);
+        std::string comp(std::string compCode);
+        std::string jump(std::string jumpCode);
 };
 
 #endif  // Code

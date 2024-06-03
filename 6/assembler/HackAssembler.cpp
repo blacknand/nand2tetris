@@ -14,6 +14,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <unordered_map> 
 #include <vector>
 #include "HackAssembler.hpp"
 
@@ -43,8 +44,10 @@ int main(int argc, char* argv[]) {
 
 
     std::cout << currentInstruction << std::endl;
+    std::string testE = parser.dest();
+    std::string testF = parser.comp();
     std::string testC = parser.jump();
-    std::cout << testC << std::endl;
+    std::cout << testE << testF << testC << std::endl;
 
     return 0;
 }
@@ -192,4 +195,84 @@ std::string Parser::jump() {
         return currentInstruction.substr(++jumpStr, ch);
 
     return "No jump";
+}
+
+
+std::string Code::dest(std::string destCode) {
+    std::unordered_map<std::string, std::string> destCodeMap = {
+        {"M", "001"},
+        {"D", "010"},
+        {"DM", "011"},
+        {"A", "100"},
+        {"AM", "101"},
+        {"AD", "110"},
+        {"ADM", "111"},
+        {"", "000"}
+    };
+
+    std::unordered_map<std::string, std::string>::const_iterator code = destCodeMap.find(destCode);
+    if (code != destCodeMap.end())
+        return code->second;
+    else
+        return "Code::dest(std::string destCode) error: have encountered errenuous instruction";
+}
+
+
+std::string Code::comp(std::string compCode) {
+    std::unordered_map<std::string, std::string> compCodeMap = {
+        {"0", "101010"},
+        {"1", "111111"},
+        {"-1", "111010"},
+        {"D", "001100"},
+        {"A", "110000"},
+        {"M", "110000"},
+        {"!D", "001101"},
+        {"!A", "110001"},
+        {"!M", "110001"},
+        {"-D", "001111"},
+        {"-A", "110011"},
+        {"-M", "110011"},
+        {"D+1", "011111"},
+        {"A+1", "110111"},
+        {"M+1", "110111"},
+        {"D-1", "001110"},
+        {"A-1", "110010"},
+        {"M-1", "110010"},
+        {"D+A", "000010"},
+        {"D+M", "000010"},
+        {"D-A", "010011"},
+        {"D-M", "010011"},
+        {"A-D", "000111"},
+        {"M-D", "000111"},
+        {"D&A", "000000"},
+        {"D&M", "000000"},
+        {"D|A", "010101"},
+        {"D|M", "010101"}
+    };
+
+    std::unordered_map<std::string, std::string>::const_iterator code = compCodeMap.find(compCode);
+    if (code != compCodeMap.end())
+        return code->second;
+    else
+        return "Code::comp(std::string compCode) error: have encountered errenuous instruction";
+}
+
+
+std::string Code::jump(std::string jumpCode) {
+    std::unordered_map<std::string, std::string> jumpCodeMap = {
+        {"JGT", "001"},
+        {"JEQ", "010"},
+        {"JGE", "011"},
+        {"JLT", "100"},
+        {"JNE", "101"},
+        {"JLE", "110"},
+        {"JMP", "111"},
+        {"", "000"}
+    };
+
+    std::unordered_map<std::string, std::string>::const_iterator code = jumpCodeMap.find(jumpCode);
+    if (code != jumpCodeMap.end())
+        return code->second;
+    else
+        return "Code::jump(std::string jumpCode) error: have encountered errenuous instruction";
 }
