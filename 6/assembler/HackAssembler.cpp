@@ -30,36 +30,15 @@ int main(int argc, char* argv[]) {
     std::vector<std::vector<std::string>> lineVect = parser.getVect();
     std::string currentInstruction = parser.getCurrentInstruct();
     int currentLine = parser.getCurrentLine();
-    std::cout << currentInstruction << std::endl;
-    std::cout << currentLine << std::endl;
-    parser.advance();
-
-    currentInstruction = parser.getCurrentInstruct();
-    currentLine = parser.getCurrentLine();
-    std::cout << currentInstruction << std::endl;
-    std::cout << currentLine << std::endl;
-
-    std::string test = parser.instructionType();
-    std::cout << test << std::endl;
-
-
 
     parser.advance();
-    test = parser.instructionType();
-    std::cout << test << std::endl;
-
     parser.advance();
-    test = parser.instructionType();
-    std::cout << test << std::endl;
-
     parser.advance();
-    test = parser.instructionType();
-    std::cout << test << std::endl;
+    parser.advance();
+    parser.advance();
 
-    std::string musk = parser.symbol();
-    std::cout << musk << std::endl;
-
-
+    std::string testD = parser.dest();
+    std::cout << testD << std::endl;
 
     return 0;
 }
@@ -83,12 +62,7 @@ void Parser::initializer(std::string inputFile) {
 
 bool Parser::hasMoreLines() {
     // Returns if there are any more valid lines (i.e. not a comment line)
-    int iter;
-    if (currentLine > 0) {
-        iter = currentLine;
-        iter++;
-    } else
-        iter = 0;
+    int iter = (currentLine > 0) ? ++currentLine : 0;
 
     for (int i = iter; i < lineVect.size(); i++) {
         for (int j = 0; j < lineVect[i].size(); j++) {
@@ -108,11 +82,7 @@ bool Parser::hasMoreLines() {
 
 void Parser::advance() {
     // Reads the next instruction from input and makes current instruction
-    int iter;
-    if (currentLine > 0) {
-        iter = ++currentLine;
-    } else
-        iter = 0;
+    int iter = (currentLine > 0) ? ++currentLine : 0;
 
     for (int i = iter; i < lineVect.size(); i++) {
         for (int j = 0; j < lineVect[i].size(); j++) {
@@ -153,15 +123,14 @@ const std::string Parser::instructionType() {
         return "L_INSTRUCTION";
     }
 
-    return "Error: have encountered erreneous instruction";
+    return "Parser::instructionType() error: have encountered erreneous instruction";
 }
 
 
 std::string Parser::symbol() {
-    // Strips the decimal/symbol from the instruction
+    // Strips the decimal/symbol from the A/L-instruction
     std::size_t pos = currentInstruction.find_first_not_of(' ');
     std::string instruction = currentInstruction.substr(pos);
-    std::cout << instruction << std::endl;
     std::string::size_type ch = currentInstruction.find_last_not_of(' ');
 
     if (instruction[0] == '@') {
@@ -170,12 +139,20 @@ std::string Parser::symbol() {
         return instruction.substr(1, --ch);
     }
 
-    return "Error: have encountered erreneous instruction";
+    return "Parser::symbol() error: have encountered erreneous instruction";
 }
 
 
 std::string Parser::dest() {
-    return "fuck";
+    // Returns the dest part of a C-instruction
+
+    std::size_t destStr = currentInstruction.find('=');
+    if (destStr != std::string::npos) {
+        std::size_t pos = currentInstruction.find_first_not_of(' ');
+        std::string instruction = currentInstruction.substr(pos);
+        return instruction.substr(pos, destStr);
+    } else
+        return "No dest";
 }
 
 
