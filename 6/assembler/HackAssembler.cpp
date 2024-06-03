@@ -27,18 +27,24 @@ int main(int argc, char* argv[]) {
     Parser parser;
     parser.initializer(argv[1]);
     parser.advance();
+    parser.advance();
+    parser.advance();
+    parser.advance();
+    parser.advance();
+
     std::vector<std::vector<std::string>> lineVect = parser.getVect();
     std::string currentInstruction = parser.getCurrentInstruct();
     int currentLine = parser.getCurrentLine();
 
-    parser.advance();
-    parser.advance();
-    parser.advance();
-    parser.advance();
-    parser.advance();
+    // parser.advance();
 
-    std::string testD = parser.dest();
-    std::cout << testD << std::endl;
+    // std::string testD = parser.dest();
+    // std::cout << testD << std::endl;
+
+
+    std::cout << currentInstruction << std::endl;
+    std::string testC = parser.comp();
+    std::cout << testC << std::endl;
 
     return 0;
 }
@@ -157,7 +163,21 @@ std::string Parser::dest() {
 
 
 std::string Parser::comp() {
-    return "fuck";
+    std::size_t pos = currentInstruction.find_first_not_of(' ');
+    std::string instruction = currentInstruction.substr(pos);
+    std::size_t destStr = currentInstruction.find('=');
+    std::size_t jumpStr = currentInstruction.find(';');
+
+    if (destStr != std::string::npos && jumpStr == std::string::npos)
+        return instruction.substr(pos, destStr);
+    else if (jumpStr != std::string::npos && destStr == std::string::npos)  
+        return instruction.substr(pos, jumpStr);
+    else if (destStr != std::string::npos && jumpStr != std::string::npos) {
+        int endPos = jumpStr - destStr;
+        return instruction.substr(++destStr, --endPos);
+    }
+
+    return "Parser::comp() error: have encountered erreneous instruction";
 }
 
 
