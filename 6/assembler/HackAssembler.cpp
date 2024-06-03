@@ -19,13 +19,13 @@ int main(int argc, char* argv[]) {
     Parser parser;
     parser.initializer(argv[1]);
     parser.hasMoreLines();
+    // while (moreLines) {
+        
+    // }
+    parser.advance();
     std::vector<std::vector<std::string>> lineVect = parser.getVect();
     std::vector<std::vector<std::string>> strippedVect = parser.getStrippedVect();
-    // for (int i = 0; i < lineVect.size(); i++) {
-    //     for (int j = 0; j < lineVect[i].size(); j++) {
-    //         std::cout << "lineVect[" << i << "]" << "[" << j << "]" << lineVect[i][j] << std::endl;
-    //     }
-    // }
+    std::string currentInstruction = parser.getCurrentInstruct();
     return 0;
 }
 
@@ -79,13 +79,13 @@ void Parser::initializer(std::string inputFile) {
 
 bool Parser::hasMoreLines() {
 
-    // TODO: Needs to read and strip comments + whitespace and then return if it has found a line
+    // TODO: From the current lines index (lineVect[i][j]), are there more VALID lines?
 
     for (int i = 0; i < lineVect.size(); i++) {
         for (int j = 0; j < lineVect[i].size(); j++) {
             std::size_t foundWhiteSpace = lineVect[i][j].find_first_not_of(' ');
             if (foundWhiteSpace != std::string::npos) {
-                if (lineVect[i][j].substr(foundWhiteSpace, foundWhiteSpace + 2) != "//")
+                if (lineVect[i][j].substr(foundWhiteSpace, 2) != "//")
                     return true;
                 else
                     continue;
@@ -101,13 +101,22 @@ bool Parser::hasMoreLines() {
 
 void Parser::advance() {
 
+    // TODO: Read next line from instruction and make it current instruction
+        //   Skip over whitespace and comments as well
+
     for (int i = 0; i < lineVect.size(); i++) {
+        // if pos is valid line
+            // current line = pos
+
         for (int j = 0; j < lineVect[i].size(); j++) {
             std::size_t foundWhiteSpace = lineVect[i][j].find_first_not_of(' ');
             if (foundWhiteSpace != std::string::npos) {
-                if (lineVect[i][j].substr(foundWhiteSpace, foundWhiteSpace + 2) != "//") {
+                if (lineVect[i][j].substr(foundWhiteSpace, 2) != "//") {
+                    std::cout << lineVect[i][j].substr(foundWhiteSpace, 2) << std::endl;
                     currentLine = i;
                     currentInstruction = lineVect[i][j];
+                    std::cout << currentInstruction << std::endl;
+                    break;
                 }
                 else    
                     continue;
@@ -118,5 +127,5 @@ void Parser::advance() {
 }
 
 const std::string Parser::instructionType() {
-
+    return "fuck";
 }

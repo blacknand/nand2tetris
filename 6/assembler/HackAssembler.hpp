@@ -6,8 +6,7 @@
 
 class Parser {
     private:
-        int lineCount;
-        int currentLine;
+        int currentLine = 0;
         std::string currentInstruction;
         std::vector<std::vector<std::string>> lineVect;
         std::vector<std::vector<std::string>> strippedVect;
@@ -22,9 +21,6 @@ class Parser {
         std::string comp();
         std::string jump();
         // Getter
-        void setLineCount(int num) {
-            lineCount = num;
-        }
         void setCurrentLine(int num) {
             currentLine = num;
         }
@@ -34,10 +30,10 @@ class Parser {
         void setStrippedVect(std::vector<std::vector<std::string>> lineVect) {
             strippedVect = lineVect;
         }
-        // Setter
-        int getLineCount() {
-            return lineCount;
+        void setCurrentInstruct(std::string instruct) {
+            currentInstruction = instruct;
         }
+        // Setter
         int getCurrentLine() {
             return currentLine;
         }
@@ -46,6 +42,9 @@ class Parser {
         }
         std::vector<std::vector<std::string>> getStrippedVect() {
             return strippedVect;
+        }
+        std::string getCurrentInstruct() {
+            return currentInstruction;
         }
 };
 
