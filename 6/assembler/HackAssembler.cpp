@@ -26,7 +26,18 @@ int main(int argc, char* argv[]) {
 
     Parser parser;
     parser.initializer(argv[1]);
+    parser.advance();
     std::vector<std::vector<std::string>> lineVect = parser.getVect();
+    std::string currentInstruction = parser.getCurrentInstruct();
+    int currentLine = parser.getCurrentLine();
+    std::cout << currentInstruction << std::endl;
+    std::cout << currentLine << std::endl;
+    parser.advance();
+
+    currentInstruction = parser.getCurrentInstruct();
+    currentLine = parser.getCurrentLine();
+    std::cout << currentInstruction << std::endl;
+    std::cout << currentLine << std::endl;
 
     return 0;
 }
@@ -69,9 +80,10 @@ bool Parser::hasMoreLines() {
 void Parser::advance() {
     // Reads the next instruction from input and makes current instruction
     int iter;
-    if (currentLine > 0)
+    if (currentLine > 0) {
         iter = currentLine;
-    else
+        iter++;
+    } else
         iter = 0;
 
     for (int i = iter; i < lineVect.size(); i++) {
@@ -81,7 +93,7 @@ void Parser::advance() {
                 if (lineVect[i][j].substr(foundWhiteSpace, 2) != "//") {
                     currentLine = i;
                     currentInstruction = lineVect[i][j];
-                    exit(0);
+                    return;
                 } else    
                     continue;
             }
