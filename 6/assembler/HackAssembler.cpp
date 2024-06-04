@@ -7,6 +7,7 @@
 */
 
 
+#include <bitset>
 #include <cctype>
 #include <cstddef>
 #include <cstring>
@@ -29,14 +30,19 @@ int main(int argc, char* argv[]) {
     Code code;
     parser.initializer(argv[1]);
     std::vector<std::vector<std::string>> lineVect = parser.getVect();
-    // std::string currentInstruction = parser.getCurrentInstruct();
 
     for (int i = 0; i < lineVect.size(); i++) {
         for (int j = 0; j < lineVect[i].size(); j++) {
             if (parser.hasMoreLines()) {
                 parser.advance();
+
                 std::string instruction = parser.instructionType();
-                std::cout << instruction << std::endl;
+                std::string hackFileName = argv[0];
+                int hackFileNamePos = hackFileName.find_first_not_of("./");
+                hackFileName = hackFileName.substr(hackFileNamePos) + ".hack";
+                std::ofstream hackFile;
+                hackFile.open(hackFileName, std::ios::app);
+
                 if (instruction == "C_INSTRUCTION") {
                     std::string instructionDest = parser.dest();
                     std::string instructionComp = parser.comp();
@@ -44,16 +50,15 @@ int main(int argc, char* argv[]) {
                     std::string destBinary = code.dest(instructionDest);
                     std::string compBinary = code.comp(instructionComp);
                     std::string jumpBinary = code.jump(instructionJump);
-                    std::string instructionBinary = "111" + compBinary + destBinary + jumpBinary;
-                    std::string hackFileName = argv[0];
-                    int hackFileNamePos = hackFileName.find_first_not_of("./");
-                    hackFileName = hackFileName.substr(hackFileNamePos) + ".hack";
-                    std::ofstream hackFile;
-                    hackFile.open(hackFileName);
-                    hackFile << instructionBinary << std::endl;
-                    hackFile.close();
+                    std::string cInstructionBinary = "111" + compBinary + destBinary + jumpBinary;
+                    std::cout << cInstructionBinary << std::endl;
+                    hackFile << cInstructionBinary << std::endl;
                 } else if (instruction == "A_INSTRUCTION") {
-                    std::cout << "is a A instruction" << std::endl;
+                    std::string aInstruction = parser.symbol();
+                    int aDigit = std::stoi(aInstruction);
+                    std::string aInstructionBinary = "0" + std::bitset<15>(aDigit).to_string();
+                    std::cout << aInstructionBinary << std::endl;
+                    hackFile << aInstructionBinary << std::endl;
                 }
             }
         }
