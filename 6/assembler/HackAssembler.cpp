@@ -187,13 +187,14 @@ std::string Parser::comp() {
     std::cout << "pos: " << pos << "\ninstruction: " << instruction << "\ndestStr: " << destStr << "\njumpStr: " << jumpStr << std::endl;
 
     if (destStr != std::string::npos && jumpStr == std::string::npos) {
-        // TODO: How to return string starting after '=' and before whitespace
+        return instruction.substr(++destStr);
     }
     else if (jumpStr != std::string::npos && destStr == std::string::npos) {
-        // TODO: How to return string after ';' and before whitespace
+        return instruction.substr(0, jumpStr);
     }
     else if (destStr != std::string::npos && jumpStr != std::string::npos) {
-        // TODO: How to return string inbetween '=' and ';'
+        std::size_t compStr = jumpStr - ++destStr;
+        return instruction.substr(destStr, compStr);
     }
 
     return "\nParser::comp() error: have encountered erreneous instruction";
