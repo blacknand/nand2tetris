@@ -26,28 +26,41 @@ int main(int argc, char* argv[]) {
     }
 
     Parser parser;
+    Code code;
     parser.initializer(argv[1]);
-    parser.advance();
-    parser.advance();
-    parser.advance();
-    parser.advance();
-    parser.advance();
-
     std::vector<std::vector<std::string>> lineVect = parser.getVect();
-    std::string currentInstruction = parser.getCurrentInstruct();
-    int currentLine = parser.getCurrentLine();
+    // std::string currentInstruction = parser.getCurrentInstruct();
 
-    // parser.advance();
+    for (int i = 0; i < lineVect.size(); i++) {
+        for (int j = 0; j < lineVect[i].size(); j++) {
+            if (parser.hasMoreLines()) {
+                parser.advance();
+                std::string instruction = parser.instructionType();
+                std::cout << instruction << std::endl;
+                if (instruction == "C_INSTRUCTION") {
+                    std::string instructionDest = parser.dest();
+                    // std::cout << "instructionDest" << instructionDest << std::endl;
+                    std::string instructionComp = parser.comp();
+                    std::cout << "comp: " << instructionComp << std::endl;
+                    std::string instructionJump = parser.jump();
+                    // std::cout << instructionJump << std::endl;
 
-    // std::string testD = parser.dest();
-    // std::cout << testD << std::endl;
+                    std::string destBinary = code.dest(instructionDest);
+                    std::string compBinary = code.comp(instructionComp);
+                    std::string jumpBinary = code.jump(instructionJump);
+                    std::string instructionBinary = destBinary + compBinary + jumpBinary;
+                } else if (instruction == "A_INSTRUCTION") {
+                    std::cout << "is a A instruction" << std::endl;
+                }
+            }
+        }
+    }
+    // for each line in asm file
+        // for c-instruction, user parser and code to translate
+            // concatenate binary string
+            // write to .hack file
+        // for a-instruction, user other thing and write to .hack file
 
-
-    std::cout << currentInstruction << std::endl;
-    std::string testE = parser.dest();
-    std::string testF = parser.comp();
-    std::string testC = parser.jump();
-    std::cout << testE << testF << testC << std::endl;
 
     return 0;
 }
@@ -132,7 +145,7 @@ const std::string Parser::instructionType() {
         return "L_INSTRUCTION";
     }
 
-    return "Parser::instructionType() error: have encountered erreneous instruction";
+    return "\nParser::instructionType() error: have encountered erreneous instruction";
 }
 
 
@@ -148,7 +161,7 @@ std::string Parser::symbol() {
         return instruction.substr(1, --ch);
     }
 
-    return "Parser::symbol() error: have encountered erreneous instruction";
+    return "\nParser::symbol() error: have encountered erreneous instruction";
 }
 
 
@@ -161,7 +174,7 @@ std::string Parser::dest() {
         std::string instruction = currentInstruction.substr(pos);
         return instruction.substr(pos, destStr);
     } else
-        return "No dest";
+        return "null";
 }
 
 
@@ -171,17 +184,19 @@ std::string Parser::comp() {
     std::string instruction = currentInstruction.substr(pos);
     std::size_t destStr = currentInstruction.find('=');
     std::size_t jumpStr = currentInstruction.find(';');
+    std::cout << "pos: " << pos << "\ninstruction: " << instruction << "\ndestStr: " << destStr << "\njumpStr: " << jumpStr << std::endl;
 
-    if (destStr != std::string::npos && jumpStr == std::string::npos)
-        return instruction.substr(pos, destStr);
-    else if (jumpStr != std::string::npos && destStr == std::string::npos)  
-        return instruction.substr(pos, jumpStr);
+    if (destStr != std::string::npos && jumpStr == std::string::npos) {
+        // TODO: How to return string starting after '=' and before whitespace
+    }
+    else if (jumpStr != std::string::npos && destStr == std::string::npos) {
+        // TODO: How to return string after ';' and before whitespace
+    }
     else if (destStr != std::string::npos && jumpStr != std::string::npos) {
-        int endPos = jumpStr - destStr;
-        return instruction.substr(++destStr, --endPos);
+        // TODO: How to return string inbetween '=' and ';'
     }
 
-    return "Parser::comp() error: have encountered erreneous instruction";
+    return "\nParser::comp() error: have encountered erreneous instruction";
 }
 
 
@@ -189,16 +204,15 @@ std::string Parser::jump() {
     // Returns the jump part of a C-instruction
     std::size_t jumpStr = currentInstruction.find(';');
     std::string::size_type ch = currentInstruction.find_last_not_of(' ');
-    std::cout << jumpStr << std::endl;
 
     if (jumpStr != std::string::npos) 
         return currentInstruction.substr(++jumpStr, ch);
 
-    return "No jump";
+    return "null";
 }
 
 
-std::string Code::dest(std::string destCode) {
+std::string Code::dest(const std::string &destCode) {
     std::unordered_map<std::string, std::string> destCodeMap = {
         {"M", "001"},
         {"D", "010"},
@@ -207,18 +221,18 @@ std::string Code::dest(std::string destCode) {
         {"AM", "101"},
         {"AD", "110"},
         {"ADM", "111"},
-        {"", "000"}
+        {"null", "000"}
     };
 
     std::unordered_map<std::string, std::string>::const_iterator code = destCodeMap.find(destCode);
     if (code != destCodeMap.end())
         return code->second;
     else
-        return "Code::dest(std::string destCode) error: have encountered errenuous instruction";
+        return "\nCode::dest(std::string destCode) error: have encountered errenuous instruction";
 }
 
 
-std::string Code::comp(std::string compCode) {
+std::string Code::comp(const std::string &compCode) {
     std::unordered_map<std::string, std::string> compCodeMap = {
         {"0", "101010"},
         {"1", "111111"},
@@ -254,11 +268,11 @@ std::string Code::comp(std::string compCode) {
     if (code != compCodeMap.end())
         return code->second;
     else
-        return "Code::comp(std::string compCode) error: have encountered errenuous instruction";
+        return "\nCode::comp(std::string compCode) error: have encountered errenuous instruction";
 }
 
 
-std::string Code::jump(std::string jumpCode) {
+std::string Code::jump(const std::string &jumpCode) {
     std::unordered_map<std::string, std::string> jumpCodeMap = {
         {"JGT", "001"},
         {"JEQ", "010"},
@@ -267,12 +281,12 @@ std::string Code::jump(std::string jumpCode) {
         {"JNE", "101"},
         {"JLE", "110"},
         {"JMP", "111"},
-        {"", "000"}
+        {"null", "000"}
     };
 
     std::unordered_map<std::string, std::string>::const_iterator code = jumpCodeMap.find(jumpCode);
     if (code != jumpCodeMap.end())
         return code->second;
     else
-        return "Code::jump(std::string jumpCode) error: have encountered errenuous instruction";
+        return "\nCode::jump(std::string jumpCode) error: have encountered errenuous instruction";
 }
