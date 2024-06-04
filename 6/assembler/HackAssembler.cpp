@@ -39,16 +39,23 @@ int main(int argc, char* argv[]) {
                 std::cout << instruction << std::endl;
                 if (instruction == "C_INSTRUCTION") {
                     std::string instructionDest = parser.dest();
-                    // std::cout << "instructionDest" << instructionDest << std::endl;
+                    std::cout << "dest: " << instructionDest << std::endl;
                     std::string instructionComp = parser.comp();
                     std::cout << "comp: " << instructionComp << std::endl;
                     std::string instructionJump = parser.jump();
-                    // std::cout << instructionJump << std::endl;
+                    std::cout << "jump: " << instructionJump << std::endl;
+
+                    // TODO: Find out how to add A bit and individual 1 bits,
+                        // this will depend on instruction type
 
                     std::string destBinary = code.dest(instructionDest);
                     std::string compBinary = code.comp(instructionComp);
                     std::string jumpBinary = code.jump(instructionJump);
-                    std::string instructionBinary = destBinary + compBinary + jumpBinary;
+                    std::string instructionBinary = "111" + compBinary + destBinary + jumpBinary;
+                    std::cout << "dest: " << destBinary << std::endl;
+                    std::cout << "comp: " << compBinary << std::endl;
+                    std::cout << "jump: " << jumpBinary << std::endl;
+                    std::cout << "binary: " << instructionBinary << std::endl;
                 } else if (instruction == "A_INSTRUCTION") {
                     std::cout << "is a A instruction" << std::endl;
                 }
@@ -184,7 +191,6 @@ std::string Parser::comp() {
     std::string instruction = currentInstruction.substr(pos);
     std::size_t destStr = currentInstruction.find('=');
     std::size_t jumpStr = currentInstruction.find(';');
-    std::cout << "pos: " << pos << "\ninstruction: " << instruction << "\ndestStr: " << destStr << "\njumpStr: " << jumpStr << std::endl;
 
     if (destStr != std::string::npos && jumpStr == std::string::npos) {
         return instruction.substr(++destStr);
@@ -214,7 +220,7 @@ std::string Parser::jump() {
 
 
 std::string Code::dest(const std::string &destCode) {
-    std::unordered_map<std::string, std::string> destCodeMap = {
+    const std::unordered_map<std::string, std::string> destCodeMap = {
         {"M", "001"},
         {"D", "010"},
         {"DM", "011"},
@@ -234,35 +240,35 @@ std::string Code::dest(const std::string &destCode) {
 
 
 std::string Code::comp(const std::string &compCode) {
-    std::unordered_map<std::string, std::string> compCodeMap = {
-        {"0", "101010"},
-        {"1", "111111"},
-        {"-1", "111010"},
-        {"D", "001100"},
-        {"A", "110000"},
-        {"M", "110000"},
-        {"!D", "001101"},
-        {"!A", "110001"},
-        {"!M", "110001"},
-        {"-D", "001111"},
-        {"-A", "110011"},
-        {"-M", "110011"},
-        {"D+1", "011111"},
-        {"A+1", "110111"},
-        {"M+1", "110111"},
-        {"D-1", "001110"},
-        {"A-1", "110010"},
-        {"M-1", "110010"},
-        {"D+A", "000010"},
-        {"D+M", "000010"},
-        {"D-A", "010011"},
-        {"D-M", "010011"},
-        {"A-D", "000111"},
-        {"M-D", "000111"},
-        {"D&A", "000000"},
-        {"D&M", "000000"},
-        {"D|A", "010101"},
-        {"D|M", "010101"}
+    const std::unordered_map<std::string, std::string> compCodeMap = {
+        {"0", "0101010"},
+        {"1", "0111111"},
+        {"-1", "0111010"},
+        {"D", "0001100"},
+        {"A", "0110000"},
+        {"M", "1110000"},
+        {"!D", "0001101"},
+        {"!A", "0110001"},
+        {"!M", "1110001"},
+        {"-D", "0001111"},
+        {"-A", "0110011"},
+        {"-M", "1110011"},
+        {"D+1", "0011111"},
+        {"A+1", "0110111"},
+        {"M+1", "1110111"},
+        {"D-1", "0001110"},
+        {"A-1", "0110010"},
+        {"M-1", "1110010"},
+        {"D+A", "0000010"},
+        {"D+M", "1000010"},
+        {"D-A", "0010011"},
+        {"D-M", "1010011"},
+        {"A-D", "0000111"},
+        {"M-D", "1000111"},
+        {"D&A", "0000000"},
+        {"D&M", "1000000"},
+        {"D|A", "0010101"},
+        {"D|M", "1010101"}
     };
 
     std::unordered_map<std::string, std::string>::const_iterator code = compCodeMap.find(compCode);
@@ -274,7 +280,7 @@ std::string Code::comp(const std::string &compCode) {
 
 
 std::string Code::jump(const std::string &jumpCode) {
-    std::unordered_map<std::string, std::string> jumpCodeMap = {
+    const std::unordered_map<std::string, std::string> jumpCodeMap = {
         {"JGT", "001"},
         {"JEQ", "010"},
         {"JGE", "011"},
