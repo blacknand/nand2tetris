@@ -39,36 +39,25 @@ int main(int argc, char* argv[]) {
                 std::cout << instruction << std::endl;
                 if (instruction == "C_INSTRUCTION") {
                     std::string instructionDest = parser.dest();
-                    std::cout << "dest: " << instructionDest << std::endl;
                     std::string instructionComp = parser.comp();
-                    std::cout << "comp: " << instructionComp << std::endl;
                     std::string instructionJump = parser.jump();
-                    std::cout << "jump: " << instructionJump << std::endl;
-
-                    // TODO: Find out how to add A bit and individual 1 bits,
-                        // this will depend on instruction type
-
                     std::string destBinary = code.dest(instructionDest);
                     std::string compBinary = code.comp(instructionComp);
                     std::string jumpBinary = code.jump(instructionJump);
                     std::string instructionBinary = "111" + compBinary + destBinary + jumpBinary;
-                    std::cout << "dest: " << destBinary << std::endl;
-                    std::cout << "comp: " << compBinary << std::endl;
-                    std::cout << "jump: " << jumpBinary << std::endl;
-                    std::cout << "binary: " << instructionBinary << std::endl;
+                    std::string hackFileName = argv[0];
+                    int hackFileNamePos = hackFileName.find_first_not_of("./");
+                    hackFileName = hackFileName.substr(hackFileNamePos) + ".hack";
+                    std::ofstream hackFile;
+                    hackFile.open(hackFileName);
+                    hackFile << instructionBinary << std::endl;
+                    hackFile.close();
                 } else if (instruction == "A_INSTRUCTION") {
                     std::cout << "is a A instruction" << std::endl;
                 }
             }
         }
     }
-    // for each line in asm file
-        // for c-instruction, user parser and code to translate
-            // concatenate binary string
-            // write to .hack file
-        // for a-instruction, user other thing and write to .hack file
-
-
     return 0;
 }
 
@@ -91,7 +80,7 @@ void Parser::initializer(std::string inputFile) {
 
 bool Parser::hasMoreLines() {
     // Returns if there are any more valid lines (i.e. not a comment line)
-    int iter = (currentLine > 0) ? ++currentLine : 0;
+    int iter = (currentLine > 0) ? (currentLine + 1) : 0;
 
     for (int i = iter; i < lineVect.size(); i++) {
         for (int j = 0; j < lineVect[i].size(); j++) {
@@ -111,7 +100,7 @@ bool Parser::hasMoreLines() {
 
 void Parser::advance() {
     // Reads the next instruction from input and makes current instruction
-    int iter = (currentLine > 0) ? ++currentLine : 0;
+    int iter = (currentLine > 0) ? (currentLine + 1) : 0;
 
     for (int i = iter; i < lineVect.size(); i++) {
         for (int j = 0; j < lineVect[i].size(); j++) {
@@ -126,7 +115,6 @@ void Parser::advance() {
             }
         }
     }
-
 }
 
 
