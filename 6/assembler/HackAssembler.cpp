@@ -21,6 +21,7 @@
 #include <unordered_map> 
 #include <vector>
 #include "HackAssembler.hpp"
+#include "OutFile.hpp"
 
 
 int main(int argc, char* argv[]) {
@@ -43,15 +44,12 @@ int main(int argc, char* argv[]) {
                 std::string hackFileName = argv[0];
                 int hackFileNamePos = hackFileName.find_first_not_of("./");
                 hackFileName = hackFileName.substr(hackFileNamePos) + ".hack";
-                std::ofstream hackFile;
-                hackFile.open(hackFileName, std::ios::app);
+                OutFile hackFile(hackFileName.c_str());
 
                 if (instruction == "C_INSTRUCTION") {
                     std::string instructionDest = parser.dest();
                     std::string instructionComp = parser.comp();
                     std::string instructionJump = parser.jump();
-                    std::cout << "---------------------------------------------------------------" << std::endl;
-                    // std::cout << "dest: " << instructionDest << " comp: " << instructionComp << " jump: " << instructionJump << std::endl;
                     std::string destBinary = code.dest(instructionDest);
                     std::string compBinary = code.comp(instructionComp);
                     std::string jumpBinary = code.jump(instructionJump);
@@ -117,6 +115,7 @@ void Parser::advance() {
                 if (lineVect[i][j].substr(foundWhiteSpace, 2) != "//") {
                     currentLine = i;
                     currentInstruction = lineVect[i][j];
+                    boost::algorithm::trim(currentInstruction);
                     return;
                 } else    
                     continue;
@@ -127,11 +126,6 @@ void Parser::advance() {
 
 
 const std::string Parser::instructionType() {
-    // Returns the current type of the instruction
-    std::size_t pos = currentInstruction.find_first_not_of(' ');
-    std::string instruction = currentInstruction.substr(pos);
-    std::string::size_type ch = currentInstruction.find_last_not_of(' ');
-
     /*
         A_INSTRUCTION for @xxx, where xxx is a symbol for 
         either a decimal number or a symbol.
@@ -140,11 +134,11 @@ const std::string Parser::instructionType() {
 
         L_INSTRUCTION for (xxx), where xxx is a symbol.
     */
-    if (instruction[0] == '@') {
+    if (currentInstruction[0] == '@') {
         return "A_INSTRUCTION";
-    } else if (instruction.find('=') != std::string::npos || instruction.find(';') != std::string::npos) {
+    } else if (currentInstruction.find('=') != std::string::npos || currentInstruction.find(';') != std::string::npos) {
         return "C_INSTRUCTION";
-    } else if (instruction[0] == '(' && instruction[ch] == ')') {
+    } else if (currentInstruction[0] == '(' && currentInstruction[-1] == ')') {
         return "L_INSTRUCTION";
     }
 
@@ -154,87 +148,48 @@ const std::string Parser::instructionType() {
 
 std::string Parser::symbol() {
     // Strips the decimal/symbol from the A/L-instruction
-    std::size_t pos = currentInstruction.find_first_not_of(' ');
-    std::string instruction = currentInstruction.substr(pos);
-    std::string::size_type ch = currentInstruction.find_last_not_of(' ');
 
-    if (instruction[0] == '@') {
-        return instruction.substr(1, ch);
-    } else if (instruction[0] == '(' && instruction[ch] == ')') {
-        return instruction.substr(1, --ch);
-    }
+    if (currentInstruction[0] == '@') 
+        return currentInstruction.substr(1);
+    else if (currentInstruction[0] == '(' && currentInstruction[-1] == ')')
+        return currentInstruction.substr(1);
 
     return "\nParser::symbol() error: instruction " + currentInstruction;
 }
 
 
-// PARSER DEST COMP AND JUMP R NOT OUTPUTTING CORRECT VALUES
-
-// NEED TO IGNORE ALL WHITESPACE
-// NEED TO IGNORE ALL \R
-// NEED TO IGNORE ALL \N
-// NEED TO IGNORE ALL TABS
-
 std::string Parser::dest() {
     // Returns the dest part of a C-instruction
-    boost::algorithm::trim(currentInstruction);
-    // std::cout << "Parser::dest(): " << instruction.substr(pos, destStr) << std::endl;
     std::size_t destStr = currentInstruction.find('=');
 
-    if (destStr != std::string::npos) {
-        // std::size_t pos = currentInstruction.find_first_not_of(' ');
-        // std::size_t testPos = currentInstruction.find_last_not_of(" \r\n\t\w")
-        // std::string instruction = currentInstruction.substr(pos);
-        // std::cout << "Parser::dest(): " << instruction.substr(pos, destStr) << std::endl;
-        // return instruction.substr(destStr);
-        std::cout << "Parser::dest(): " << currentInstruction.substr(0, destStr) << " --> " << currentInstruction << std::endl;
+    if (destStr != std::string::npos) 
         return currentInstruction.substr(0, destStr);
-    } else
+    else 
         return "null";
 }
 
 
 std::string Parser::comp() {
     // Returns the comp part of a C-instruction
-    boost::algorithm::trim(currentInstruction);
-    // std::size_t pos = currentInstruction.find_first_not_of(' ');
-    // std::string instruction = currentInstruction.substr(pos);
     std::size_t destStr = currentInstruction.find('=');
     std::size_t jumpStr = currentInstruction.find(';');
 
     /*
         dest=comp;jump
 
-        if string contains = and not ;
+        if (string contains = and not ;)
             then get everything after =
-        else if string contains ; and not =
+        else if (string contains ; and not =)
             then get everything before ;
-        else if string contains ; and =
+        else (if string contains ; and =)
             get everything after = and before ;
     */
-
-    // TODO: If there is a = and no ; then get everything after the =
-
-    if (destStr != std::string::npos && jumpStr == std::string::npos) {
-        // std::cout << "Parser::comp(): " << instruction.substr(++destStr) << std::endl;
-        // return instruction.substr(++destStr);
-        std::cout << "Parser::comp(): " << currentInstruction.substr((destStr + 1)) << " --> " << currentInstruction << std::endl;
+    if (destStr != std::string::npos && jumpStr == std::string::npos)
         return currentInstruction.substr((destStr + 1));
-    }
-
-    else if (jumpStr != std::string::npos && destStr == std::string::npos) {
-        // std::cout << "Parser::comp(): " << instruction.substr(0, jumpStr) << std::endl;
-        // return instruction.substr(0, jumpStr);
-        std::cout << "Parser::comp(): " << currentInstruction.substr(0, jumpStr) << " --> " << currentInstruction << std::endl;
+    else if (jumpStr != std::string::npos && destStr == std::string::npos) 
         return currentInstruction.substr(0, jumpStr);
-    }
-
-    // TODO: If there is both ; and = then get everything after = and before ;
     else if (destStr != std::string::npos && jumpStr != std::string::npos) {
         std::size_t compStr = jumpStr - (destStr + 1);
-        // std::cout << "Parser::comp(): " << instruction.substr(destStr, compStr) << std::endl;
-        // return instruction.substr(destStr, compStr);
-        std::cout << "Parser::comp(): " << currentInstruction.substr(destStr, compStr) << " --> " << currentInstruction << std::endl;
         return currentInstruction.substr(destStr, compStr);
     }
 
@@ -243,17 +198,8 @@ std::string Parser::comp() {
 
 
 std::string Parser::jump() {
-    boost::algorithm::trim(currentInstruction);
-
-    // Returns the jump part of a C-instruction
     std::size_t jumpStr = currentInstruction.find(';');
-    // std::string::size_type ch = currentInstruction.find_last_not_of(' ');
-
     if (jumpStr != std::string::npos) {
-        // std::cout << "Parser::jump(): " << currentInstruction.substr(++jumpStr, ch) << std::endl;
-        // return currentInstruction.substr(++jumpStr, ch);
-        std::cout << "Parser::jump(): " << currentInstruction.substr((jumpStr + 1)) << " --> " << currentInstruction << std::endl;
-        
         return currentInstruction.substr((jumpStr + 1));
     }
     else
@@ -266,9 +212,12 @@ std::string Code::dest(const std::string &destCode) {
         {"M", "001"},
         {"D", "010"},
         {"DM", "011"},
+        {"MD", "011"},
         {"A", "100"},
         {"AM", "101"},
+        {"MA", "101"},
         {"AD", "110"},
+        {"DA", "110"},
         {"ADM", "111"},
         {"null", "000"}
     };
