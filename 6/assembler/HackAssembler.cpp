@@ -7,7 +7,10 @@
 */
 
 
+#include <algorithm>
 #include <bitset>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <cctype>
 #include <cstddef>
 #include <cstring>
@@ -47,17 +50,17 @@ int main(int argc, char* argv[]) {
                     std::string instructionDest = parser.dest();
                     std::string instructionComp = parser.comp();
                     std::string instructionJump = parser.jump();
+                    std::cout << "---------------------------------------------------------------" << std::endl;
+                    // std::cout << "dest: " << instructionDest << " comp: " << instructionComp << " jump: " << instructionJump << std::endl;
                     std::string destBinary = code.dest(instructionDest);
                     std::string compBinary = code.comp(instructionComp);
                     std::string jumpBinary = code.jump(instructionJump);
                     std::string cInstructionBinary = "111" + compBinary + destBinary + jumpBinary;
-                    std::cout << cInstructionBinary << std::endl;
                     hackFile << cInstructionBinary << std::endl;
                 } else if (instruction == "A_INSTRUCTION") {
                     std::string aInstruction = parser.symbol();
                     int aDigit = std::stoi(aInstruction);
                     std::string aInstructionBinary = "0" + std::bitset<15>(aDigit).to_string();
-                    std::cout << aInstructionBinary << std::endl;
                     hackFile << aInstructionBinary << std::endl;
                 }
             }
@@ -145,7 +148,7 @@ const std::string Parser::instructionType() {
         return "L_INSTRUCTION";
     }
 
-    return "\nParser::instructionType() error: have encountered erreneous instruction";
+    return "\nParser::instructionType() error: instruction " + currentInstruction;
 }
 
 
@@ -161,18 +164,31 @@ std::string Parser::symbol() {
         return instruction.substr(1, --ch);
     }
 
-    return "\nParser::symbol() error: have encountered erreneous instruction";
+    return "\nParser::symbol() error: instruction " + currentInstruction;
 }
 
 
+// PARSER DEST COMP AND JUMP R NOT OUTPUTTING CORRECT VALUES
+
+// NEED TO IGNORE ALL WHITESPACE
+// NEED TO IGNORE ALL \R
+// NEED TO IGNORE ALL \N
+// NEED TO IGNORE ALL TABS
+
 std::string Parser::dest() {
     // Returns the dest part of a C-instruction
+    boost::algorithm::trim(currentInstruction);
+    // std::cout << "Parser::dest(): " << instruction.substr(pos, destStr) << std::endl;
     std::size_t destStr = currentInstruction.find('=');
 
     if (destStr != std::string::npos) {
-        std::size_t pos = currentInstruction.find_first_not_of(' ');
-        std::string instruction = currentInstruction.substr(pos);
-        return instruction.substr(pos, destStr);
+        // std::size_t pos = currentInstruction.find_first_not_of(' ');
+        // std::size_t testPos = currentInstruction.find_last_not_of(" \r\n\t\w")
+        // std::string instruction = currentInstruction.substr(pos);
+        // std::cout << "Parser::dest(): " << instruction.substr(pos, destStr) << std::endl;
+        // return instruction.substr(destStr);
+        std::cout << "Parser::dest(): " << currentInstruction.substr(0, destStr) << " --> " << currentInstruction << std::endl;
+        return currentInstruction.substr(0, destStr);
     } else
         return "null";
 }
@@ -180,35 +196,68 @@ std::string Parser::dest() {
 
 std::string Parser::comp() {
     // Returns the comp part of a C-instruction
-    std::size_t pos = currentInstruction.find_first_not_of(' ');
-    std::string instruction = currentInstruction.substr(pos);
+    boost::algorithm::trim(currentInstruction);
+    // std::size_t pos = currentInstruction.find_first_not_of(' ');
+    // std::string instruction = currentInstruction.substr(pos);
     std::size_t destStr = currentInstruction.find('=');
     std::size_t jumpStr = currentInstruction.find(';');
 
+    /*
+        dest=comp;jump
+
+        if string contains = and not ;
+            then get everything after =
+        else if string contains ; and not =
+            then get everything before ;
+        else if string contains ; and =
+            get everything after = and before ;
+    */
+
+    // TODO: If there is a = and no ; then get everything after the =
+
     if (destStr != std::string::npos && jumpStr == std::string::npos) {
-        return instruction.substr(++destStr);
-    }
-    else if (jumpStr != std::string::npos && destStr == std::string::npos) {
-        return instruction.substr(0, jumpStr);
-    }
-    else if (destStr != std::string::npos && jumpStr != std::string::npos) {
-        std::size_t compStr = jumpStr - ++destStr;
-        return instruction.substr(destStr, compStr);
+        // std::cout << "Parser::comp(): " << instruction.substr(++destStr) << std::endl;
+        // return instruction.substr(++destStr);
+        std::cout << "Parser::comp(): " << currentInstruction.substr((destStr + 1)) << " --> " << currentInstruction << std::endl;
+        return currentInstruction.substr((destStr + 1));
     }
 
-    return "\nParser::comp() error: have encountered erreneous instruction";
+    else if (jumpStr != std::string::npos && destStr == std::string::npos) {
+        // std::cout << "Parser::comp(): " << instruction.substr(0, jumpStr) << std::endl;
+        // return instruction.substr(0, jumpStr);
+        std::cout << "Parser::comp(): " << currentInstruction.substr(0, jumpStr) << " --> " << currentInstruction << std::endl;
+        return currentInstruction.substr(0, jumpStr);
+    }
+
+    // TODO: If there is both ; and = then get everything after = and before ;
+    else if (destStr != std::string::npos && jumpStr != std::string::npos) {
+        std::size_t compStr = jumpStr - (destStr + 1);
+        // std::cout << "Parser::comp(): " << instruction.substr(destStr, compStr) << std::endl;
+        // return instruction.substr(destStr, compStr);
+        std::cout << "Parser::comp(): " << currentInstruction.substr(destStr, compStr) << " --> " << currentInstruction << std::endl;
+        return currentInstruction.substr(destStr, compStr);
+    }
+
+    return "\nParser::comp() error: instruction: " + currentInstruction;
 }
 
 
 std::string Parser::jump() {
+    boost::algorithm::trim(currentInstruction);
+
     // Returns the jump part of a C-instruction
     std::size_t jumpStr = currentInstruction.find(';');
-    std::string::size_type ch = currentInstruction.find_last_not_of(' ');
+    // std::string::size_type ch = currentInstruction.find_last_not_of(' ');
 
-    if (jumpStr != std::string::npos) 
-        return currentInstruction.substr(++jumpStr, ch);
-
-    return "null";
+    if (jumpStr != std::string::npos) {
+        // std::cout << "Parser::jump(): " << currentInstruction.substr(++jumpStr, ch) << std::endl;
+        // return currentInstruction.substr(++jumpStr, ch);
+        std::cout << "Parser::jump(): " << currentInstruction.substr((jumpStr + 1)) << " --> " << currentInstruction << std::endl;
+        
+        return currentInstruction.substr((jumpStr + 1));
+    }
+    else
+        return "null";
 }
 
 
@@ -228,7 +277,7 @@ std::string Code::dest(const std::string &destCode) {
     if (code != destCodeMap.end())
         return code->second;
     else
-        return "\nCode::dest(std::string destCode) error: have encountered errenuous instruction";
+        return "\nCode::dest(const std::string &destCode) error: &destCode " + destCode;
 }
 
 
@@ -268,7 +317,7 @@ std::string Code::comp(const std::string &compCode) {
     if (code != compCodeMap.end())
         return code->second;
     else
-        return "\nCode::comp(std::string compCode) error: have encountered errenuous instruction";
+        return "\nCode::comp(const std::string &compCode) error: &compCode: " + compCode;
 }
 
 
@@ -288,5 +337,5 @@ std::string Code::jump(const std::string &jumpCode) {
     if (code != jumpCodeMap.end())
         return code->second;
     else
-        return "\nCode::jump(std::string jumpCode) error: have encountered errenuous instruction";
+        return "\nCode::jump(const std::string &jumpCode) error: &jumpCode " + jumpCode;
 }
