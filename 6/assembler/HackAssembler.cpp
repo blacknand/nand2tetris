@@ -24,7 +24,7 @@
 #include "OutFile.hpp"
 
 
-int main(int argc, char* argv[]) {
+int main(int argc, char** argv) {
     if (argc != 2) {
         std::cout << "Usage: ./HackAssembler prog.asm" << std::endl;
         return 1;
@@ -32,8 +32,11 @@ int main(int argc, char* argv[]) {
 
     Parser parser;
     Code code;
+    SymbolTable symbolTable;
+    symbolTable.initializeTable();
     parser.initializer(argv[1]);
     std::vector<std::vector<std::string>> lineVect = parser.getVect();
+    int lineCounter = 0;
 
     for (int i = 0; i < lineVect.size(); i++) {
         for (int j = 0; j < lineVect[i].size(); j++) {
@@ -47,6 +50,7 @@ int main(int argc, char* argv[]) {
                 OutFile hackFile(hackFileName.c_str());
 
                 if (instruction == "C_INSTRUCTION") {
+                    lineCounter++;
                     std::string instructionDest = parser.dest();
                     std::string instructionComp = parser.comp();
                     std::string instructionJump = parser.jump();
@@ -56,10 +60,13 @@ int main(int argc, char* argv[]) {
                     std::string cInstructionBinary = "111" + compBinary + destBinary + jumpBinary;
                     hackFile << cInstructionBinary << std::endl;
                 } else if (instruction == "A_INSTRUCTION") {
+                    lineCounter++;
                     std::string aInstruction = parser.symbol();
                     int aDigit = std::stoi(aInstruction);
                     std::string aInstructionBinary = "0" + std::bitset<15>(aDigit).to_string();
                     hackFile << aInstructionBinary << std::endl;
+                } else if (instruction == "L_INSTRUCTION") {
+
                 }
             }
         }
@@ -85,7 +92,7 @@ void Parser::initializer(std::string inputFile) {
 
 
 bool Parser::hasMoreLines() {
-    // Returns if there are any more valid lines (i.e. not a comment line)
+    // Returns if there are any more valid lines
     int iter = (currentLine > 0) ? (currentLine + 1) : 0;
 
     for (int i = iter; i < lineVect.size(); i++) {
@@ -219,6 +226,11 @@ std::string Code::dest(const std::string &destCode) {
         {"AD", "110"},
         {"DA", "110"},
         {"ADM", "111"},
+        {"AMD", "111"},
+        {"DAM", "111"},
+        {"DMA", "111"},
+        {"MAD", "111"},
+        {"MDA", "111"},
         {"null", "000"}
     };
 
@@ -288,3 +300,76 @@ std::string Code::jump(const std::string &jumpCode) {
     else
         return "\nCode::jump(const std::string &jumpCode) error: &jumpCode " + jumpCode;
 }
+
+/*
+TODO
+    SymbolTable::initializeTable()
+        initialize with all predefined symbols and their addresses
+
+        create a new valid line counter which only increments on a c or a instruction
+
+*/
+
+void SymbolTable::initializeTable() {
+    symbolTable = {
+        {"R0", 0},
+        {"R1", 1},
+        {"R2", 2},
+        {"R3", 3},
+        {"R4", 4},
+        {"R5", 5},
+        {"R6", 6},
+        {"R7", 7},
+        {"R8", 8},
+        {"R9", 9},
+        {"R10", 10},
+        {"R11", 11},
+        {"R12", 12},
+        {"R13", 13},
+        {"R14", 14},
+        {"R15", 15},
+        {"SP", 0},
+        {"LCL", 1},
+        {"ARG", 2},
+        {"THIS", 3},
+        {"THAT", 4},
+        {"SCREEN", 16384},
+        {"KBD", 24576}
+    };
+}
+
+
+// TODO: Add symbol entry to table
+void SymbolTable::addEntry(const std::string &symbol, const int &address) {
+    symbolTable.insert({symbol, address});
+}
+
+
+bool SymbolTable::contains(const std::string &symbol) {
+    std::map<std::string, int>::iterator foundSymbol;
+    foundSymbol = symbolTable.find(symbol);
+    if (foundSymbol != symbolTable.end())
+        return true;
+    else
+        return false;
+}
+
+
+int SymbolTable::getAddress(const std::string &symbol) {
+    std::map<std::string, int>::iterator foundSymbol;
+    foundSymbol = symbolTable.find(symbol);
+    if (foundSymbol != symbolTable.end())
+        return foundSymbol->second;
+    else
+        return 404;
+}
+// PROBLEM
+    // NEED A LINE COUNTER, THAT IS ACCESSIBLE FROM ALL FUNCTIONS BUT IS NOT INSIDE ANY CLASS OR DEFINED GLOBALLY
+
+
+/*
+put in parser class
+    can access in all methods
+
+can then parse into the code methods
+*/

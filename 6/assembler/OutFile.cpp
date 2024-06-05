@@ -1,9 +1,12 @@
+// Overwrites the data in the .hack file
+
 #include <fstream>
 #include <map>
 #include <string>
 #include "OutFile.hpp"
 
 
+// https://stackoverflow.com/questions/40873849/append-data-to-a-file-in-c-but-overwrite-if-the-program-is-re-executed
 std::ios_base::openmode OutFile::hasBeenOpened( std::string fileName ) {
     // Test if the key is present
     if (record.find(fileName) == record.end()) {

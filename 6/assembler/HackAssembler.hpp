@@ -61,10 +61,13 @@ class Code {
 #define ASSEMBLER_SYMBOL_TABLE
 
 class SymbolTable {
+    private:
+        std::map<std::string, int> symbolTable;
     public: 
-        void addEntry(std::string symbol, int address);
-        bool contains(std::string);
-        int getAddress(std::string);
+        void initializeTable();
+        void addEntry(const std::string &symbol, const std::string &address);
+        bool contains(const std::string &symbol);
+        int getAddress(const std::string &symbol);
 };
 
 #endif  // SymbolTable
