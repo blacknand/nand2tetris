@@ -15,3 +15,14 @@ public:
 };
 
 #endif  // WRITE_TO_FILE_HPP
+
+
+#ifndef IS_NUMBER
+#define IS_NUMBER
+
+class Decimal {
+    public:
+        bool IsNumber(const std::string& s);
+};
+
+#endif  // IS_NUMBER
