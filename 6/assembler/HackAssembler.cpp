@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
                     lineCounter++;
                 else if (instruction == "L_INSTRUCTION") {
                     std::string symboL = parser.symbol();
-                    symbolTableObj.addEntry(symboL, (lineCounter + 1));
+                    symbolTableObj.addEntry(symboL, lineCounter);
                 }
             }
         }
@@ -70,11 +70,10 @@ int main(int argc, char** argv) {
                 int hackFileNamePos = hackFileName.find_first_not_of("./");
                 hackFileName = hackFileName.substr(hackFileNamePos) + ".hack";
                 OutFile hackFile(hackFileName.c_str());
-
                 std::string currentInstruction = parser.getCurrentInstruct();
                 std::string instruction = parser.instructionType();
                 std::map<std::string, int> symbolTable = symbolTableObj.getSymbolTable();
-
+                
                 if (instruction == "C_INSTRUCTION") {
                     std::string instructionDest = parser.dest();
                     std::string instructionComp = parser.comp();
@@ -91,15 +90,16 @@ int main(int argc, char** argv) {
                         std::string aInstructionBinary = "0" + std::bitset<15>(aDigit).to_string();
                         hackFile << aInstructionBinary << std::endl;
                     } else {
-                        if (!symbolTableObj.contains(aInstruction))
-                            symbolTableObj.addEntry(aInstruction, ++ramAddr);
-                        else {
+                        if (!symbolTableObj.contains(aInstruction)) {
+                            symbolTableObj.addEntry(aInstruction, ramAddr);
+                            ramAddr++;
+                        } else {
                             int aDigit = symbolTableObj.getAddress(aInstruction);
                             symbolTable[aInstruction] = aDigit;
-                            aDigit = symbolTableObj.getAddress(aInstruction);
-                            std::string aInstructionBinary = "0" + std::bitset<15>(aDigit).to_string();
-                            hackFile << aInstructionBinary << std::endl;
                         }
+                        int aDigit = symbolTableObj.getAddress(aInstruction);
+                        std::string aInstructionBinary = "0" + std::bitset<15>(aDigit).to_string();
+                        hackFile << aInstructionBinary << std::endl;
                     }
                 }
             }
@@ -133,12 +133,11 @@ bool Parser::hasMoreLines() {
 
     for (int i = iter; i < lineVect.size(); i++) {
         for (int j = 0; j < lineVect[i].size(); j++) {
-            std::size_t foundWhiteSpace = lineVect[i][j].find_first_not_of(' ');
+            std::size_t foundWhiteSpace = lineVect[i][j].find_first_not_of(" \t\n\v\f\r");
             if (foundWhiteSpace != std::string::npos) {
                 if (lineVect[i][j].substr(foundWhiteSpace, 2) != "//")
                     return true;
-                else
-                    continue;
+                continue;
             }
         }
     }
@@ -155,10 +154,11 @@ void Parser::advance() {
 
     for (int i = iter; i < lineVect.size(); i++) {
         for (int j = 0; j < lineVect[i].size(); j++) {
-            std::size_t foundWhiteSpace = lineVect[i][j].find_first_not_of(' ');
+            std::size_t foundWhiteSpace = lineVect[i][j].find_first_not_of(" \t\n\v\f\r");
             if (foundWhiteSpace != std::string::npos) {
                 if (lineVect[i][j].substr(foundWhiteSpace, 2) != "//") {
                     currentLine = i;
+                    std::string debugLine = lineVect[i][j];
                     boost::algorithm::trim(lineVect[i][j]);
                     currentInstruction = lineVect[i][j];
                     return;
@@ -183,7 +183,7 @@ const std::string Parser::instructionType() {
         return "A_INSTRUCTION";
     } else if (currentInstruction.find('=') != std::string::npos || currentInstruction.find(';') != std::string::npos) {
         return "C_INSTRUCTION";
-    } else if (currentInstruction[0] == '(' && currentInstruction[-1] == ')') {
+    } else if (currentInstruction[0] == '(' && currentInstruction.back() == ')') {
         return "L_INSTRUCTION";
     }
 
@@ -196,8 +196,8 @@ std::string Parser::symbol() {
 
     if (currentInstruction[0] == '@') 
         return currentInstruction.substr(1);
-    else if (currentInstruction[0] == '(' && currentInstruction[-1] == ')')
-        return currentInstruction.substr(1);
+    else if (currentInstruction[0] == '(' && currentInstruction.back() == ')')
+        return currentInstruction.substr(1, currentInstruction.size() - 2);
 
     return "\nParser::symbol() error: instruction " + currentInstruction;
 }
