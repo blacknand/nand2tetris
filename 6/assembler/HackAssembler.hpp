@@ -9,6 +9,7 @@ class Parser {
         int currentLine = 0;
         std::string currentInstruction;
         std::vector<std::vector<std::string>> lineVect;
+        bool secondPass;
     public:
         void initializer(std::string inputFile);
         void close(std::string inputFile);
@@ -29,6 +30,9 @@ class Parser {
         void setCurrentInstruct(std::string instruct) {
             currentInstruction = instruct;
         }
+        void setSecondPass(bool pass) {
+            secondPass = pass;
+        }
         // Setter
         int getCurrentLine() {
             return currentLine;
@@ -38,6 +42,9 @@ class Parser {
         }
         std::string getCurrentInstruct() {
             return currentInstruction;
+        }
+        bool getSecondPass() {
+            return secondPass;
         }
 };
 
@@ -65,9 +72,15 @@ class SymbolTable {
         std::map<std::string, int> symbolTable;
     public: 
         void initializeTable();
-        void addEntry(const std::string &symbol, const std::string &address);
+        void addEntry(const std::string &symbol, const int &address);
         bool contains(const std::string &symbol);
         int getAddress(const std::string &symbol);
+        void setSymbolTable(std::map<std::string, int> map) {
+            symbolTable = map;
+        }
+        std::map<std::string, int> getSymbolTable() {
+            return symbolTable;
+        }
 };
 
 #endif  // SymbolTable

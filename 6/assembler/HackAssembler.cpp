@@ -1,5 +1,5 @@
 /*
-    Implementation of an assembler for the Hack computer. Converts Hack
+    Implementation of a 2 pass assembler for the Hack computer. Converts Hack
     assembly language code into binary code and generates a .hack file.
 
     The assembler does not perform error checking of any kind and it is 
@@ -21,7 +21,7 @@
 #include <unordered_map> 
 #include <vector>
 #include "HackAssembler.hpp"
-#include "OutFile.hpp"
+#include "other.hpp"
 
 
 int main(int argc, char** argv) {
@@ -32,25 +32,50 @@ int main(int argc, char** argv) {
 
     Parser parser;
     Code code;
-    SymbolTable symbolTable;
-    symbolTable.initializeTable();
+    SymbolTable symbolTableObj;
+    Decimal decimal;
+    symbolTableObj.initializeTable();
     parser.initializer(argv[1]);
     std::vector<std::vector<std::string>> lineVect = parser.getVect();
     int lineCounter = 0;
+    int ramAddr = 16;
+    parser.setSecondPass(false);
 
+    // First pass
     for (int i = 0; i < lineVect.size(); i++) {
         for (int j = 0; j < lineVect[i].size(); j++) {
             if (parser.hasMoreLines()) {
                 parser.advance();
-
                 std::string instruction = parser.instructionType();
+                if (instruction == "C_INSTRUCTION" || instruction == "A_INSTRUCTION") 
+                    lineCounter++;
+                else if (instruction == "L_INSTRUCTION") {
+                    std::string symboL = parser.symbol();
+                    symbolTableObj.addEntry(symboL, (lineCounter + 1));
+                }
+            }
+        }
+    }
+
+    // Second pass
+    parser.setSecondPass(true);
+    for (int i = 0; i < lineVect.size(); i++) {
+        for (int j = 0; j < lineVect[i].size(); j++) {
+            if (parser.hasMoreLines()) {
+                parser.advance();
+                parser.setSecondPass(false);
+
+                // Prepare .hack file
                 std::string hackFileName = argv[0];
                 int hackFileNamePos = hackFileName.find_first_not_of("./");
                 hackFileName = hackFileName.substr(hackFileNamePos) + ".hack";
                 OutFile hackFile(hackFileName.c_str());
 
+                std::string currentInstruction = parser.getCurrentInstruct();
+                std::string instruction = parser.instructionType();
+                std::map<std::string, int> symbolTable = symbolTableObj.getSymbolTable();
+
                 if (instruction == "C_INSTRUCTION") {
-                    lineCounter++;
                     std::string instructionDest = parser.dest();
                     std::string instructionComp = parser.comp();
                     std::string instructionJump = parser.jump();
@@ -60,13 +85,22 @@ int main(int argc, char** argv) {
                     std::string cInstructionBinary = "111" + compBinary + destBinary + jumpBinary;
                     hackFile << cInstructionBinary << std::endl;
                 } else if (instruction == "A_INSTRUCTION") {
-                    lineCounter++;
                     std::string aInstruction = parser.symbol();
-                    int aDigit = std::stoi(aInstruction);
-                    std::string aInstructionBinary = "0" + std::bitset<15>(aDigit).to_string();
-                    hackFile << aInstructionBinary << std::endl;
-                } else if (instruction == "L_INSTRUCTION") {
-
+                    if (decimal.isNumber(aInstruction)) {
+                        int aDigit = std::stoi(aInstruction);
+                        std::string aInstructionBinary = "0" + std::bitset<15>(aDigit).to_string();
+                        hackFile << aInstructionBinary << std::endl;
+                    } else {
+                        if (!symbolTableObj.contains(aInstruction))
+                            symbolTableObj.addEntry(aInstruction, ++ramAddr);
+                        else {
+                            int aDigit = symbolTableObj.getAddress(aInstruction);
+                            symbolTable[aInstruction] = aDigit;
+                            aDigit = symbolTableObj.getAddress(aInstruction);
+                            std::string aInstructionBinary = "0" + std::bitset<15>(aDigit).to_string();
+                            hackFile << aInstructionBinary << std::endl;
+                        }
+                    }
                 }
             }
         }
@@ -94,6 +128,8 @@ void Parser::initializer(std::string inputFile) {
 bool Parser::hasMoreLines() {
     // Returns if there are any more valid lines
     int iter = (currentLine > 0) ? (currentLine + 1) : 0;
+    if (secondPass)
+        iter = 0;
 
     for (int i = iter; i < lineVect.size(); i++) {
         for (int j = 0; j < lineVect[i].size(); j++) {
@@ -114,6 +150,8 @@ bool Parser::hasMoreLines() {
 void Parser::advance() {
     // Reads the next instruction from input and makes current instruction
     int iter = (currentLine > 0) ? (currentLine + 1) : 0;
+    if (secondPass)
+        iter = 0;
 
     for (int i = iter; i < lineVect.size(); i++) {
         for (int j = 0; j < lineVect[i].size(); j++) {
@@ -121,8 +159,8 @@ void Parser::advance() {
             if (foundWhiteSpace != std::string::npos) {
                 if (lineVect[i][j].substr(foundWhiteSpace, 2) != "//") {
                     currentLine = i;
+                    boost::algorithm::trim(lineVect[i][j]);
                     currentInstruction = lineVect[i][j];
-                    boost::algorithm::trim(currentInstruction);
                     return;
                 } else    
                     continue;
@@ -301,16 +339,10 @@ std::string Code::jump(const std::string &jumpCode) {
         return "\nCode::jump(const std::string &jumpCode) error: &jumpCode " + jumpCode;
 }
 
-/*
-TODO
-    SymbolTable::initializeTable()
-        initialize with all predefined symbols and their addresses
-
-        create a new valid line counter which only increments on a c or a instruction
-
-*/
 
 void SymbolTable::initializeTable() {
+    // Initalizes table with predefined symbols
+
     symbolTable = {
         {"R0", 0},
         {"R1", 1},
@@ -339,13 +371,14 @@ void SymbolTable::initializeTable() {
 }
 
 
-// TODO: Add symbol entry to table
 void SymbolTable::addEntry(const std::string &symbol, const int &address) {
     symbolTable.insert({symbol, address});
 }
 
 
 bool SymbolTable::contains(const std::string &symbol) {
+    // Returns if the table contains the symbol parse in
+
     std::map<std::string, int>::iterator foundSymbol;
     foundSymbol = symbolTable.find(symbol);
     if (foundSymbol != symbolTable.end())
@@ -356,6 +389,8 @@ bool SymbolTable::contains(const std::string &symbol) {
 
 
 int SymbolTable::getAddress(const std::string &symbol) {
+    // Returns the address of the symbol parsed in
+
     std::map<std::string, int>::iterator foundSymbol;
     foundSymbol = symbolTable.find(symbol);
     if (foundSymbol != symbolTable.end())
@@ -363,13 +398,3 @@ int SymbolTable::getAddress(const std::string &symbol) {
     else
         return 404;
 }
-// PROBLEM
-    // NEED A LINE COUNTER, THAT IS ACCESSIBLE FROM ALL FUNCTIONS BUT IS NOT INSIDE ANY CLASS OR DEFINED GLOBALLY
-
-
-/*
-put in parser class
-    can access in all methods
-
-can then parse into the code methods
-*/

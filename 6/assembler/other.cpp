@@ -23,7 +23,7 @@ std::map< std::string, bool > OutFile::record;
 
 // Check if string is a decimal
 // https://stackoverflow.com/questions/4654636/how-to-determine-if-a-string-is-a-number-with-c
-bool Decimal::is_number(const std::string& s) {
+bool Decimal::isNumber(const std::string& s) {
     std::string::const_iterator it = s.begin();
     while (it != s.end() && std::isdigit(*it)) ++it;
     return !s.empty() && it == s.end();

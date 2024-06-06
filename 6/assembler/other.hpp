@@ -22,7 +22,7 @@ public:
 
 class Decimal {
     public:
-        bool IsNumber(const std::string& s);
+        bool isNumber(const std::string& s);
 };
 
 #endif  // IS_NUMBER
