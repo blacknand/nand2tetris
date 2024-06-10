@@ -44,3 +44,19 @@ bool Parser::hasMoreLines() {
 
     return false;
 }
+
+void Parser::advance() {
+    int iter = (currentLine > 0) ? (currentLine + 1) : 0;
+
+    for (int i = iter; i < fileVect.size(); i++) {
+        for (int j = 0; j < fileVect[i].size(); j++) {
+            std::size_t foundWhiteSpace = fileVect[i][j].find_first_not_of(" \t\n\v\f\r");
+            if (fileVect[i][j].substr(foundWhiteSpace, 2) != "//"){
+                currentLine = i;
+                currentInstruction = fileVect[i][j];
+                return;
+            }
+            continue;
+        }
+    }
+}
