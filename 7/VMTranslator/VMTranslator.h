@@ -7,6 +7,8 @@
 class Parser {
     private:
         std::vector<std::vector<std::string>> fileVect;
+        int currentLine = 0;
+        std::string currentInstruction;
     public:
         void initializer(std::ifstream &inputFile);
         bool hasMoreLines();
