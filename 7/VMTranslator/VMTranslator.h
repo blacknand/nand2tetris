@@ -9,6 +9,18 @@ class Parser {
         std::vector<std::vector<std::string>> fileVect;
         int currentLine = 0;
         std::string currentInstruction;
+        enum Commands {
+            C_ARITHMETIC = 1,
+            C_PUSH,
+            C_POP,
+            C_LABEL,
+            C_GOTO,
+            C_IF,
+            C_FUNCTION,
+            C_RETURN,
+            C_CALL
+        };
+        std::unordered_map<std::string, Commands> commandMap;
     public:
         void initializer(std::ifstream &inputFile);
         bool hasMoreLines();
