@@ -15,7 +15,24 @@ int main(int argc, char **argv) {
     parser.initializer(inputFile);
     parser.getFileVect();
     parser.advance();
+    parser.advance();
+    parser.advance();
+    parser.advance();
+    parser.advance();
+    parser.advance();
+    parser.advance();
+    parser.advance();
+        parser.advance();
+    parser.advance();
+    parser.advance();
+    parser.advance();
+        parser.advance();
+    parser.advance();
+    parser.advance();
+    parser.advance();
+    parser.advance();
     parser.commandType();
+    parser.arg1();
     return 1;
 }
 
@@ -127,4 +144,27 @@ const std::string Parser::commandType() {
     }
 
     return "std::string Parser::commandType() has encountered an error\n";
+}
+
+
+std::string Parser::arg1() {
+    std::size_t push = currentInstruction.find("push");
+    std::size_t pop = currentInstruction.find("pop");
+    std::size_t whitespacePos = currentInstruction.find_first_of(' ');
+
+    if (push != std::string::npos || pop != std::string::npos) {
+        std::string pushPopInstruction = currentInstruction.substr(whitespacePos);
+        boost::algorithm::trim(pushPopInstruction);
+        std::size_t whitespaceSubPos = pushPopInstruction.find_first_of(' ');
+        std::string strippedPushPopInstruction = pushPopInstruction.substr(0, whitespaceSubPos);
+        return strippedPushPopInstruction;
+    }
+    
+    std::size_t eos = currentInstruction.find_last_not_of(' ');
+    return currentInstruction.substr(0, (eos + 1));
+}
+
+
+std::string Parser::arg2() {
+    return "fuck";
 }
