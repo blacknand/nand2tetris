@@ -15,9 +15,10 @@ int main(int argc, char **argv) {
     parser.initializer(inputFile);
     parser.getFileVect();
     parser.advance();
+    parser.advance();
     parser.commandType();
     std::cout << parser.arg1() << std::endl;
-    // std::cout << parser.arg2() << std::endl;
+    std::cout << parser.arg2() << std::endl;
     return 1;
 }
 
