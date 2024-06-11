@@ -1,4 +1,4 @@
-# A 16 bit computer, built completely from the groun up capable of running Tetris
+# A 16 bit computer, built completely from the ground up capable of running Tetris
 all hardware and software components are built completely from scratch to fully learn and understand how computers work. The ultimate goal is to create a fully functional 16-bit computer capable of running Tetris.
 ## 1. Logic Gates/Boolean Logic
 The foundation of any computer system is built on logic gates and boolean logic. In this phase, we construct a large collection of 1-bit and 16-bit logic gates from scratch.
