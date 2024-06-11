@@ -17,6 +17,7 @@ int main(int argc, char **argv) {
     parser.advance();
     parser.commandType();
     std::cout << parser.arg1() << std::endl;
+    // std::cout << parser.arg2() << std::endl;
     return 1;
 }
 
@@ -132,25 +133,22 @@ const std::string Parser::commandType() {
 
 
 std::string Parser::arg1() {
-    std::size_t firstWhiteSpacePos = currentInstruction.find_first_of(' ');
-    
     // C_INSTRUCTION
-    if (firstWhiteSpacePos == std::string::npos)
+    std::size_t whiteSpace1 = currentInstruction.find_first_of(' ');
+    if (whiteSpace1 == std::string::npos)
         return currentInstruction;
 
-    std::string strippedArg = currentInstruction.substr(firstWhiteSpacePos);
-    boost::algorithm::trim(strippedArg);
-    std::size_t secondWhiteSpacePos = strippedArg.find_first_of(' ');
-
-    // If there is 2 args
-    if (secondWhiteSpacePos == std::string::npos)
-        return strippedArg;
-
-    // If there is a 3rd arg
-    return strippedArg.substr(0, secondWhiteSpacePos);
+    std::string instructSubStr1 = currentInstruction.substr(whiteSpace1);
+    boost::algorithm::trim(instructSubStr1);
+    std::size_t whiteSpace2 = instructSubStr1.find_first_of(' ');
+    std::string strippedInstruct = instructSubStr1.substr(0, whiteSpace2);    
+    return strippedInstruct;
 }
 
 
 std::string Parser::arg2() {
-    return "fuck";
+    std::size_t lastWhiteSpacePos = currentInstruction.find_last_of(' ');
+    std::string finalCommand = currentInstruction.substr(lastWhiteSpacePos);
+    boost::algorithm::trim(finalCommand);
+    return finalCommand;
 }
