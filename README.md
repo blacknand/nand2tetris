@@ -33,7 +33,6 @@ The first part of the Virtual Machine (VM) translation as part of a two-step com
 + Stack Arithmetic: Handling basic stack operations
 + Memory Access: Translating memory access commands
 + Code Translation: Converting VM code to Hack assembly
-Sure! Here's the continuation of the README, detailing the remaining phases of the project:
 ## 8. VM Part II
 In this phase, we extend the capabilities of the VM translator to handle more complex commands, including program flow and function calling.
 + Program Flow: Translating conditional and unconditional branching commands
