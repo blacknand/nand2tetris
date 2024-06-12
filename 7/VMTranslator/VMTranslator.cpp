@@ -7,18 +7,19 @@
 #include <string>
 #include <vector>
 #include "CodeWriter.h"
+#include "FileOp.h"
 #include "Parser.h"
 
 
 int main(int argc, char **argv) {
     Parser parser;
+    CodeWriter codeWriter;
     std::ifstream inputFile(argv[1]);
     parser.initializer(inputFile);
     parser.getFileVect();
     parser.advance();
-    parser.advance();
     parser.commandType();
-    std::cout << parser.arg1() << std::endl;
-    std::cout << parser.arg2() << std::endl;
+    const char *testFile = argv[1];
+    codeWriter.initializer(testFile);
     return 1;
 }

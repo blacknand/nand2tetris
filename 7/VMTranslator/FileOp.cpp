@@ -3,8 +3,8 @@
 #include <string>
 #include "FileOp.h"
 
-// https://stackoverflow.com/questions/40873849/append-data-to-a-file-in-c-but-overwrite-if-the-program-is-re-executed
-std::ios_base::openmode OutFile::hasBeenOpened( std::string fileName ) {
+// using regular method
+std::ios_base::openmode FileWriting::hasBeenOpened( std::string fileName ) {
     // Test if the key is present
     if (record.find(fileName) == record.end()) {
         record[ fileName ] = true;
@@ -13,7 +13,8 @@ std::ios_base::openmode OutFile::hasBeenOpened( std::string fileName ) {
         return std::ofstream::app;
 }
 
-OutFile::OutFile( const char * filename )
-: std::ofstream( filename, hasBeenOpened( std::string( filename ) ) ) {}
+std::ofstream FileWriting::writeFile( const char * filename ) {
+    return std::ofstream(filename, hasBeenOpened(std::string(filename)));
+}
 
-std::map< std::string, bool > OutFile::record;
+std::map< std::string, bool > FileWriting::record;

@@ -5,8 +5,9 @@
 #include <string>
 #include <vector>
 #include "CodeWriter.h"
+#include "FileOp.h"
 
 
-void CodeWriter::initializer(const std::ofstream &outputFile) {
-    
+void CodeWriter::initializer(const char *outputFile) {
+    std::ofstream asmFile = fileWriter.writeFile(outputFile);    
 }
