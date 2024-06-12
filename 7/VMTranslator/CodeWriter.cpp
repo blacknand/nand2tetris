@@ -123,22 +123,43 @@ void CodeWriter::writeArithmetic(std::string command) {
         {"not", NOT}
     }
 
-    // pop first 2 off of stack
-    // choose command
-    // push result back onto stack and then return
+    asmFile << pop << std::endl;
+    asmFile << popR13 << std::endl;
+    asmFile << pop << std::endl;
+    asmFile << popR14 << std::endl;
 
-    asmFile << pop << std::endl;
-    asmFile << pop << std::endl;
     std::unordered_map<std::string, Commands>::const_iterator commandIter = commandMap.find(command);
     switch (commandIter->second) {
-        case 1:
-
+        case 1: 
+            asmFile << add << std::endl;
+            break;
+        case 2:
+            asmFile << sub << std::endl;
+            break;
+        case 3:
+            asmFile << neg << std::endl;
+            break;
+        case 4:
+            asmFile << eq << std::endl;
+            break;
+        case 5:
+            asmFile << gt << std::endl;
+            break;
+        case 6:
+            asmFile << lt << std::endl;
+            break;
+        case 7:
+            asmFile << bitAnd << std::endl;
+            break;
+        case 8:
+            asmFile << bitOr << std::endl;
+            break;
+        case 9:
+            asmFile << bitNot << std::endl;
             break;
     }
 
-    asmFile << pop << std::endl;
-
-
+    asmFile << push << std::endl;
 }
 
 
