@@ -9,6 +9,17 @@ class CodeWriter: FileWriting {
         int fileNamePos;
         FileWriting fileWriter;
         std::ofstream asmFile;
+        enum Commands {
+            ADD = 1,
+            SUB,
+            NEG,
+            EQ,
+            GT,
+            LT,
+            AND,
+            OR,
+            NOT
+        }
     public:
         void initializer(const char *outputFile);
         void writeArithmetic(std::string command);

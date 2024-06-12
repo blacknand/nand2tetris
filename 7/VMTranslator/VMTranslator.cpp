@@ -1,7 +1,6 @@
-// Translates Hack VM bytecode into Hack ASM
-
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -19,7 +18,12 @@ int main(int argc, char **argv) {
     parser.getFileVect();
     parser.advance();
     parser.commandType();
-    const char *testFile = argv[1];
-    codeWriter.initializer(testFile);
+
+    std::string asmFileName = argv[0];
+    int asmFileNamePos = asmFileName.find_first_not_of("./");
+    asmFileName = asmFileName.substr(asmFileNamePos) + ".asm";
+    codeWriter.initializer(asmFileName.c_str());
+    codeWriter.writeArithmetic("add");
+    codeWriter.close();
     return 1;
 }
