@@ -9,8 +9,7 @@
 
 
 void CodeWriter::initializer(const char *outputFile) {
-    std::ofstream asmFile = fileWriter.writeFile(outputFile);    
-    asmFile << "test ahhhh" << std::endl;
+    asmFile = fileWriter.writeFile(outputFile);   
 }
 
 

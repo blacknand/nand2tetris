@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     int asmFileNamePos = asmFileName.find_first_not_of("./");
     asmFileName = asmFileName.substr(asmFileNamePos) + ".asm";
     codeWriter.initializer(asmFileName.c_str());
-    codeWriter.writeArithmetic("add");
+    codeWriter.writeArithmetic("neg");
     codeWriter.close();
     return 1;
 }

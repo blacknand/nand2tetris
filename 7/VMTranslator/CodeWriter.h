@@ -8,6 +8,7 @@ class CodeWriter: FileWriting {
         std::string asmFileName;
         FileWriting fileWriter;
         std::ofstream asmFile;
+        // std::ofstream *asmFilePtr;
         int labelCounter;
         enum Commands {
             ADD = 1,
