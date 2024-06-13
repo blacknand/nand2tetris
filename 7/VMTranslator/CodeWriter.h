@@ -6,9 +6,9 @@
 class CodeWriter: FileWriting {
     private:
         std::string asmFileName;
-        int fileNamePos;
         FileWriting fileWriter;
         std::ofstream asmFile;
+        int labelCounter;
         enum Commands {
             ADD = 1,
             SUB,
@@ -19,7 +19,7 @@ class CodeWriter: FileWriting {
             AND,
             OR,
             NOT
-        }
+        };
     public:
         void initializer(const char *outputFile);
         void writeArithmetic(std::string command);

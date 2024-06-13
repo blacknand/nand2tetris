@@ -1,7 +1,7 @@
-#include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include "CodeWriter.h"
@@ -10,106 +10,113 @@
 
 void CodeWriter::initializer(const char *outputFile) {
     std::ofstream asmFile = fileWriter.writeFile(outputFile);    
+    asmFile << "test ahhhh" << std::endl;
 }
 
 
 void CodeWriter::writeArithmetic(std::string command) {
-    const char *push = 
-        "@SP"
-        "A=M"
-        "M=D"
-        "@SP"
-        "M=M+1"
+    labelCounter++;
+    std::stringstream labelCounterStream;
+    std::string labelCounterStr;
+    labelCounterStream << labelCounter;
+    labelCounterStream >> labelCounterStr;
 
-    const char *pop = 
-        "@SP"
-        "M-M-1"
-        "A=M"
-        "D=M"
+    std::string push = 
+        "@SP\n"
+        "A=M\n"
+        "M=D\n"
+        "@SP\n"
+        "M=M+1\n";
+
+    std::string pop = 
+        "@SP\n"
+        "M=M-1\n"
+        "A=M\n"
+        "D=M\n";
     
-    const char *popR13 = 
-        "@R13"
-        "M=D"
+    std::string popR13 = 
+        "@R13\n"
+        "M=D\n";
 
-    const char *popR14 = 
-        "@R14"
-        "M=D"
+    std::string popR14 = 
+        "@R14\n"
+        "M=D\n";
 
-    const char *add = 
-        "@R13"
-        "D=M"
-        "@R14"
-        "M=D+M"
+    std::string add = 
+        "@R13\n"
+        "D=M\n"
+        "@R14\n"
+        "M=D+M\n";
 
-    const char *sub = 
-        "@R13"
-        "D=M"
-        "@R14"
-        "D=D-M"
+    std::string sub = 
+        "@R13\n"
+        "D=M\n"
+        "@R14\n"
+        "D=D-M\n";
 
-    const char *neg = 
-        "@R13"
-        "D=M"
-        "D=D-D"
-        "D=D-D"
+    std::string neg = 
+        "@R13\n"
+        "D=M\n"
+        "D=D-D\n"
+        "D=D-D\n";
 
-    const char *gt = 
-        "@R13"
-        "D=M"
-        "@R14"
-        "D=D-M"
-        "@GT"
-        "D;JGT"
-        "@NO"
-        "0;JMP"
-        "(GT)"
-        "D=-1"
-        "(NO)"
-        "D=0"
+    std::string gt = 
+        "@R13\n"
+        "D=M\n"
+        "@R14\n"
+        "D=D-M\n"
+        "@GT" + labelCounterStr + "\n"
+        "D;JGT\n"
+        "@NO.gt" + labelCounterStr + "\n"
+        "0;JMP\n"
+        "(GT" + labelCounterStr + ")" + "\n"
+        "D=-1\n"
+        "(NO.gt" + labelCounterStr + ")" + "\n"
+        "D=0\n";
 
-    const char *lt = 
-        "@R13"
-        "D=M"
-        "@R14"
-        "D=D-M"
-        "@LT"
-        "D;JLT"
-        "@NO"
-        "0;JMP"
-        "(LT)"
-        "D=-1"
-        "(NO)"
-        "D=0"
+    std::string lt = 
+        "@R13\n"
+        "D=M\n"
+        "@R14\n"
+        "D=D-M\n"
+        "@LT" + labelCounterStr + "\n"
+        "D;JLT\n"
+        "@NO.lt" + labelCounterStr + "\n"
+        "0;JMP\n"
+        "(LT" + labelCounterStr + ")" + "\n"
+        "D=-1\n"
+        "(NO.lt" + labelCounterStr + ")" + "\n"
+        "D=0\n";
 
-    const char *eq = 
-        "@R13"
-        "D=M"
-        "@R14"
-        "D=D-M"
-        "@EQ"
-        "D;JEQ"
-        "@NO"
-        "0;JMP"
-        "(EQ)"
-        "D=-1"
-        "(NO)"
-        "D=0"
+    std::string eq = 
+        "@R13\n"
+        "D=M\n"
+        "@R14\n"
+        "D=D-M\n"
+        "@EQ" + labelCounterStr + "\n"
+        "D;JEQ\n"
+        "@NO.eq" + labelCounterStr + "\n"
+        "0;JMP\n"
+        "(EQ" + labelCounterStr + ")" + "\n"
+        "D=-1\n"
+        "(NO.eq" + labelCounterStr + ")" + "\n"
+        "D=0\n";
 
-    const char *bitNot = 
-        "@R13"
-        "D=!M"
+    std::string bitNot = 
+        "@R13\n"
+        "D=!M\n";
 
-    const char *bitAnd = 
-        "@R13"
-        "D=M"
-        "@R14"
-        "D=D&M"
+    std::string bitAnd = 
+        "@R13\n"
+        "D=M\n"
+        "@R14\n"
+        "D=D&M\n";
 
-    const char *bitOr =
-        "@R13"
-        "D=M"
-        "@R14"
-        "D=D|M"
+    std::string bitOr =
+        "@R13\n"
+        "D=M\n"
+        "@R14\n"
+        "D=D|M\n";
 
     std::unordered_map<std::string, Commands> commandMap = {
         {"add", ADD},
@@ -121,37 +128,49 @@ void CodeWriter::writeArithmetic(std::string command) {
         {"and", AND},
         {"or", OR},
         {"not", NOT}
-    }
+    };
 
     asmFile << pop << std::endl;
     asmFile << popR13 << std::endl;
-    asmFile << pop << std::endl;
-    asmFile << popR14 << std::endl;
 
     std::unordered_map<std::string, Commands>::const_iterator commandIter = commandMap.find(command);
     switch (commandIter->second) {
         case 1: 
+            asmFile << pop << std::endl;
+            asmFile << popR14 << std::endl;
             asmFile << add << std::endl;
             break;
         case 2:
+            asmFile << pop << std::endl;
+            asmFile << popR14 << std::endl;
             asmFile << sub << std::endl;
             break;
         case 3:
             asmFile << neg << std::endl;
             break;
         case 4:
+            asmFile << pop << std::endl;
+            asmFile << popR14 << std::endl;
             asmFile << eq << std::endl;
             break;
         case 5:
+            asmFile << pop << std::endl;
+            asmFile << popR14 << std::endl;
             asmFile << gt << std::endl;
             break;
         case 6:
+            asmFile << pop << std::endl;
+            asmFile << popR14 << std::endl;
             asmFile << lt << std::endl;
             break;
         case 7:
+            asmFile << pop << std::endl;
+            asmFile << popR14 << std::endl;
             asmFile << bitAnd << std::endl;
             break;
         case 8:
+            asmFile << pop << std::endl;
+            asmFile << popR14 << std::endl;
             asmFile << bitOr << std::endl;
             break;
         case 9:
