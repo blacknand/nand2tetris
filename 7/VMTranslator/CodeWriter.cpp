@@ -209,15 +209,24 @@ void CodeWriter::writePushPop(std::string &command, std::string &segment, int &i
     indexStream << index;
     indexStream >> strIndex;
 
-    if (segment == "local")
-        segment = "LCL";
-    else if (segment == "argument")
-        segment = "ARG";
+    std::string argSegment;
 
-    if (segment == "pointer" && index == 0)
+    if (segment == "local") {
+        segment = "LCL";
+        argSegment = "local";
+    } else if (segment == "argument") {
+        segment = "ARG";
+        argSegment = "argument";
+    }
+
+    // segment == this or that and not pointer
+    if ((segment == "pointer" && index == 0) || segment == "this") {
         segment = "THIS";
-    else if (segment == "pointer" && index == 1)
+        argSegment = "this";
+    } else if ((segment == "pointer" && index == 1) || segment == "that") {
         segment = "THAT";
+        argSegment = "that";
+    }
 
     std::string push1 = 
         "@" + segment + "\n"
@@ -301,28 +310,28 @@ void CodeWriter::writePushPop(std::string &command, std::string &segment, int &i
         "A=M\n"
         "M=D\n";
 
-    std::string segmentsArr[5] = {"local", "argument", "this", "that", "pointer"};
-    std::string *foundSegment = std::find(std::begin(segmentsArr), std::end(segmentsArr), segment);
+    std::string segmentsArr[4] = {"local", "argument", "this", "that"};
+    std::string *foundSegment = std::find(std::begin(segmentsArr), std::end(segmentsArr), argSegment);
 
-    if (command == "push" && foundSegment != std::end(segmentsArr)) {
+    if (command == "C_PUSH" && foundSegment != std::end(segmentsArr)) {
         asmFile << "// push " + segment + " " + strIndex << std::endl;
         asmFile << push1 << std::endl; 
-    } else if (command == "pop" && foundSegment != std::end(segmentsArr)) {
+    } else if (command == "C_POP" && foundSegment != std::end(segmentsArr)) {
         asmFile << "// pop " + segment + " " + strIndex << std::endl;
         asmFile << pop1 << std::endl; 
-    } else if (command == "pop" && segment == "temp") {
+    } else if (command == "C_POP" && segment == "temp") {
         asmFile << "// pop " + segment + " " + strIndex << std::endl;
         asmFile << popTemp << std::endl; 
-    } else if (command == "push" && segment == "temp") {
+    } else if (command == "C_PUSH" && segment == "temp") {
         asmFile << "// push " + segment + " " + strIndex << std::endl;
         asmFile << pushTemp << std::endl; 
-    } else if (command == "push" && segment == "constant") {
+    } else if (command == "C_PUSH" && segment == "constant") {
         asmFile << "// push " + segment + " " + strIndex << std::endl;
         asmFile << pushConst << std::endl;
-    } else if (command == "push" && segment == "static") {
+    } else if (command == "C_PUSH" && segment == "static") {
         asmFile << "// push " + segment + " " + strIndex << std::endl;
         asmFile << pushStatic << std::endl;
-    } else if (command == "pop" && segment == "static") {
+    } else if (command == "C_POP" && segment == "static") {
         asmFile << "// pop " + segment + " " + strIndex << std::endl;
         asmFile << popStatic << std::endl;
     }

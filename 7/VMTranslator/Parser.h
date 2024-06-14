@@ -27,7 +27,7 @@ class Parser {
         void advance();
         const std::string commandType();
         std::string arg1();
-        std::string arg2();
+        int arg2();
         std::vector<std::vector<std::string>> getFileVect() {
             return fileVect;
         }

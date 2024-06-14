@@ -132,10 +132,9 @@ std::string Parser::arg1() {
     return strippedInstruct;
 }
 
-
-std::string Parser::arg2() {
+int Parser::arg2() {
     std::size_t lastWhiteSpacePos = currentInstruction.find_last_of(' ');
     std::string finalCommand = currentInstruction.substr(lastWhiteSpacePos);
     boost::algorithm::trim(finalCommand);
-    return finalCommand;
+    return std::stoi(finalCommand);
 }

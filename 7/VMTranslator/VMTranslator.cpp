@@ -41,20 +41,18 @@ int main(int argc, char **argv) {
         for (int j = 0; j < fileVect[i].size(); j++) {
             if (parser.hasMoreLines()) {
                 parser.advance();
-                std::string arg1 = "NULL", arg2 = "NULL";
-                const std::string commandType = parser.commandType();
+                std::string arg1;
+                int arg2;
+                std::string commandType = parser.commandType();
                 if (commandType != "C_RETURN")
                     arg1 = parser.arg1();
-                else if (commandType == "C_PUSH" || commandType == "C_POP" || commandType == "C_FUNCTION"
-                        || commandType == "C_CALL")
+                if (commandType == "C_PUSH" || commandType == "C_POP")
                     arg2 = parser.arg2();
-                
-                std::cout << "fileVect[" << i << "]" << "[" << j << "]" << " " << "arg1: " << arg1 << std::endl;
-                std::cout << "fileVect[" << i << "]" << "[" << j << "]" << " " << "arg2: " << arg2 << std::endl;
-                // if (commandType == "C_ARITHMETIC")
-                //     codeWriter.writeArithmetic(arg1);
-                // else if (arg2 != "NULL") 
-                //     codeWriter.writePushPop()
+
+                if (commandType == "C_ARITHMETIC")
+                    codeWriter.writeArithmetic(arg1);
+                else if (commandType == "C_PUSH" || commandType == "C_POP")
+                    codeWriter.writePushPop(commandType, arg1, arg2);
             }
         }
     }
