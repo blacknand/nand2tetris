@@ -22,8 +22,23 @@ int main(int argc, char **argv) {
     std::string asmFileName = argv[0];
     int asmFileNamePos = asmFileName.find_first_not_of("./");
     asmFileName = asmFileName.substr(asmFileNamePos) + ".asm";
-    codeWriter.initializer(asmFileName.c_str());
-    codeWriter.writeArithmetic("neg");
+
+    std::string vmFileName = argv[1];
+    std::size_t vmExtensionI = vmFileName.find(".vm");
+    std::size_t forwardSlash = vmFileName.find_last_of("/");
+
+    if (forwardSlash != std::string::npos) {
+        std::string strippedFileName = vmFileName.substr((forwardSlash + 1));
+        std::size_t fileExtension = strippedFileName.find(".vm");
+        strippedFileName.erase(fileExtension);
+        vmFileName = strippedFileName;
+    }
+    else
+        vmFileName.erase(vmExtensionI, 3);
+
+    codeWriter.initializer(asmFileName.c_str(), vmFileName);
+    codeWriter.writeArithmetic("add");
     codeWriter.close();
+
     return 1;
 }

@@ -8,8 +8,9 @@
 #include "FileOp.h"
 
 
-void CodeWriter::initializer(const char *outputFile) {
+void CodeWriter::initializer(const char *outputFile, const std::string &VMFileName) {
     asmFile = fileWriter.writeFile(outputFile);   
+    VMfileName = VMFileName;
 }
 
 
@@ -192,7 +193,7 @@ void CodeWriter::writeArithmetic(std::string &command) {
 }
 
 
-void CodeWriter::writePushPop(std::string &command, std::string &segment, int index) {
+void CodeWriter::writePushPop(std::string &command, std::string &segment, int &index) {
     labelCounterOther++;
 
     std::stringstream labelCounterStream;
@@ -200,81 +201,131 @@ void CodeWriter::writePushPop(std::string &command, std::string &segment, int in
     labelCounterStream << labelCounterOther;
     labelCounterStream >> labelCounterStr;
 
+    if (segment == "temp")
+        index = index + 5;
+
     std::string strIndex;
     std::stringstream indexStream;
     indexStream << index;
     indexStream >> strIndex;
 
-    // std::unordered_map<std::string, Sections> commandMap = {
-    //     {"argument", ARGUMENT},
-    //     {"local", LOCAL},
-    //     // {"static", STATIC},
-    //     // {"constant", CONSTANT},
-    //     {"this", THIS},
-    //     {"that", THAT}
-    //     // {"that", THAT},
-    //     // {"pointer", POINTER},
-    //     // {"temp", TEMP}
-    // };
+    if (segment == "local")
+        segment = "LCL";
+    else if (segment == "argument")
+        segment = "ARG";
 
-    // LOCAL, ARGUMENT, THIS, THAT
+    if (segment == "pointer" && index == 0)
+        segment = "THIS";
+    else if (segment == "pointer" && index == 1)
+        segment = "THAT";
 
     std::string push1 = 
-        "@" + segment
-        "D=M"
-        "@" + strIndex;
-        "A=D+M"
-        "D+M"
-        "@SP"
-        "A=M"
-        "M=D"
-        "@SP"
-        "M=M+1"
+        "@" + segment + "\n"
+        "D=M\n"
+        "@" + strIndex + "\n"
+        "A=D+M\n"
+        "D+M\n"
+        "@SP\n"
+        "A=M\n"
+        "M=D\n"
+        "@SP\n"
+        "M=M+1\n";
 
     std::string pop1 = 
-        "@" + segment
-        "D=M"
-        "@" + strIndex;
-        "D=D+A"
-        "@R15"
-        "M=D"
-        "@SP"
-        "AM=M-1"
-        "D=M"
-        "@R15"
-        "A=M"
-        "M=D"
+        "@" + segment + "\n"
+        "D=M\n"
+        "@" + strIndex + "\n"
+        "D=D+A\n"
+        "@R15\n"
+        "M=D\n"
+        "@SP\n"
+        "AM=M-1\n"
+        "D=M\n"
+        "@R15\n"
+        "A=M\n"
+        "M=D\n";
 
-    if (command == "push") {
-        asmFile << "// push " + segment " " + strIndex << std::endl;
+    std::string pushTemp = 
+        "@R5\n" 
+        "D=M\n"
+        "@" + strIndex + "\n"
+        "A=D+M\n"
+        "D+M\n"
+        "@SP\n"
+        "A=M\n"
+        "M=D\n"
+        "@SP\n"
+        "M=M+1\n";
+
+    std::string popTemp = 
+        "@R5\n"
+        "D=M\n"
+        "@" + strIndex + "\n"
+        "D=D+A\n"
+        "@R15\n"
+        "M=D\n"
+        "@SP\n"
+        "AM=M-1\n"
+        "D=M\n"
+        "@R15\n"
+        "A=M\n"
+        "M=D\n";
+
+    std::string pushConst = 
+        "@" + strIndex + "\n"
+        "D=A\n"
+        "@SP\n"
+        "A=M\n"
+        "M=D\n"
+        "@SP\n"
+        "M=M+1\n";
+
+    std::string pushStatic = 
+        "@" + VMfileName + "." + strIndex + "\n"
+        "D=A\n"
+        "@SP\n"
+        "A=M\n"
+        "M=D\n"
+        "@SP\n"
+        "M=M+1\n";
+
+    std::string popStatic = 
+        "@" + VMfileName + "." + strIndex + "\n"
+        "D=A\n"
+        "@R15\n"
+        "M=D\n"
+        "@SP\n"
+        "AM=M-1\n"
+        "D=M\n"
+        "@R15\n"
+        "A=M\n"
+        "M=D\n";
+
+    std::string segmentsArr[5] = {"local", "argument", "this", "that", "pointer"};
+    std::string *foundSegment = std::find(std::begin(segmentsArr), std::end(segmentsArr), segment);
+
+    if (command == "push" && foundSegment != std::end(segmentsArr)) {
+        asmFile << "// push " + segment + " " + strIndex << std::endl;
         asmFile << push1 << std::endl; 
-    } else if (command == "pop") {
-        asmFile << "// pop " + segment " " + strIndex << std::endl;
+    } else if (command == "pop" && foundSegment != std::end(segmentsArr)) {
+        asmFile << "// pop " + segment + " " + strIndex << std::endl;
         asmFile << pop1 << std::endl; 
+    } else if (command == "pop" && segment == "temp") {
+        asmFile << "// pop " + segment + " " + strIndex << std::endl;
+        asmFile << popTemp << std::endl; 
+    } else if (command == "push" && segment == "temp") {
+        asmFile << "// push " + segment + " " + strIndex << std::endl;
+        asmFile << pushTemp << std::endl; 
+    } else if (command == "push" && segment == "constant") {
+        asmFile << "// push " + segment + " " + strIndex << std::endl;
+        asmFile << pushConst << std::endl;
+    } else if (command == "push" && segment == "static") {
+        asmFile << "// push " + segment + " " + strIndex << std::endl;
+        asmFile << pushStatic << std::endl;
+    } else if (command == "pop" && segment == "static") {
+        asmFile << "// pop " + segment + " " + strIndex << std::endl;
+        asmFile << popStatic << std::endl;
     }
-
-    // std::unordered_map<std::string, Sections>::const_iterator commandIter = commandMap.find(command);
-    // switch (commandIter->second) {
-    //     case 1:
-    //         break;
-    //     case 2:
-    //         break;
-    //     case 3:
-    //         break;
-    //     case 4:
-    //         break;
-    //     // case 5:
-    //     //     break;
-    //     // case 6:
-    //     //     break;
-    //     // case 7:
-    //     //     break;
-    //     // case 8:
-    //     //     break;
-    // }
-
-    // std::string pushSegment = 
-    //     "@" + 
 }
 
 

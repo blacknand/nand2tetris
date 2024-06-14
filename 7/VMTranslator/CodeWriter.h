@@ -6,9 +6,9 @@
 class CodeWriter: FileWriting {
     private:
         std::string asmFileName;
+        std::string VMfileName;
         FileWriting fileWriter;
         std::ofstream asmFile;
-        // std::ofstream *asmFilePtr;
         int labelCounterArithmetic;
         int labelCounterOther;
         enum Commands {
@@ -22,21 +22,10 @@ class CodeWriter: FileWriting {
             OR,
             NOT
         };
-        // enum Sections {
-        //     ARGUMENT = 1,
-        //     LOCAL,
-        //     // STATIC,
-        //     // CONSTANT,
-        //     THIS,
-        //     THAT,
-        //     // THAT,
-        //     // POINTER,
-        //     // TEMP
-        // }
     public:
         void initializer(const char *outputFile);
         void writeArithmetic(std::string &command);
-        void writePushPop(std::string &command, std::string &segment, int index);
+        void writePushPop(std::string &command, std::string &segment, int &index);
         void close();
 };
 
