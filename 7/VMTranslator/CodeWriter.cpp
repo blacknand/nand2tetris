@@ -46,7 +46,7 @@ void CodeWriter::writeArithmetic(std::string &command) {
         "@R13\n"
         "D=M\n"
         "@R14\n"
-        "M=D+M";
+        "D=D+M";
 
     std::string sub = 
         "@R13\n"
@@ -130,23 +130,23 @@ void CodeWriter::writeArithmetic(std::string &command) {
         {"not", NOT}
     };
 
-    asmFile << "// pop, popR13" << std::endl;
-    asmFile << pop << std::endl;
-    asmFile << popR13 << std::endl;
+    // when subbing, it should use r14 instead so i think order is wrong
 
     std::unordered_map<std::string, Commands>::const_iterator commandIter = commandMap.find(command);
     switch (commandIter->second) {
         case 1: 
-            asmFile << "// pop, popR14, add" << std::endl;
-            asmFile << pop << std::endl;
-            asmFile << popR14 << std::endl;
-            asmFile << add << std::endl;
+            asmFile << pop << "     // pop" << std::endl;
+            asmFile << popR13 << "      // save to R13" << std::endl;
+            asmFile << pop << "     // pop" << std::endl;
+            asmFile << popR14 << "      // save to R14" << std::endl;
+            asmFile << add << "     // add" << std::endl;
             break;
         case 2:
-            asmFile << "// pop, popR14, sub" << std::endl;
-            asmFile << pop << std::endl;
-            asmFile << popR14 << std::endl;
-            asmFile << sub << std::endl;
+            asmFile << pop << "     // pop" << std::endl;
+            asmFile << popR14 << "      // save to R14" << std::endl;
+            asmFile << pop << "     // pop" << std::endl;
+            asmFile << popR13 << "      // save to R13" << std::endl;
+            asmFile << sub << "     // sub" << std::endl;
             break;
         case 3:
             asmFile << "// pop, neg" << std::endl;
@@ -232,8 +232,8 @@ void CodeWriter::writePushPop(std::string &command, std::string &segment, int &i
         "@" + segment + "\n"
         "D=M\n"
         "@" + strIndex + "\n"
-        "A=D+M\n"
-        "D+M\n"
+        "A=D+A\n"
+        "D=M\n"
         "@SP\n"
         "A=M\n"
         "M=D\n"
@@ -258,8 +258,8 @@ void CodeWriter::writePushPop(std::string &command, std::string &segment, int &i
         "@R5\n" 
         "D=M\n"
         "@" + strIndex + "\n"
-        "A=D+M\n"
-        "D+M\n"
+        "A=D+A\n"
+        "D=M\n"
         "@SP\n"
         "A=M\n"
         "M=D\n"
