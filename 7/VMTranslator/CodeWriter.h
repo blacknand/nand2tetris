@@ -23,7 +23,7 @@ class CodeWriter: FileWriting {
             NOT
         };
     public:
-        void initializer(const char *outputFile);
+        void initializer(const char *outputFile, const std::string &VMFileName);
         void writeArithmetic(std::string &command);
         void writePushPop(std::string &command, std::string &segment, int &index);
         void close();

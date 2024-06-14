@@ -30,8 +30,10 @@ bool Parser::hasMoreLines() {
     for (int i = iter; i < fileVect.size(); i++) {
         for (int j = 0; j < fileVect[i].size(); j++) {
             std::size_t foundWhiteSpace = fileVect[i][j].find_first_not_of(" \t\n\v\f\r");
-            if (fileVect[i][j].substr(foundWhiteSpace, 2) != "//")
-                return true;
+            if (foundWhiteSpace != std::string::npos) {
+                if (fileVect[i][j].substr(foundWhiteSpace, 2) != "//")
+                    return true;
+            }
             continue;
         }
     }
