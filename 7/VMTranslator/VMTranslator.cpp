@@ -14,10 +14,6 @@ int main(int argc, char **argv) {
     Parser parser;
     CodeWriter codeWriter;
 
-    // std::string asmFileName = argv[0];
-    // int asmFileNamePos = asmFileName.find_first_not_of("./");
-    // asmFileName = asmFileName.substr(asmFileNamePos) + ".asm";
-
     std::string vmFileName = argv[1];
     std::size_t vmExtensionI = vmFileName.find(".vm");
     std::size_t forwardSlash = vmFileName.find_last_of("/");
@@ -31,7 +27,6 @@ int main(int argc, char **argv) {
     else
         vmFileName.erase(vmExtensionI, 3);
 
-    // TODO: VM translator
     std::ifstream inputFile(argv[1]);
     parser.initializer(inputFile);
     std::vector<std::vector<std::string>> fileVect = parser.getFileVect();
@@ -51,10 +46,8 @@ int main(int argc, char **argv) {
 
                 if (commandType == "C_ARITHMETIC")
                     codeWriter.writeArithmetic(arg1);
-                else if (commandType == "C_PUSH" || commandType == "C_POP") {
-                    std::cout << "fileVect[" << i << "]" << "[" << j << "]" << " " << "arg2: " << arg2 << std::endl;
+                else if (commandType == "C_PUSH" || commandType == "C_POP")
                     codeWriter.writePushPop(commandType, arg1, arg2);
-                }
             }
         }
     }
