@@ -38,6 +38,7 @@ int main(int argc, char **argv) {
                 parser.advance();
                 std::string arg1;
                 int arg2;
+                // did not add in pointer as type
                 std::string commandType = parser.commandType();
                 if (commandType != "C_RETURN")
                     arg1 = parser.arg1();

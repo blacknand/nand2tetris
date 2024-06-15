@@ -230,24 +230,20 @@ void CodeWriter::writePushPop(std::string &command, std::string &segment, int &i
     indexStream << index;
     indexStream >> strIndex;
 
-    std::string argSegment;
+    std::string ogSegment = segment;
 
-    if (segment == "local") {
+    if (segment == "local")
         segment = "LCL";
-        argSegment = "local";
-    } else if (segment == "argument") {
+    else if (segment == "argument")
         segment = "ARG";
-        argSegment = "argument";
-    }
-
-    // segment == this or that and not pointer
-    if ((segment == "pointer" && index == 0) || segment == "this") {
+    else if (segment == "this")
         segment = "THIS";
-        argSegment = "this";
-    } else if ((segment == "pointer" && index == 1) || segment == "that") {
+    else if (segment == "that")
         segment = "THAT";
-        argSegment = "that";
-    }
+    else if (segment == "pointer" && index == 0)
+        segment = "THIS";
+    else if (segment == "pointer" && index == 1)
+        segment = "THAT";
 
     std::string push1 = 
         "@" + segment + "\n"
@@ -266,6 +262,27 @@ void CodeWriter::writePushPop(std::string &command, std::string &segment, int &i
         "D=M\n"
         "@" + strIndex + "\n"
         "D=D+A\n"
+        "@R15\n"
+        "M=D\n"
+        "@SP\n"
+        "AM=M-1\n"
+        "D=M\n"
+        "@R15\n"
+        "A=M\n"
+        "M=D\n";
+
+    std::string pushPointer = 
+        "@" + segment + "\n"
+        "D=M\n"
+        "@SP\n"
+        "A=M\n"
+        "M=D\n"
+        "@SP\n"
+        "M=M+1\n";
+
+    std::string popPointer = 
+        "@" + segment + "\n"
+        "D=A\n"                 // might be M=D, not sure
         "@R15\n"
         "M=D\n"
         "@SP\n"
@@ -331,10 +348,16 @@ void CodeWriter::writePushPop(std::string &command, std::string &segment, int &i
         "A=M\n"
         "M=D\n";
 
-    std::string segmentsArr[4] = {"local", "argument", "this", "that"};
-    std::string *foundSegment = std::find(std::begin(segmentsArr), std::end(segmentsArr), argSegment);
+    std::string segmentsArr[5] = {"LCL", "ARG", "THIS", "THAT"};
+    std::string *foundSegment = std::find(std::begin(segmentsArr), std::end(segmentsArr), segment);
 
-    if (command == "C_PUSH" && foundSegment != std::end(segmentsArr)) {
+    if (command == "C_PUSH" && ogSegment == "pointer") {
+        asmFile << "// push " + ogSegment + " " + strIndex << std::endl;
+        asmFile << pushPointer << std::endl;
+    } else if (command == "C_POP" && ogSegment == "pointer") {
+        asmFile << "// pop " + ogSegment + " " + strIndex << std::endl;
+        asmFile << popPointer << std::endl;
+    } else if (command == "C_PUSH" && foundSegment != std::end(segmentsArr)) {
         asmFile << "// push " + segment + " " + strIndex << std::endl;
         asmFile << push1 << std::endl; 
     } else if (command == "C_POP" && foundSegment != std::end(segmentsArr)) {
