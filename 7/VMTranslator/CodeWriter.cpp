@@ -330,6 +330,9 @@ void CodeWriter::writePushPop(std::string &command, std::string &segment, int &i
     std::string pushStatic = 
         "@" + VMfileName + "." + strIndex + "\n"
         "D=A\n"
+        "@" + strIndex + "\n"
+        "A=D+A\n"
+        "D=M\n"
         "@SP\n"
         "A=M\n"
         "M=D\n"
@@ -339,6 +342,8 @@ void CodeWriter::writePushPop(std::string &command, std::string &segment, int &i
     std::string popStatic = 
         "@" + VMfileName + "." + strIndex + "\n"
         "D=A\n"
+        "@" + strIndex + "\n"
+        "D=D+A\n"
         "@R15\n"
         "M=D\n"
         "@SP\n"
