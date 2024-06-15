@@ -1,5 +1,5 @@
-// push constant 3030
-@3030
+// push constant 111
+@111
 D=A
 @SP
 A=M
@@ -7,20 +7,8 @@ M=D
 @SP
 M=M+1
 
-// pop pointer 0
-@THIS
-D=A
-@R15
-M=D
-@SP
-AM=M-1
-D=M
-@R15
-A=M
-M=D
-
-// push constant 3040
-@3040
+// push constant 333
+@333
 D=A
 @SP
 A=M
@@ -28,20 +16,8 @@ M=D
 @SP
 M=M+1
 
-// pop pointer 1
-@THAT
-D=A
-@R15
-M=D
-@SP
-AM=M-1
-D=M
-@R15
-A=M
-M=D
-
-// push constant 32
-@32
+// push constant 888
+@888
 D=A
 @SP
 A=M
@@ -49,10 +25,10 @@ M=D
 @SP
 M=M+1
 
-// pop THIS 2
-@THIS
-D=M
-@2
+// pop static 8
+@StaticTest.8
+D=A
+@8
 D=D+A
 @R15
 M=D
@@ -63,19 +39,10 @@ D=M
 A=M
 M=D
 
-// push constant 46
-@46
+// pop static 3
+@StaticTest.3
 D=A
-@SP
-A=M
-M=D
-@SP
-M=M+1
-
-// pop THAT 6
-@THAT
-D=M
-@6
+@3
 D=D+A
 @R15
 M=D
@@ -86,8 +53,25 @@ D=M
 A=M
 M=D
 
-// push pointer 0
-@THIS
+// pop static 1
+@StaticTest.1
+D=A
+@1
+D=D+A
+@R15
+M=D
+@SP
+AM=M-1
+D=M
+@R15
+A=M
+M=D
+
+// push static 3
+@StaticTest.3
+D=A
+@3
+A=D+A
 D=M
 @SP
 A=M
@@ -95,48 +79,10 @@ M=D
 @SP
 M=M+1
 
-// push pointer 1
-@THAT
-D=M
-@SP
-A=M
-M=D
-@SP
-M=M+1
-
-// pop R13 and R14, add
-@SP
-M=M-1
-A=M
-D=M
-     // pop
-@R13
-M=D
-      // save to R13
-@SP
-M=M-1
-A=M
-D=M
-     // pop
-@R14
-M=D
-      // save to R14
-@R13
-D=M
-@R14
-D=D+M
-     // add
-// push
-@SP
-A=M
-M=D
-@SP
-M=M+1
-
-// push THIS 2
-@THIS
-D=M
-@2
+// push static 1
+@StaticTest.1
+D=A
+@1
 A=D+A
 D=M
 @SP
@@ -174,10 +120,10 @@ M=D
 @SP
 M=M+1
 
-// push THAT 6
-@THAT
-D=M
-@6
+// push static 8
+@StaticTest.8
+D=A
+@8
 A=D+A
 D=M
 @SP
@@ -214,4 +160,9 @@ A=M
 M=D
 @SP
 M=M+1
+
+@END
+(END)
+@END
+0;JMP
 

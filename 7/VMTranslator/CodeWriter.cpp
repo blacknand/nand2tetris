@@ -388,5 +388,11 @@ void CodeWriter::writePushPop(std::string &command, std::string &segment, int &i
 
 
 void CodeWriter::close() {
+    std::string endLoop = 
+        "@END\n"
+        "(END)\n"
+        "@END\n"
+        "0;JMP\n";
+    asmFile << endLoop << std::endl;
     asmFile.close();
 }
