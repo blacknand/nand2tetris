@@ -13,6 +13,11 @@ void Parser::initializer(std::ifstream &inputFile) {
     if (inputFile.is_open()) {
         while (std::getline(inputFile, line)) {
             lineVect.clear();
+
+            std::size_t commentPos = line.find("//");
+            if (commentPos != std::string::npos)
+                line.erase(commentPos);
+
             boost::algorithm::trim(line);
             lineVect.push_back(line);
             fileVect.push_back(lineVect);
@@ -43,8 +48,14 @@ bool Parser::hasMoreLines() {
 
 
 void Parser::advance() {
-    int iter = (currentLine > 0) ? (currentLine + 1) : 0;
+    int iter = (currentLine > 0) ? currentLine + 1 : 0;
 
+    // Prevent advance() ignoring 1st index line
+    if (secondLine) {
+        iter = 1;
+        secondLine = false;
+    }
+    
     for (int i = iter; i < fileVect.size(); i++) {
         for (int j = 0; j < fileVect[i].size(); j++) {
             std::size_t foundWhiteSpace = fileVect[i][j].find_first_not_of(" \t\n\v\f\r");
@@ -52,6 +63,8 @@ void Parser::advance() {
                 if (fileVect[i][j].substr(foundWhiteSpace, 2) != "//") {
                     currentLine = i;
                     currentInstruction = fileVect[i][j];
+                    if (currentLine == 0)
+                        secondLine = true;
                     return;
                 } 
                 continue;

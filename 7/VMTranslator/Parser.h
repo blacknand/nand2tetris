@@ -9,6 +9,7 @@ class Parser {
         std::vector<std::vector<std::string>> fileVect;
         int currentLine = 0;
         std::string currentInstruction;
+        bool secondLine = false;
         enum Commands {
             C_ARITHMETIC = 1,
             C_PUSH,

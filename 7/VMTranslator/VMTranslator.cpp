@@ -34,11 +34,11 @@ int main(int argc, char **argv) {
 
     for (int i = 0; i < fileVect.size(); i++) {
         for (int j = 0; j < fileVect[i].size(); j++) {
+            std::cout << fileVect[i][j] << std::endl;
             if (parser.hasMoreLines()) {
                 parser.advance();
                 std::string arg1;
                 int arg2;
-                // did not add in pointer as type
                 std::string commandType = parser.commandType();
                 if (commandType != "C_RETURN")
                     arg1 = parser.arg1();
