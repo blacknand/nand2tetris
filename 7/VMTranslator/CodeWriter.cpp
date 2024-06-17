@@ -396,3 +396,38 @@ void CodeWriter::close() {
     asmFile << endLoop << std::endl;
     asmFile.close();
 }
+
+
+void CodeWriter::setFileName(const std::string &fileName) {
+
+}
+
+
+void CodeWriter::writeLabel(const std::string &label) {
+
+}
+
+
+void CodeWriter::writeGoto(const std::string &label) {
+
+}
+
+
+void CodeWriter::writeIf(const std::string &label) {
+
+}
+
+
+void CodeWriter::writeFunction(const std::string &functionName, const int &nVars) {
+
+}
+
+
+void CodeWriter::writeCall(const std::string &functionName, const int &nVars) {
+
+}
+
+
+void CodeWriter::return() {
+
+}

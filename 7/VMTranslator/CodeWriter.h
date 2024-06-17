@@ -27,6 +27,13 @@ class CodeWriter: FileWriting {
         void writeArithmetic(std::string &command);
         void writePushPop(std::string &command, std::string &segment, int &index);
         void close();
+        void CodeWriter::setFileName(const std::string &fileName);
+        void CodeWriter::writeLabel(const std::string &label);
+        void CodeWriter::writeGoto(const std::string &label);
+        void CodeWriter::writeIf(const std::string &label);
+        void CodeWriter::writeFunction(const std::string &functionName, const int &nVars);
+        void CodeWriter::writeCall(const std::string &functionName, const int &nVars);
+        void CodeWriter::return();
 };
 
 #endif      // CODE_WRITER
