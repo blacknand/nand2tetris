@@ -403,18 +403,27 @@ void CodeWriter::setFileName(const std::string &fileName) {
 }
 
 
-void CodeWriter::writeLabel(const std::string &label) {
-
+void CodeWriter::writeLabel(const std::string &label, const std::string &funcName) {
+    std::string labelASM = 
+        "(" + VMfileName + "." + funcName + "$" + label + ")" + "\n";
 }
 
 
-void CodeWriter::writeGoto(const std::string &label) {
-
+void CodeWriter::writeGoto(const std::string &label, const std::string &funcName) {
+    std::string gotoASM = 
+        "@" + VMfileName + "." + funcName + "$" + label + "\n"
+        "0;JMP\n";
 }
 
 
-void CodeWriter::writeIf(const std::string &label) {
-
+void CodeWriter::writeIf(const std::string &label, const std::string &funcName) {
+    std::string ifGotoASM = 
+        "@SP\n"
+        "M=M-1\n"
+        "A=M\n"      
+        "D=M\n"      
+        "@" + VMfileName + "." + funcName + "$" + label + "\n"
+        "D;JNE\n";
 }
 
 

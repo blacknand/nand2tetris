@@ -28,12 +28,15 @@ class CodeWriter: FileWriting {
         void writePushPop(std::string &command, std::string &segment, int &index);
         void close();
         void CodeWriter::setFileName(const std::string &fileName);
-        void CodeWriter::writeLabel(const std::string &label);
-        void CodeWriter::writeGoto(const std::string &label);
-        void CodeWriter::writeIf(const std::string &label);
+        void CodeWriter::writeLabel(const std::string &label, const std::string &funcName);
+        void CodeWriter::writeGoto(const std::string &label, const std::string &funcName);
+        void CodeWriter::writeIf(const std::string &label, const std::string &funcName);
         void CodeWriter::writeFunction(const std::string &functionName, const int &nVars);
         void CodeWriter::writeCall(const std::string &functionName, const int &nVars);
         void CodeWriter::return();
+        void setFileName(const std::string &fileName) {
+            
+        }
 };
 
 #endif      // CODE_WRITER
