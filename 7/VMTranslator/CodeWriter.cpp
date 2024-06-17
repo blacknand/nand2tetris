@@ -282,7 +282,7 @@ void CodeWriter::writePushPop(std::string &command, std::string &segment, int &i
 
     std::string popPointer = 
         "@" + segment + "\n"
-        "D=A\n"                 // might be M=D, not sure
+        "D=A\n"             
         "@R15\n"
         "M=D\n"
         "@SP\n"

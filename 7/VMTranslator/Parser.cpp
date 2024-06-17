@@ -145,6 +145,7 @@ std::string Parser::arg1() {
     return strippedInstruct;
 }
 
+
 int Parser::arg2() {
     std::size_t lastWhiteSpacePos = currentInstruction.find_last_of(' ');
     std::string finalCommand = currentInstruction.substr(lastWhiteSpacePos);
