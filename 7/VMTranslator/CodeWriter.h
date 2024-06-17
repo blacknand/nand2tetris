@@ -11,6 +11,8 @@ class CodeWriter: FileWriting {
         std::ofstream asmFile;
         int labelCounterArithmetic;
         int labelCounterOther;
+        std::string currentFuncName;
+        std::string currentFileName;
         enum Commands {
             ADD = 1,
             SUB,
@@ -27,15 +29,15 @@ class CodeWriter: FileWriting {
         void writeArithmetic(std::string &command);
         void writePushPop(std::string &command, std::string &segment, int &index);
         void close();
-        void CodeWriter::setFileName(const std::string &fileName);
-        void CodeWriter::writeLabel(const std::string &label, const std::string &funcName);
-        void CodeWriter::writeGoto(const std::string &label, const std::string &funcName);
-        void CodeWriter::writeIf(const std::string &label, const std::string &funcName);
-        void CodeWriter::writeFunction(const std::string &functionName, const int &nVars);
-        void CodeWriter::writeCall(const std::string &functionName, const int &nVars);
-        void CodeWriter::return();
-        void setFileName(const std::string &fileName) {
-            
+        void setFileName(const std::string &fileName);
+        void writeLabel(const std::string &label);
+        void writeGoto(const std::string &label);
+        void writeIf(const std::string &label);
+        void writeFunction(const std::string &functionName, const int &nVars);
+        void writeCall(const std::string &functionName, const int &nVars);
+        void writeReturn();
+        void setterFileName(const std::string &fileName) {
+            currentFileName = fileName;
         }
 };
 

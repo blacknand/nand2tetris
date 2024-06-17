@@ -17,12 +17,14 @@ int main(int argc, char **argv) {
     CodeWriter codeWriter;
 
     bool directory = false;
-    int iterations = 0;
     std::string dirFile;
-    std::vector<std::pair<std::string, std::string>> vmFiles;
+    std::vector<std::string> vmFiles;
     std::string vmFileName = argv[1];
     std::size_t vmExtensionI = vmFileName.find(".vm");
     std::size_t forwardSlash = vmFileName.find_last_of("/");
+
+    // TODO: Instead of translating each .vm file into a seperate .asm file,
+    // the .vm files need to be translated into a single .vm file
 
     // Is a forward slash and is a single file
     if (forwardSlash != std::string::npos && vmExtensionI != std::string::npos) {
@@ -42,26 +44,22 @@ int main(int argc, char **argv) {
 
         for (const auto &dirEntry: recursive_dir_iter(argv[1])) {
             if (dirEntry.is_regular_file() && dirEntry.path().extension() == ".vm") {
-                std::string strippedFileName = dirEntry.path().stem().string();
-                std::pair<std::string, std::string> linePair = {strippedFileName, dirEntry.path().string()};
-                vmFiles.push_back(linePair);
-                iterations++;
+                vmFiles.push_back(dirEntry.path().string());
             }
         }
-    } else {
-        iterations = 1;
-        vmFiles.push_back({vmFileName, argv[1]});
-    }
+    } else
+        vmFiles.push_back(argv[1]);
 
-    for (int k = 0; k < iterations; k++) {
+    std::string testStrr = "test.asm";
+    codeWriter.initializer(testStrr.c_str(), "test");
+    for (int k = 0; k < vmFiles.size(); k++) {
         std::ifstream inputFile;
         if (directory)
-            inputFile.open(vmFiles.at(k).second);
+            inputFile.open(vmFiles.at(k));
         else
             inputFile.open(argv[1]);
         parser.initializer(inputFile);
         std::vector<std::vector<std::string>> fileVect = parser.getFileVect();
-        codeWriter.initializer((vmFiles.at(k).first + ".asm").c_str(), vmFiles.at(k).first);
 
         for (int i = 0; i < fileVect.size(); i++) {
             for (int j = 0; j < fileVect[i].size(); j++) {
@@ -72,17 +70,24 @@ int main(int argc, char **argv) {
                     std::string commandType = parser.commandType();
                     if (commandType != "C_RETURN")
                         arg1 = parser.arg1();
-                    if (commandType == "C_PUSH" || commandType == "C_POP")
+                    if (commandType == "C_PUSH" || commandType == "C_POP"
+                        || commandType == "C_FUNCTION" || commandType == "C_RETURN")
                         arg2 = parser.arg2();
 
                     if (commandType == "C_ARITHMETIC")
                         codeWriter.writeArithmetic(arg1);
                     else if (commandType == "C_PUSH" || commandType == "C_POP")
                         codeWriter.writePushPop(commandType, arg1, arg2);
+                    else if (commandType == "C_LABEL")
+                        codeWriter.writeLabel(arg1);
+                    else if (commandType == "C_GOTO")
+                        codeWriter.writeGoto(arg1);
+                    else if (commandType == "C_IF")
+                        codeWriter.writeIf(arg1);
                 }
             }
         }
-        codeWriter.close();
     }
+    codeWriter.close();
     return 0;
 }

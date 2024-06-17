@@ -403,27 +403,33 @@ void CodeWriter::setFileName(const std::string &fileName) {
 }
 
 
-void CodeWriter::writeLabel(const std::string &label, const std::string &funcName) {
+void CodeWriter::writeLabel(const std::string &label) {
+    std::string tempFuncName = currentFuncName.empty() ? "NULL" : currentFuncName;
     std::string labelASM = 
-        "(" + VMfileName + "." + funcName + "$" + label + ")" + "\n";
+        "(" + VMfileName + "." + tempFuncName + "$" + label + ")" + "\n";
+    asmFile << labelASM << std::endl;
 }
 
 
-void CodeWriter::writeGoto(const std::string &label, const std::string &funcName) {
+void CodeWriter::writeGoto(const std::string &label) {
+    std::string tempFuncName = currentFuncName.empty() ? "NULL" : currentFuncName;
     std::string gotoASM = 
-        "@" + VMfileName + "." + funcName + "$" + label + "\n"
+        "@" + VMfileName + "." + tempFuncName + "$" + label + "\n"
         "0;JMP\n";
+    asmFile << gotoASM << std::endl;
 }
 
 
-void CodeWriter::writeIf(const std::string &label, const std::string &funcName) {
+void CodeWriter::writeIf(const std::string &label) {
+    std::string tempFuncName = currentFuncName.empty() ? "NULL" : currentFuncName;
     std::string ifGotoASM = 
         "@SP\n"
         "M=M-1\n"
         "A=M\n"      
         "D=M\n"      
-        "@" + VMfileName + "." + funcName + "$" + label + "\n"
+        "@" + VMfileName + "." + tempFuncName + "$" + label + "\n"
         "D;JNE\n";
+    asmFile << ifGotoASM << std::endl;
 }
 
 
@@ -437,6 +443,6 @@ void CodeWriter::writeCall(const std::string &functionName, const int &nVars) {
 }
 
 
-void CodeWriter::return() {
+void CodeWriter::writeReturn() {
 
 }
