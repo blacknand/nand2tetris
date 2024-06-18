@@ -146,15 +146,15 @@ M=D
 @SP
 M=M+1
 
-@SP
-M=M-1
-A=M
-D=M
-@test.NULL$COMPUTE_ELEMENT
-D;JNE
+   @SP
+   M=M-1
+   A=M
+   D=M
+   @test.NULL$COMPUTE_ELEMENT
+   D;JNE
 
-@test.NULL$END
-0;JMP
+   @test.NULL$END
+   0;JMP
 
 (test.NULL$COMPUTE_ELEMENT)
 
@@ -348,8 +348,8 @@ D=M
 A=M
 M=D
 
-@test.NULL$LOOP
-0;JMP
+   @test.NULL$LOOP
+   0;JMP
 
 (test.NULL$END)
 

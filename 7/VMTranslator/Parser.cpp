@@ -90,7 +90,8 @@ const std::string Parser::commandType() {
         {"label", C_LABEL},
         {"goto", C_GOTO},
         {"if-goto", C_IF},
-        {"function", C_CALL},
+        {"function", C_FUNCTION},
+        {"call", C_CALL},
         {"return", C_RETURN}
     };
 

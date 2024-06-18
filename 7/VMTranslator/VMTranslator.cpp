@@ -1,5 +1,3 @@
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/trim.hpp>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -22,9 +20,6 @@ int main(int argc, char **argv) {
     std::string vmFileName = argv[1];
     std::size_t vmExtensionI = vmFileName.find(".vm");
     std::size_t forwardSlash = vmFileName.find_last_of("/");
-
-    // TODO: Instead of translating each .vm file into a seperate .asm file,
-    // the .vm files need to be translated into a single .vm file
 
     // Is a forward slash and is a single file
     if (forwardSlash != std::string::npos && vmExtensionI != std::string::npos) {
@@ -71,8 +66,10 @@ int main(int argc, char **argv) {
                     if (commandType != "C_RETURN")
                         arg1 = parser.arg1();
                     if (commandType == "C_PUSH" || commandType == "C_POP"
-                        || commandType == "C_FUNCTION" || commandType == "C_RETURN")
+                        || commandType == "C_FUNCTION" || commandType == "C_CALL")
                         arg2 = parser.arg2();
+
+                    // std::cout << arg1 << std::endl;
 
                     if (commandType == "C_ARITHMETIC")
                         codeWriter.writeArithmetic(arg1);
@@ -84,6 +81,12 @@ int main(int argc, char **argv) {
                         codeWriter.writeGoto(arg1);
                     else if (commandType == "C_IF")
                         codeWriter.writeIf(arg1);
+                    else if (commandType == "C_CALL")
+                        codeWriter.writeCall(arg1, arg2);
+                    else if (commandType == "C_FUNCTION")
+                        codeWriter.writeFunction(arg1, arg2);
+                    else if (commandType == "C_RETURN")
+                        codeWriter.writeReturn();
                 }
             }
         }

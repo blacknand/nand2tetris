@@ -434,13 +434,14 @@ void CodeWriter::writeIf(const std::string &label) {
 
 
 void CodeWriter::writeFunction(const std::string &functionName, const int &nVars) {
+    currentFuncName = functionName;
     std::string writeFuncASM = 
         "(" + functionName + ")\n"
         "   @" + std::to_string(nVars) + "\n"
         "   D=A\n"
         "   @" + functionName + "$" + "end_func\n"
         "   D;JEQ\n"
-        "(" + functionName + "$" + "main_loop\n"
+        "(" + functionName + "$" + "main_loop)\n"
         "   @SP\n"
         "   A=M\n"
         "   M=0\n"
@@ -449,7 +450,7 @@ void CodeWriter::writeFunction(const std::string &functionName, const int &nVars
         "   D=D-1\n"
         "   @" + functionName + "$" + "main_loop\n"
         "   D;JGT\n"
-        "(" + functionName + "$" + "end_func)\n"
+        "(" + functionName + "$" + "end_func)\n";
     asmFile << writeFuncASM << std::endl;
 }
 
@@ -457,11 +458,11 @@ void CodeWriter::writeFunction(const std::string &functionName, const int &nVars
 void CodeWriter::writeCall(const std::string &functionName, const int &nVars) {
     static int runningInt = 0;
     std::string stdPush = 
-        "@SP\n"
-        "A=M\n"
-        "M=D\n"
-        "@SP\n"
-        "M=M+1\n"
+        "   @SP\n"
+        "   A=M\n"
+        "   M=D\n"
+        "   @SP\n"
+        "   M=M+1\n";
 
     std::string writeCallASM =  
         // push returnAddress
@@ -487,8 +488,10 @@ void CodeWriter::writeCall(const std::string &functionName, const int &nVars) {
         // ARG = SP - 5 - nArgs
         "   @SP\n"
         "   D=M\n"
-        "   D=D-5\n"
-        "   D=D-" + std::to_string(nVars) + "\n"
+        "   @5\n"
+        "   D=D-A\n"
+        "   @" + std::to_string(nVars) + "\n"
+        "   D=D-A\n"
         "   @ARG\n"
         "   M=D\n" 
         // LCL = SP
@@ -499,12 +502,82 @@ void CodeWriter::writeCall(const std::string &functionName, const int &nVars) {
         // goto f
         "@" + functionName + "\n"
         "0;JMP\n"
-    "(" + functionName + "$ret." + std::to_string(runningInt) + ")\n"
+    "(" + functionName + "$ret." + std::to_string(runningInt) + ")\n";
     asmFile << writeCallASM << std::endl;
     runningInt++;
 }
 
 
 void CodeWriter::writeReturn() {
-    
+    std::string writeReturnASM = 
+        // frame = LCL
+        "   @LCL\n"
+        "   D=M\n"
+        "   @" + currentFuncName + "$frame\n"
+        "   M=D\n"
+        // retAddr(R15) = *(LCL - 5)
+        "   @LCL\n"
+        "   D=M\n"
+        "   A=D\n"
+        "   D=M\n"
+        "   @5\n"
+        "   D=D-A\n"
+        "   M=D\n"
+        "   @R15\n"
+        "   M=D\n"
+        // *ARG = pop()
+        "   @ARG\n"
+        "   D=M\n"
+        "   A=D\n"
+        "   D=M\n"
+        "   @R13\n"
+        "   M=D\n"
+        "   @SP\n"
+        "   M=M-1\n"
+        "   A=M\n"
+        "   D=M\n"
+        "   @R13\n"
+        "   A=M\n"
+        "   M=D\n"
+        // SP = ARG++
+        "   @ARG\n"
+        "   D=M\n"
+        "   D=D+1\n"
+        "   @SP\n"
+        "   M=D\n"
+        // THAT = *(frame--)
+        "   @" + currentFuncName + "$frame\n"
+        "   D=M-1\n"
+        "   A=D\n"
+        "   D=M\n"
+        "   @THAT\n"
+        "   M=D\n"
+        // THIS = *(frame - 2)
+        "   @" + currentFuncName + "$frame\n"
+        "   D=A\n"
+        "   @2\n"
+        "   A=D-A\n"
+        "   D=M\n"
+        "   @THIS\n"
+        "   M=D\n"
+        // ARG = *(frame - 3)
+        "   @" + currentFuncName + "$frame\n"
+        "   D=A\n"
+        "   @3\n"
+        "   A=D-A\n"
+        "   D=M\n"
+        "   @ARG\n"
+        "   M=D\n"
+        // LCL = *(frame - 4)
+        "   @" + currentFuncName + "$frame\n"
+        "   D=A\n"
+        "   @4\n"
+        "   A=D-A\n"
+        "   D=M\n"
+        "   @LCL\n"
+        "   M=D\n"
+        // goto retAddr
+        "   @R15\n"
+        "   0;JMP\n";
+    asmFile << writeReturnASM << std::endl;
 }
