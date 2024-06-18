@@ -414,8 +414,8 @@ void CodeWriter::writeLabel(const std::string &label) {
 void CodeWriter::writeGoto(const std::string &label) {
     std::string tempFuncName = currentFuncName.empty() ? "NULL" : currentFuncName;
     std::string gotoASM = 
-        "@" + VMfileName + "." + tempFuncName + "$" + label + "\n"
-        "0;JMP\n";
+        "   @" + VMfileName + "." + tempFuncName + "$" + label + "\n"
+        "   0;JMP\n";
     asmFile << gotoASM << std::endl;
 }
 
@@ -423,18 +423,34 @@ void CodeWriter::writeGoto(const std::string &label) {
 void CodeWriter::writeIf(const std::string &label) {
     std::string tempFuncName = currentFuncName.empty() ? "NULL" : currentFuncName;
     std::string ifGotoASM = 
-        "@SP\n"
-        "M=M-1\n"
-        "A=M\n"      
-        "D=M\n"      
-        "@" + VMfileName + "." + tempFuncName + "$" + label + "\n"
-        "D;JNE\n";
+        "   @SP\n"
+        "   M=M-1\n"
+        "   A=M\n"      
+        "   D=M\n"      
+        "   @" + VMfileName + "." + tempFuncName + "$" + label + "\n"
+        "   D;JNE\n";
     asmFile << ifGotoASM << std::endl;
 }
 
 
 void CodeWriter::writeFunction(const std::string &functionName, const int &nVars) {
-
+    std::string writeFuncASM = 
+        "(" + functionName + ")\n"
+        "   @" + std::to_string(nVars) + "\n"
+        "   D=A\n"
+        "   @" + functionName + "$" + "end_func\n"
+        "   D;JEQ\n"
+        "(" + functionName + "$" + "main_loop\n"
+        "   @SP\n"
+        "   A=M\n"
+        "   M=0\n"
+        "   @SP\n"
+        "   M=M+1\n"
+        "   D=D-1\n"
+        "   @" + functionName + "$" + "main_loop\n"
+        "   D;JGT\n"
+        "(" + functionName + "$" + "end_func)\n"
+    asmFile << writeFuncASM << std::endl;
 }
 
 
