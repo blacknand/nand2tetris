@@ -455,10 +455,56 @@ void CodeWriter::writeFunction(const std::string &functionName, const int &nVars
 
 
 void CodeWriter::writeCall(const std::string &functionName, const int &nVars) {
+    static int runningInt = 0;
+    std::string stdPush = 
+        "@SP\n"
+        "A=M\n"
+        "M=D\n"
+        "@SP\n"
+        "M=M+1\n"
 
+    std::string writeCallASM =  
+        // push returnAddress
+        "   @" + functionName + "$ret." + std::to_string(runningInt) + "\n"
+        "   D=A\n"
+        "   " + stdPush + 
+        // push LCL
+        "   @LCL\n"
+        "   D=M\n"
+        "   " + stdPush +
+        // push ARG
+        "   @ARG\n"
+        "   D=M\n"
+        "   " + stdPush +
+        // push THIS
+        "   @THIS\n"
+        "   D=M\n"
+        "   " + stdPush +
+        // push THAT
+        "   @THAT\n"
+        "   D=M\n"
+        "   " + stdPush +
+        // ARG = SP - 5 - nArgs
+        "   @SP\n"
+        "   D=M\n"
+        "   D=D-5\n"
+        "   D=D-" + std::to_string(nVars) + "\n"
+        "   @ARG\n"
+        "   M=D\n" 
+        // LCL = SP
+        "   @SP\n"
+        "   D=M\n"
+        "   @LCL\n"
+        "   M=D\n"
+        // goto f
+        "@" + functionName + "\n"
+        "0;JMP\n"
+    "(" + functionName + "$ret." + std::to_string(runningInt) + ")\n"
+    asmFile << writeCallASM << std::endl;
+    runningInt++;
 }
 
 
 void CodeWriter::writeReturn() {
-
+    
 }
