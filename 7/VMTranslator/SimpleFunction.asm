@@ -1,3 +1,4 @@
+//writeFuncASM
 (SimpleFunction.test)
    @2
    D=A
@@ -168,10 +169,12 @@ M=D
 @SP
 M=M+1
 
+// frame = LCL
    @LCL
    D=M
    @SimpleFunction.test$frame
    M=D
+// retAddr(R15) = *(LCL - 5)
    @LCL
    D=M
    A=D
@@ -181,51 +184,52 @@ M=M+1
    M=D
    @R15
    M=D
-   @ARG
-   D=M
-   A=D
-   D=M
-   @R13
-   M=D
+// *ARG = pop()
    @SP
-   M=M-1
-   A=M
+   AM=M-1
    D=M
-   @R13
+   @ARG
    A=M
    M=D
+// SP = ARG++
    @ARG
    D=M
    D=D+1
    @SP
    M=D
+// THAT = *(frame--)
    @SimpleFunction.test$frame
-   D=M-1
+   M=M-1
+   D=M
    A=D
    D=M
    @THAT
    M=D
+// THIS = *(frame - 2)
    @SimpleFunction.test$frame
-   D=A
-   @2
-   A=D-A
+   M=M-1
+   D=M
+   A=D
    D=M
    @THIS
    M=D
+ // ARG = *(frame - 3)
    @SimpleFunction.test$frame
-   D=A
-   @3
-   A=D-A
+   M=M-1
+   D=M
+   A=D
    D=M
    @ARG
    M=D
+// LCL = *(frame - 4)
    @SimpleFunction.test$frame
-   D=A
-   @4
-   A=D-A
+   M=M-1
+   D=M
+   A=D
    D=M
    @LCL
    M=D
+// goto retAddr
    @R15
    0;JMP
 
