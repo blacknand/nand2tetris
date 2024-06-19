@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
 
     bool directory = false;
     std::string dirFile;
-    std::vector<std::string> vmFiles;
+    std::vector<std::vector<std::string>> vmFiles;
     std::string vmFileName = argv[1];
     std::size_t vmExtensionI = vmFileName.find(".vm");
     std::size_t forwardSlash = vmFileName.find_last_of("/");
@@ -39,20 +39,28 @@ int main(int argc, char **argv) {
 
         for (const auto &dirEntry: recursive_dir_iter(argv[1])) {
             if (dirEntry.is_regular_file() && dirEntry.path().extension() == ".vm") {
-                vmFiles.push_back(dirEntry.path().string());
+                vmFiles.push_back({dirEntry.path().string(), dirEntry.path().stem().string()});
             }
         }
-    } else
-        vmFiles.push_back(argv[1]);
+        std::filesystem::path abs_path(vmFileName);
+        std::string finalDir = abs_path.parent_path().filename();
+        finalDir = finalDir + ".asm";
+        codeWriter.initializer(finalDir.c_str());
+    } else {
+        std::string strArgv = argv[1];
+        vmFiles.push_back({strArgv, vmFileName});
+        codeWriter.initializer((vmFileName + ".asm").c_str());
+    }
 
-    std::string testStrr = "test.asm";
-    codeWriter.initializer(testStrr.c_str(), "test");
     for (int k = 0; k < vmFiles.size(); k++) {
         std::ifstream inputFile;
-        if (directory)
-            inputFile.open(vmFiles.at(k));
+
+        if (directory) 
+            inputFile.open(vmFiles.at(k).at(0));
         else
             inputFile.open(argv[1]);
+
+        codeWriter.setFileName(vmFiles.at(k).at(1));
         parser.initializer(inputFile);
         std::vector<std::vector<std::string>> fileVect = parser.getFileVect();
 
@@ -63,13 +71,12 @@ int main(int argc, char **argv) {
                     std::string arg1;
                     int arg2;
                     std::string commandType = parser.commandType();
+
                     if (commandType != "C_RETURN")
                         arg1 = parser.arg1();
                     if (commandType == "C_PUSH" || commandType == "C_POP"
                         || commandType == "C_FUNCTION" || commandType == "C_CALL")
                         arg2 = parser.arg2();
-
-                    // std::cout << arg1 << std::endl;
 
                     if (commandType == "C_ARITHMETIC")
                         codeWriter.writeArithmetic(arg1);

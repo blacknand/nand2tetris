@@ -6,7 +6,6 @@
 class CodeWriter: FileWriting {
     private:
         std::string asmFileName;
-        std::string VMfileName;
         FileWriting fileWriter;
         std::ofstream asmFile;
         int labelCounterArithmetic;
@@ -25,7 +24,7 @@ class CodeWriter: FileWriting {
             NOT
         };
     public:
-        void initializer(const char *outputFile, const std::string &VMFileName);
+        void initializer(const char *outputFile);
         void writeArithmetic(std::string &command);
         void writePushPop(std::string &command, std::string &segment, int &index);
         void close();

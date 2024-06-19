@@ -8,9 +8,8 @@
 #include "FileOp.h"
 
 
-void CodeWriter::initializer(const char *outputFile, const std::string &VMFileName) {
+void CodeWriter::initializer(const char *outputFile) {
     asmFile = fileWriter.writeFile(outputFile);   
-    VMfileName = VMFileName;
 }
 
 
@@ -328,7 +327,7 @@ void CodeWriter::writePushPop(std::string &command, std::string &segment, int &i
         "M=M+1\n";
 
     std::string pushStatic = 
-        "@" + VMfileName + "." + strIndex + "\n"
+        "@" + currentFileName + "." + strIndex + "\n"
         "D=A\n"
         "@" + strIndex + "\n"
         "A=D+A\n"
@@ -340,7 +339,7 @@ void CodeWriter::writePushPop(std::string &command, std::string &segment, int &i
         "M=M+1\n";
 
     std::string popStatic = 
-        "@" + VMfileName + "." + strIndex + "\n"
+        "@" + currentFileName + "." + strIndex + "\n"
         "D=A\n"
         "@" + strIndex + "\n"
         "D=D+A\n"
@@ -399,14 +398,14 @@ void CodeWriter::close() {
 
 
 void CodeWriter::setFileName(const std::string &fileName) {
-
+    currentFileName = fileName;
 }
 
 
 void CodeWriter::writeLabel(const std::string &label) {
     std::string tempFuncName = currentFuncName.empty() ? "NULL" : currentFuncName;
     std::string labelASM = 
-        "(" + VMfileName + "." + tempFuncName + "$" + label + ")" + "\n";
+        "(" + currentFileName + "." + tempFuncName + "$" + label + ")" + "\n";
     asmFile << "// labelASM" << std::endl;
     asmFile << labelASM << std::endl;
 }
@@ -415,7 +414,7 @@ void CodeWriter::writeLabel(const std::string &label) {
 void CodeWriter::writeGoto(const std::string &label) {
     std::string tempFuncName = currentFuncName.empty() ? "NULL" : currentFuncName;
     std::string gotoASM = 
-        "   @" + VMfileName + "." + tempFuncName + "$" + label + "\n"
+        "   @" + currentFileName + "." + tempFuncName + "$" + label + "\n"
         "   0;JMP\n";
     asmFile << "// gotoASM" << std::endl;
     asmFile << gotoASM << std::endl;
@@ -429,7 +428,7 @@ void CodeWriter::writeIf(const std::string &label) {
         "   M=M-1\n"
         "   A=M\n"      
         "   D=M\n"      
-        "   @" + VMfileName + "." + tempFuncName + "$" + label + "\n"
+        "   @" + currentFileName + "." + tempFuncName + "$" + label + "\n"
         "   D;JNE\n";
     asmFile << "// ifGotoASM" << std::endl;
     asmFile << ifGotoASM << std::endl;
@@ -439,7 +438,6 @@ void CodeWriter::writeIf(const std::string &label) {
 void CodeWriter::writeFunction(const std::string &functionName, const int &nVars) {
     currentFuncName = functionName;
     std::string writeFuncASM = 
-        // TODO: Make function iterate correct number of times
         "(" + functionName + ")\n"
         "   @" + std::to_string(nVars) + "\n"
         "   D=A\n"
