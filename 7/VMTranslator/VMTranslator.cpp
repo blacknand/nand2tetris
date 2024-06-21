@@ -33,17 +33,28 @@ int main(int argc, char **argv) {
     else if (vmExtensionI == std::string::npos)
         directory = true;
 
-
     if (directory) {
         using recursive_dir_iter = std::filesystem::recursive_directory_iterator;
 
         for (const auto &dirEntry: recursive_dir_iter(argv[1])) {
             if (dirEntry.is_regular_file() && dirEntry.path().extension() == ".vm") {
-                vmFiles.push_back({dirEntry.path().string(), dirEntry.path().stem().string()});
+                // Make sure Sys.vm is translated before any other .vm files, and Main.vm translated second
+                if (dirEntry.path().stem().string() == "Sys")
+                    vmFiles.insert(vmFiles.begin(), {dirEntry.path().string(), dirEntry.path().stem().string()});
+                // else if (dirEntry.path().stem().string() == "Main")
+                //     vmFiles.insert(vmFiles.begin() + 1, {dirEntry.path().string(), dirEntry.path().stem().string()});
+                else
+                    vmFiles.push_back({dirEntry.path().string(), dirEntry.path().stem().string()});
             }
         }
         std::filesystem::path abs_path(vmFileName);
-        std::string finalDir = abs_path.parent_path().filename();
+        std::string finalDir;
+
+        if (abs_path.has_filename())
+            finalDir = abs_path.filename().string();
+        else 
+            finalDir = abs_path.parent_path().filename().string();
+
         finalDir = finalDir + ".asm";
         codeWriter.initializer(finalDir.c_str());
     } else {
@@ -77,7 +88,8 @@ int main(int argc, char **argv) {
                     if (commandType == "C_PUSH" || commandType == "C_POP"
                         || commandType == "C_FUNCTION" || commandType == "C_CALL")
                         arg2 = parser.arg2();
-
+                    
+                    codeWriter.writeDebugMarker();
                     if (commandType == "C_ARITHMETIC")
                         codeWriter.writeArithmetic(arg1);
                     else if (commandType == "C_PUSH" || commandType == "C_POP")

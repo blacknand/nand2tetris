@@ -1,47 +1,54 @@
-// push constant 3030
-@3030
+@Sys.init$ret.0
 D=A
 @SP
 A=M
 M=D
 @SP
 M=M+1
-
-// pop pointer 0
-@THIS
-D=A
-@R15
-M=D
-@SP
-AM=M-1
+@LCL
 D=M
-@R15
-A=M
-M=D
-
-// push constant 3040
-@3040
-D=A
 @SP
 A=M
 M=D
 @SP
 M=M+1
-
-// pop pointer 1
+@ARG
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+@THIS
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
 @THAT
-D=A
-@R15
-M=D
-@SP
-AM=M-1
 D=M
-@R15
+@SP
 A=M
 M=D
+@SP
+M=M+1
+@5
+D=A
+@SP
+D=M-D
+@ARG
+M=D
+@SP
+D=M
+@LCL
+M=D
+@Sys.init
+0;JMP
+(Sys.init$ret.0)
 
-// push constant 32
-@32
+// push constant 0
+@0
 D=A
 @SP
 A=M
@@ -49,10 +56,10 @@ M=D
 @SP
 M=M+1
 
-// pop THIS 2
-@THIS
+// pop LCL 0
+@LCL
 D=M
-@2
+@0
 D=D+A
 @R15
 M=D
@@ -63,31 +70,13 @@ D=M
 A=M
 M=D
 
-// push constant 46
-@46
-D=A
-@SP
-A=M
-M=D
-@SP
-M=M+1
+(BasicLoop.NULL$LOOP)
 
-// pop THAT 6
-@THAT
+// push ARG 0
+@ARG
 D=M
-@6
-D=D+A
-@R15
-M=D
-@SP
-AM=M-1
-D=M
-@R15
-A=M
-M=D
-
-// push pointer 0
-@THIS
+@0
+A=D+A
 D=M
 @SP
 A=M
@@ -95,8 +84,11 @@ M=D
 @SP
 M=M+1
 
-// push pointer 1
-@THAT
+// push LCL 0
+@LCL
+D=M
+@0
+A=D+A
 D=M
 @SP
 A=M
@@ -133,12 +125,35 @@ M=D
 @SP
 M=M+1
 
-// push THIS 2
-@THIS
+// pop LCL 0
+@LCL
 D=M
-@2
+@0
+D=D+A
+@R15
+M=D
+@SP
+AM=M-1
+D=M
+@R15
+A=M
+M=D
+
+// push ARG 0
+@ARG
+D=M
+@0
 A=D+A
 D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+
+// push constant 1
+@1
+D=A
 @SP
 A=M
 M=D
@@ -174,10 +189,24 @@ M=D
 @SP
 M=M+1
 
-// push THAT 6
-@THAT
+// pop ARG 0
+@ARG
 D=M
-@6
+@0
+D=D+A
+@R15
+M=D
+@SP
+AM=M-1
+D=M
+@R15
+A=M
+M=D
+
+// push ARG 0
+@ARG
+D=M
+@0
 A=D+A
 D=M
 @SP
@@ -186,29 +215,19 @@ M=D
 @SP
 M=M+1
 
-// pop R13 and R14, add
 @SP
 M=M-1
 A=M
 D=M
-     // pop
-@R13
-M=D
-      // save to R13
-@SP
-M=M-1
-A=M
+@BasicLoop.NULL$LOOP
+D;JNE
+
+// push LCL 0
+@LCL
 D=M
-     // pop
-@R14
-M=D
-      // save to R14
-@R13
+@0
+A=D+A
 D=M
-@R14
-D=D+M
-     // add
-// push
 @SP
 A=M
 M=D

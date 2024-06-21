@@ -38,6 +38,7 @@ class CodeWriter: FileWriting {
         void setterFileName(const std::string &fileName) {
             currentFileName = fileName;
         }
+        void writeDebugMarker();
 };
 
 #endif      // CODE_WRITER
