@@ -2,8 +2,22 @@
 M=0
 M=1
 
- // ------------------------- writeFunction ---------------------
-(Sys.Sys.init)
+// -------------------- bootstrapASM --------------------
+@261
+D=A
+@SP
+M=D
+@Sys.init
+// -------------------- bootstrapASM --------------------
+0;JMP
+(Sys.init$ret.0)
+
+@7777
+M=0
+M=1
+
+ // ------------------------- writeFunctionSys.init0 ---------------------
+(Sys.init)
  // ------------------------- writeFunction ---------------------
 
 @7777
@@ -24,8 +38,8 @@ M=M+1
 M=0
 M=1
 
-// -------------------- writeCall -------------------
-@Sys.Main.fibonacci$ret.0
+// -------------------- writeCallMain.fibonacci1 -------------------
+@Main.fibonacci$ret.0
 D=A
 @SP
 A=M
@@ -70,23 +84,23 @@ M=D
 D=M
 @LCL
 M=D
-@Sys.Main.fibonacci
-// -------------------- writeCall -------------------
+@Main.fibonacci
+// -------------------- writeCallMain.fibonacci1 -------------------
 0;JMP
-(Sys.Main.fibonacci$ret.0)
+(Main.fibonacci$ret.0)
 
 @7777
 M=0
 M=1
 
-(Sys.Sys.init$END)
+(Sys.init$END)
 
 @7777
 M=0
 M=1
 
  // ------------------------- writeGoto ---------------------
-@Sys.Sys.init$END
+@Sys.init$END
  // ------------------------- writeGoto ---------------------
 0;JMP
 
@@ -94,8 +108,8 @@ M=1
 M=0
 M=1
 
- // ------------------------- writeFunction ---------------------
-(Main.Main.fibonacci)
+ // ------------------------- writeFunctionMain.fibonacci0 ---------------------
+(Main.fibonacci)
  // ------------------------- writeFunction ---------------------
 
 @7777
@@ -183,7 +197,7 @@ M=1
 M=M-1
 A=M
 D=M
-@Main.Main.fibonacci$N_LT_2
+@Main.fibonacci$N_LT_2
  // ------------------------- writeIf ---------------------
 D;JNE
 
@@ -192,7 +206,7 @@ M=0
 M=1
 
  // ------------------------- writeGoto ---------------------
-@Main.Main.fibonacci$N_GE_2
+@Main.fibonacci$N_GE_2
  // ------------------------- writeGoto ---------------------
 0;JMP
 
@@ -200,7 +214,7 @@ M=1
 M=0
 M=1
 
-(Main.Main.fibonacci$N_LT_2)
+(Main.fibonacci$N_LT_2)
 
 @7777
 M=0
@@ -245,29 +259,28 @@ D=M+1
 M=D
 @R15
 D=M
-@1
-A=D-A
+A=D-1
 D=M
 @THAT
 M=D
-@R15
-D=M
 @2
-A=D-A
+D=A
+@R15
+A=M-D
 D=M
 @THIS
 M=D
-@R15
-D=M
 @3
-A=D-A
+D=A
+@R15
+A=M-D
 D=M
 @ARG
 M=D
-@R15
-D=M
 @4
-A=D-A
+D=A
+@R15
+A=M-D
 D=M
 @LCL
 M=D
@@ -280,7 +293,7 @@ A=M
 M=0
 M=1
 
-(Main.Main.fibonacci$N_GE_2)
+(Main.fibonacci$N_GE_2)
 
 @7777
 M=0
@@ -351,8 +364,8 @@ M=M+1
 M=0
 M=1
 
-// -------------------- writeCall -------------------
-@Main.Main.fibonacci$ret.1
+// -------------------- writeCallMain.fibonacci1 -------------------
+@Main.fibonacci$ret.1
 D=A
 @SP
 A=M
@@ -397,10 +410,10 @@ M=D
 D=M
 @LCL
 M=D
-@Main.Main.fibonacci
-// -------------------- writeCall -------------------
+@Main.fibonacci
+// -------------------- writeCallMain.fibonacci1 -------------------
 0;JMP
-(Main.Main.fibonacci$ret.1)
+(Main.fibonacci$ret.1)
 
 @7777
 M=0
@@ -471,8 +484,8 @@ M=M+1
 M=0
 M=1
 
-// -------------------- writeCall -------------------
-@Main.Main.fibonacci$ret.2
+// -------------------- writeCallMain.fibonacci1 -------------------
+@Main.fibonacci$ret.2
 D=A
 @SP
 A=M
@@ -517,10 +530,10 @@ M=D
 D=M
 @LCL
 M=D
-@Main.Main.fibonacci
-// -------------------- writeCall -------------------
+@Main.fibonacci
+// -------------------- writeCallMain.fibonacci1 -------------------
 0;JMP
-(Main.Main.fibonacci$ret.2)
+(Main.fibonacci$ret.2)
 
 @7777
 M=0
@@ -582,29 +595,28 @@ D=M+1
 M=D
 @R15
 D=M
-@1
-A=D-A
+A=D-1
 D=M
 @THAT
 M=D
-@R15
-D=M
 @2
-A=D-A
+D=A
+@R15
+A=M-D
 D=M
 @THIS
 M=D
-@R15
-D=M
 @3
-A=D-A
+D=A
+@R15
+A=M-D
 D=M
 @ARG
 M=D
-@R15
-D=M
 @4
-A=D-A
+D=A
+@R15
+A=M-D
 D=M
 @LCL
 M=D

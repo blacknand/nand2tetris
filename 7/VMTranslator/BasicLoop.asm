@@ -1,53 +1,12 @@
-@Sys.init$ret.0
-D=A
-@SP
-A=M
-M=D
-@SP
-M=M+1
-@LCL
-D=M
-@SP
-A=M
-M=D
-@SP
-M=M+1
-@ARG
-D=M
-@SP
-A=M
-M=D
-@SP
-M=M+1
-@THIS
-D=M
-@SP
-A=M
-M=D
-@SP
-M=M+1
-@THAT
-D=M
-@SP
-A=M
-M=D
-@SP
-M=M+1
-@5
-D=A
-@SP
-D=M-D
-@ARG
-M=D
-@SP
-D=M
-@LCL
-M=D
-@Sys.init
-0;JMP
-(Sys.init$ret.0)
+@7777
+M=0
+M=1
 
-// push constant 0
+@7777
+M=0
+M=1
+
+// push -------------------------constant 0
 @0
 D=A
 @SP
@@ -56,7 +15,12 @@ M=D
 @SP
 M=M+1
 
-// pop LCL 0
+// push -------------------------constant 0
+@7777
+M=0
+M=1
+
+// pop -------------------------LCL 0
 @LCL
 D=M
 @0
@@ -70,9 +34,18 @@ D=M
 A=M
 M=D
 
-(BasicLoop.NULL$LOOP)
+// pop -------------------------LCL 0
+@7777
+M=0
+M=1
 
-// push ARG 0
+(NULL$LOOP)
+
+@7777
+M=0
+M=1
+
+// push -------------------------ARG 0
 @ARG
 D=M
 @0
@@ -84,7 +57,12 @@ M=D
 @SP
 M=M+1
 
-// push LCL 0
+// push -------------------------ARG 0
+@7777
+M=0
+M=1
+
+// push -------------------------LCL 0
 @LCL
 D=M
 @0
@@ -96,7 +74,12 @@ M=D
 @SP
 M=M+1
 
-// pop R13 and R14, add
+// push -------------------------LCL 0
+@7777
+M=0
+M=1
+
+// -------------- pop R13 and R14, add ------------------
 @SP
 M=M-1
 A=M
@@ -118,6 +101,7 @@ D=M
 @R14
 D=D+M
      // add
+// -------------- pop R13 and R14, add ------------------
 // push
 @SP
 A=M
@@ -125,7 +109,11 @@ M=D
 @SP
 M=M+1
 
-// pop LCL 0
+@7777
+M=0
+M=1
+
+// pop -------------------------LCL 0
 @LCL
 D=M
 @0
@@ -139,7 +127,12 @@ D=M
 A=M
 M=D
 
-// push ARG 0
+// pop -------------------------LCL 0
+@7777
+M=0
+M=1
+
+// push -------------------------ARG 0
 @ARG
 D=M
 @0
@@ -151,7 +144,12 @@ M=D
 @SP
 M=M+1
 
-// push constant 1
+// push -------------------------ARG 0
+@7777
+M=0
+M=1
+
+// push -------------------------constant 1
 @1
 D=A
 @SP
@@ -160,7 +158,12 @@ M=D
 @SP
 M=M+1
 
-// pop R14 and R13, sub
+// push -------------------------constant 1
+@7777
+M=0
+M=1
+
+// ---------------- pop R14 and R13, sub -----------------
 @SP
 M=M-1
 A=M
@@ -182,6 +185,7 @@ D=M
 @R14
 D=D-M
      // sub
+// ---------------- pop R14 and R13, sub -----------------
 // push
 @SP
 A=M
@@ -189,7 +193,11 @@ M=D
 @SP
 M=M+1
 
-// pop ARG 0
+@7777
+M=0
+M=1
+
+// pop -------------------------ARG 0
 @ARG
 D=M
 @0
@@ -203,7 +211,12 @@ D=M
 A=M
 M=D
 
-// push ARG 0
+// pop -------------------------ARG 0
+@7777
+M=0
+M=1
+
+// push -------------------------ARG 0
 @ARG
 D=M
 @0
@@ -215,14 +228,25 @@ M=D
 @SP
 M=M+1
 
+// push -------------------------ARG 0
+@7777
+M=0
+M=1
+
+ // ------------------------- writeIf ---------------------
 @SP
 M=M-1
 A=M
 D=M
-@BasicLoop.NULL$LOOP
+@NULL$LOOP
+ // ------------------------- writeIf ---------------------
 D;JNE
 
-// push LCL 0
+@7777
+M=0
+M=1
+
+// push -------------------------LCL 0
 @LCL
 D=M
 @0
@@ -234,6 +258,7 @@ M=D
 @SP
 M=M+1
 
+// push -------------------------LCL 0
 @END
 (END)
 @END

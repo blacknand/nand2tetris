@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
                     if (commandType == "C_PUSH" || commandType == "C_POP"
                         || commandType == "C_FUNCTION" || commandType == "C_CALL")
                         arg2 = parser.arg2();
-                    
+
                     codeWriter.writeDebugMarker();
                     if (commandType == "C_ARITHMETIC")
                         codeWriter.writeArithmetic(arg1);

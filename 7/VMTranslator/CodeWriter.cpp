@@ -27,40 +27,20 @@ void CodeWriter::initializer(const char *outputFile) {
         "@SP\n"
         "M=M+1\n";
 
-    std::string returnLabel = currentFileName + "Sys.init$ret.0";
+    std::string returnLabel = "Sys.init$ret.0";
     std::string bootstrapASM =
         "// -------------------- bootstrapASM --------------------\n"
-        "@256\n"
+        "@261\n"
         "D=A\n"
         "@SP\n"
         "M=D\n"
-        // "@" + returnLabel + "\n"
-        // "D=A\n" + push + 
-        // "@LCL\n"
-        // "D=M\n" + push +
-        // "@ARG\n"
-        // "D=M\n" + push +
-        // "@THIS\n"
-        // "D=M\n" + push +
-        // "@THAT\n"
-        // "D=M\n" + push +
-        // "@5\n"
-        // "D=A\n"
-        // "@SP\n"
-        // "D=M-D\n"
-        // "@ARG\n"
-        // "M=D\n" 
-        // "@SP\n"
-        // "D=M\n"
-        // "@LCL\n"
-        // "M=D\n"
         "@Sys.init\n"
         "// -------------------- bootstrapASM --------------------\n"
         "0;JMP\n"
         "(" + returnLabel + ")\n";
     
-    // writeDebugMarker();
-    // asmFile << bootstrapASM << std::endl;
+    writeDebugMarker();
+    asmFile << bootstrapASM << std::endl;
 }
 
 
@@ -282,8 +262,8 @@ void CodeWriter::writePushPop(std::string &command, std::string &segment, int &i
     labelCounterStream << labelCounterOther;
     labelCounterStream >> labelCounterStr;
 
-    if (segment == "temp")
-        index = index + 5;
+    // if (segment == "temp")
+    //     index = index + 5;
 
     std::string strIndex;
     std::stringstream indexStream;
@@ -353,10 +333,7 @@ void CodeWriter::writePushPop(std::string &command, std::string &segment, int &i
         "M=D\n";
 
     std::string pushTemp = 
-        "@R5\n" 
-        "D=M\n"
-        "@" + strIndex + "\n"
-        "A=D+A\n"
+        "@" + std::to_string(5 + index) + "\n"
         "D=M\n"
         "@SP\n"
         "A=M\n"
@@ -365,17 +342,11 @@ void CodeWriter::writePushPop(std::string &command, std::string &segment, int &i
         "M=M+1\n";
 
     std::string popTemp = 
-        "@R5\n"
-        "D=M\n"
-        "@" + strIndex + "\n"
-        "D=D+A\n"
-        "@R15\n"
-        "M=D\n"
         "@SP\n"
-        "AM=M-1\n"
-        "D=M\n"
-        "@R15\n"
+        "M=M-1\n"
         "A=M\n"
+        "D=M\n"
+        "@" + std::to_string(5 + index) + "\n"
         "M=D\n";
 
     std::string pushConst = 
@@ -389,9 +360,6 @@ void CodeWriter::writePushPop(std::string &command, std::string &segment, int &i
 
     std::string pushStatic = 
         "@" + currentFileName + "." + strIndex + "\n"
-        "D=A\n"
-        "@" + strIndex + "\n"
-        "A=D+A\n"
         "D=M\n"
         "@SP\n"
         "A=M\n"
@@ -400,17 +368,10 @@ void CodeWriter::writePushPop(std::string &command, std::string &segment, int &i
         "M=M+1\n";
 
     std::string popStatic = 
-        "@" + currentFileName + "." + strIndex + "\n"
-        "D=A\n"
-        "@" + strIndex + "\n"
-        "D=D+A\n"
-        "@R15\n"
-        "M=D\n"
         "@SP\n"
         "AM=M-1\n"
         "D=M\n"
-        "@R15\n"
-        "A=M\n"
+        "@" + currentFileName + "." + strIndex + "\n"
         "M=D\n";
 
     std::string segmentsArr[5] = {"LCL", "ARG", "THIS", "THAT"};
@@ -477,7 +438,8 @@ void CodeWriter::writeLabel(const std::string &label) {
     // writeDebugMarker();
     std::string funcName = currentFuncName.empty() ? "NULL" : currentFuncName;
     std::string writeLabelASM =
-        "(" + currentFileName + "." + funcName + "$" + label + ")\n";
+        // "(" + currentFileName + "." + funcName + "$" + label + ")\n";
+        "(" + funcName + "$" + label + ")\n";
     asmFile << writeLabelASM << std::endl;
 }
 
@@ -487,7 +449,8 @@ void CodeWriter::writeGoto(const std::string &label) {
     std::string funcName = currentFuncName.empty() ? "NULL" : currentFuncName;
     std::string writeGotoASM =
         " // ------------------------- writeGoto ---------------------\n"
-        "@" + currentFileName + "." + funcName + "$" + label + "\n"
+        // "@" + currentFileName + "." + funcName + "$" + label + "\n"
+        "@" + funcName + "$" + label + "\n"
         " // ------------------------- writeGoto ---------------------\n"
         "0;JMP\n";
     asmFile << writeGotoASM << std::endl;
@@ -503,7 +466,8 @@ void CodeWriter::writeIf(const std::string &label) {
         "M=M-1\n"
         "A=M\n"
         "D=M\n"
-        "@" + currentFileName + "." + funcName + "$" + label + "\n"
+        // "@" + currentFileName + "." + funcName + "$" + label + "\n"
+        "@" + funcName + "$" + label + "\n"
         " // ------------------------- writeIf ---------------------\n"
         "D;JNE\n";
     asmFile << writeIfASM << std::endl;
@@ -514,8 +478,9 @@ void CodeWriter::writeFunction(const std::string &functionName, const int &nVars
     // writeDebugMarker();
     currentFuncName = functionName;
     std::string writeFunctionASM = 
-        " // ------------------------- writeFunction ---------------------\n"
-        "(" + currentFileName + "." + functionName + ")\n";
+        " // ------------------------- writeFunction" + functionName + std::to_string(nVars) + " ---------------------\n"
+        // "(" + currentFileName + "." + functionName + ")\n";
+        "(" + functionName + ")\n";
     for (int i = 0; i < nVars; i++) {
         writeFunctionASM += 
             "@SP\n"
@@ -534,7 +499,8 @@ void CodeWriter::writeFunction(const std::string &functionName, const int &nVars
 void CodeWriter::writeCall(const std::string &functionName, const int &nArgs) {
     // writeDebugMarker();
     static int runningInt = 0;
-    std::string returnLabel = currentFileName + "." + functionName + "$ret." + std::to_string(runningInt);
+    // std::string returnLabel = currentFileName + "." + functionName + "$ret." + std::to_string(runningInt);
+    std::string returnLabel = functionName + "$ret." + std::to_string(runningInt);
     std::string push = 
         "@SP\n"
         "A=M\n"
@@ -542,7 +508,7 @@ void CodeWriter::writeCall(const std::string &functionName, const int &nArgs) {
         "@SP\n"
         "M=M+1\n";
     std::string writeCallASM =  
-        "// -------------------- writeCall -------------------\n"
+        "// -------------------- writeCall" + functionName + std::to_string(nArgs) + " -------------------\n"
         "@" + returnLabel + "\n"
         "D=A\n" + push + 
         "@LCL\n"
@@ -566,8 +532,8 @@ void CodeWriter::writeCall(const std::string &functionName, const int &nArgs) {
         "@LCL\n"
         "M=D\n"
         // goto f
-        "@" + currentFileName + "." + functionName + "\n"
-        "// -------------------- writeCall -------------------\n"
+        "@" + functionName + "\n"
+        "// -------------------- writeCall" + functionName + std::to_string(nArgs) + " -------------------\n"
         "0;JMP\n"
         "(" + returnLabel + ")\n";
     asmFile << writeCallASM << std::endl;
@@ -603,35 +569,34 @@ void CodeWriter::writeReturn() {
         "D=M+1\n"
         "@SP\n"
         "M=D\n"
-        // Restore THAT for caller
+        // THAT = *(frame - 1)
         "@R15\n"
         "D=M\n"
-        "@1\n"
-        "A=D-A\n"
+        "A=D-1\n"
         "D=M\n"
         "@THAT\n"
         "M=D\n"
-        // Restore THIS for caller
-        "@R15\n"
-        "D=M\n"
+        // THIS *(frame - 2)
         "@2\n"
-        "A=D-A\n"
+        "D=A\n"
+        "@R15\n"
+        "A=M-D\n"
         "D=M\n"
         "@THIS\n"
         "M=D\n"
-        // Restore ARG for caller
-        "@R15\n"
-        "D=M\n"
+        // ARG = *(frame - 3)
         "@3\n"
-        "A=D-A\n"
+        "D=A\n"
+        "@R15\n"
+        "A=M-D\n"
         "D=M\n"
         "@ARG\n"
         "M=D\n"
-        // Restore LCL for caller
-        "@R15\n"
-        "D=M\n"
+        // LCL = *(frame - 4)
         "@4\n"
-        "A=D-A\n"
+        "D=A\n"
+        "@R15\n"
+        "A=M-D\n"
         "D=M\n"
         "@LCL\n"
         "M=D\n"
