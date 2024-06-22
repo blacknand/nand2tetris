@@ -1,5 +1,3 @@
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/trim.hpp>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -17,9 +15,8 @@ int main(int argc, char **argv) {
     CodeWriter codeWriter;
 
     bool directory = false;
-    int iterations = 0;
     std::string dirFile;
-    std::vector<std::pair<std::string, std::string>> vmFiles;
+    std::vector<std::vector<std::string>> vmFiles;
     std::string vmFileName = argv[1];
     std::size_t vmExtensionI = vmFileName.find(".vm");
     std::size_t forwardSlash = vmFileName.find_last_of("/");
@@ -36,32 +33,47 @@ int main(int argc, char **argv) {
     else if (vmExtensionI == std::string::npos)
         directory = true;
 
-
     if (directory) {
         using recursive_dir_iter = std::filesystem::recursive_directory_iterator;
 
         for (const auto &dirEntry: recursive_dir_iter(argv[1])) {
             if (dirEntry.is_regular_file() && dirEntry.path().extension() == ".vm") {
-                std::string strippedFileName = dirEntry.path().stem().string();
-                std::pair<std::string, std::string> linePair = {strippedFileName, dirEntry.path().string()};
-                vmFiles.push_back(linePair);
-                iterations++;
+                // Make sure Sys.vm is translated before any other .vm files, and Main.vm translated second
+                if (dirEntry.path().stem().string() == "Sys")
+                    vmFiles.insert(vmFiles.begin(), {dirEntry.path().string(), dirEntry.path().stem().string()});
+                // else if (dirEntry.path().stem().string() == "Main")
+                //     vmFiles.insert(vmFiles.begin() + 1, {dirEntry.path().string(), dirEntry.path().stem().string()});
+                else
+                    vmFiles.push_back({dirEntry.path().string(), dirEntry.path().stem().string()});
             }
         }
+        std::filesystem::path abs_path(vmFileName);
+        std::string finalDir;
+
+        if (abs_path.has_filename())
+            finalDir = abs_path.filename().string();
+        else 
+            finalDir = abs_path.parent_path().filename().string();
+
+        finalDir = finalDir + ".asm";
+        codeWriter.initializer(finalDir.c_str());
     } else {
-        iterations = 1;
-        vmFiles.push_back({vmFileName, argv[1]});
+        std::string strArgv = argv[1];
+        vmFiles.push_back({strArgv, vmFileName});
+        codeWriter.initializer((vmFileName + ".asm").c_str());
     }
 
-    for (int k = 0; k < iterations; k++) {
+    for (int k = 0; k < vmFiles.size(); k++) {
         std::ifstream inputFile;
-        if (directory)
-            inputFile.open(vmFiles.at(k).second);
+
+        if (directory) 
+            inputFile.open(vmFiles.at(k).at(0));
         else
             inputFile.open(argv[1]);
+
+        codeWriter.setFileName(vmFiles.at(k).at(1));
         parser.initializer(inputFile);
         std::vector<std::vector<std::string>> fileVect = parser.getFileVect();
-        codeWriter.initializer((vmFiles.at(k).first + ".asm").c_str(), vmFiles.at(k).first);
 
         for (int i = 0; i < fileVect.size(); i++) {
             for (int j = 0; j < fileVect[i].size(); j++) {
@@ -70,19 +82,34 @@ int main(int argc, char **argv) {
                     std::string arg1;
                     int arg2;
                     std::string commandType = parser.commandType();
+
                     if (commandType != "C_RETURN")
                         arg1 = parser.arg1();
-                    if (commandType == "C_PUSH" || commandType == "C_POP")
+                    if (commandType == "C_PUSH" || commandType == "C_POP"
+                        || commandType == "C_FUNCTION" || commandType == "C_CALL")
                         arg2 = parser.arg2();
 
+                    codeWriter.writeDebugMarker();
                     if (commandType == "C_ARITHMETIC")
                         codeWriter.writeArithmetic(arg1);
                     else if (commandType == "C_PUSH" || commandType == "C_POP")
                         codeWriter.writePushPop(commandType, arg1, arg2);
+                    else if (commandType == "C_LABEL")
+                        codeWriter.writeLabel(arg1);
+                    else if (commandType == "C_GOTO")
+                        codeWriter.writeGoto(arg1);
+                    else if (commandType == "C_IF")
+                        codeWriter.writeIf(arg1);
+                    else if (commandType == "C_CALL")
+                        codeWriter.writeCall(arg1, arg2);
+                    else if (commandType == "C_FUNCTION")
+                        codeWriter.writeFunction(arg1, arg2);
+                    else if (commandType == "C_RETURN")
+                        codeWriter.writeReturn();
                 }
             }
         }
-        codeWriter.close();
     }
+    codeWriter.close();
     return 0;
 }
