@@ -5,12 +5,12 @@ class Invaders {
 
 
     constructor InvadersConstruct new(int rows) {
-        let this.rowsCounter = rows;
+        let this.rowsCount = rows;
         let this.direction = false;
         let this.y = 40;
         let this.aliens = this.initializeAliens();
         let this.speed = 1;
-        let this.arrCounter = 0;
+        let this.arrCounter = this.rowsCount * ((512 - 80) / 30);                       // Initialize arrCounter to the total number of aliens
         return this;
     }
 
@@ -21,13 +21,13 @@ class Invaders {
         let updateCounter = 0;
 
         while (updateCounter < this.arrCounter) {
-            if (this.direction = true) { let this.aliens[updateCounter] = this.aliens[updateCounter] + this.speed; }
-            else { let this.aliens[updateCounter] = this.aliens[updateCounter] - this.speed; }
+            if (this.direction = true) { let this.aliens[updateCounter].x = this.aliens[updateCounter] + this.speed; }
+            else { let this.aliens[updateCounter].x = this.aliens[updateCounter] - this.speed; }
             let updateCounter = updateCounter + 1;
         }
 
         let boolean hasChanged = this.hasChangedDirection();
-        if (hasChanged = true) {do this.moveAlienDown();}
+        if (hasChanged = true) { do this.moveAlienDown(); }
     }
 
 
@@ -36,8 +36,8 @@ class Invaders {
         let updateCounter = 0;
         
         while (updateCounter < this.arrCounter) {
-            if ((this.aliens[updateCounter] = 512 - 40) | this.aliens[updateCounter] > 512 - 40) {
-                this.direction = false;
+            if ((this.aliens[updateCounter].x = 512 - 40) | (this.aliens[updateCounter].x > 512 - 40)) {
+                let this.direction = false;
                 return true;
             }
             let updateCounter = updateCounter + 1;
@@ -51,7 +51,7 @@ class Invaders {
         let updateCounter = 0;
         
         while (updateCounter < this.arrCounter) {
-            let this.aliens[updateCounter] = this.aliens[updateCounter] + 10;
+            let this.aliens[updateCounter].y = this.aliens[updateCounter].y + 10;
             let updateCounter = updateCounter + 1;
         }
     }
@@ -65,7 +65,6 @@ class Invaders {
         var int index;
 
         let updateY = 40;
-        let updateX = 0;
         let counterI = 0;
         let index = 0;
         let updateAliens = Array.new(this.rowsCount * ((512 - 80) / 30));             // Calculate num of aliens, - 80 to account for margins, / 30 for 30 aliens per row
@@ -80,8 +79,18 @@ class Invaders {
             }
             let updateY = updateY + 40;                                               // Increment by 40 to place next row of aliens 40 pixels below previous row
             let counterI = counterI + 1;
-            let this.arrCounter = this.arrCounter + 1;
         }
         return updateAliens;
+    }
+
+
+    method void draw() {
+        var int updateCounter;
+        let updateCounter = 0;
+        
+        while (updateCounter < this.arrCounter) {
+            do this.aliens[updateCounter].draw();
+            let updateCounter = updateCounter + 1;
+        }
     }
 }

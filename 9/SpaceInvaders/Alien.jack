@@ -9,7 +9,7 @@ class Alien {
 	}
 
 	// Draw sprite at current position
-	method void draw(int) {
+	method void draw() {
 		var int memAddress; 
 		let memAddress = 16384 + this.y + 32 * this.x / 16;
 		// column 0
