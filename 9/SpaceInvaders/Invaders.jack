@@ -3,6 +3,7 @@ class Invaders {
     field Array aliens, bullets;
     field boolean direction;
 
+
     constructor InvadersConstruct new(int rows) {
         let this.rowsCounter = rows;
         let this.direction = false;
@@ -12,6 +13,7 @@ class Invaders {
         let this.arrCounter = 0;
         return this;
     }
+
 
     method void update() {
         var int updateCounter;
@@ -27,6 +29,33 @@ class Invaders {
         let boolean hasChanged = this.hasChangedDirection();
         if (hasChanged = true) {do this.moveAlienDown();}
     }
+
+
+    method boolean hasChangedDirection() {
+        var int updateCounter;
+        let updateCounter = 0;
+        
+        while (updateCounter < this.arrCounter) {
+            if ((this.aliens[updateCounter] = 512 - 40) | this.aliens[updateCounter] > 512 - 40) {
+                this.direction = false;
+                return true;
+            }
+            let updateCounter = updateCounter + 1;
+        }
+        return false;
+    }
+
+
+    method void moveAlienDown() {
+        var int updateCounter;
+        let updateCounter = 0;
+        
+        while (updateCounter < this.arrCounter) {
+            let this.aliens[updateCounter] = this.aliens[updateCounter] + 10;
+            let updateCounter = updateCounter + 1;
+        }
+    }
+
 
     method Array initialiseAliens() {
         var Array updateAliens;
