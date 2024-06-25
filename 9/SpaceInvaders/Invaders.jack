@@ -1,5 +1,5 @@
 class Invaders {
-    field int rowsCount, y, speed;
+    field int rowsCount, y, speed, arrCounter;
     field Array aliens, bullets;
     field boolean direction;
 
@@ -9,10 +9,24 @@ class Invaders {
         let this.y = 40;
         let this.aliens = this.initializeAliens();
         let this.speed = 1;
+        let this.arrCounter = 0;
         return this;
     }
 
+    method void update() {
+        var int updateCounter;
+        var boolean hasChanged;
+        let updateCounter = 0;
 
+        while (updateCounter < this.arrCounter) {
+            if (this.direction = true) { let this.aliens[updateCounter] = this.aliens[updateCounter] + this.speed; }
+            else { let this.aliens[updateCounter] = this.aliens[updateCounter] - this.speed; }
+            let updateCounter = updateCounter + 1;
+        }
+
+        let boolean hasChanged = this.hasChangedDirection();
+        if (hasChanged = true) {do this.moveAlienDown();}
+    }
 
     method Array initialiseAliens() {
         var Array updateAliens;
@@ -37,6 +51,7 @@ class Invaders {
             }
             let updateY = updateY + 40;                                               // Increment by 40 to place next row of aliens 40 pixels below previous row
             let counterI = counterI + 1;
+            let this.arrCounter = this.arrCounter + 1;
         }
         return updateAliens;
     }
