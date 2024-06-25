@@ -40,6 +40,7 @@ In this phase, we extend the capabilities of the VM translator to handle more co
 + Advanced Memory Access: Managing memory segments like pointers, static, and temp
 ## 9. High-Level Language (Jack)
 The high-level language Jack is introduced, providing a more abstract and user-friendly way to write programs.
++ Space Invaders: A basic version of Space Invaders, implementing the core mechanics
 + Syntax and Semantics: Definition of the Jack language, including syntax and semantic rules
 + Standard Library: Basic standard library functions for string manipulation, I/O, and mathematics
 + Sample Programs: Example Jack programs demonstrating language features
