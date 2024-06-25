@@ -3,15 +3,15 @@ class Alien {
 
 	// Draw the invader sprite
 	constructor AlienConstruct new(int posX, int posY) {
-		let x = posX;
-		let y = posY;
+		let this.x = posX;
+		let this.y = posY;
 		return this;				// Return reference to new obj
 	}
 
 	// Draw sprite at current position
 	method void draw(int) {
 		var int memAddress; 
-		let memAddress = 16384 + y + 32 * x / 16;
+		let memAddress = 16384 + this.y + 32 * this.x / 16;
 		// column 0
 		do Memory.poke(memAddress, 132);
 		do Memory.poke(memAddress +32, 72);

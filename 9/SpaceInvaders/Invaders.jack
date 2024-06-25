@@ -1,3 +1,43 @@
 class Invaders {
-    constructor 
+    field int rowsCount, y, speed;
+    field Array aliens, bullets;
+    field boolean direction;
+
+    constructor InvadersConstruct new(int rows) {
+        let this.rowsCounter = rows;
+        let this.direction = false;
+        let this.y = 40;
+        let this.aliens = this.initializeAliens();
+        let this.speed = 1;
+        return this;
+    }
+
+
+
+    method Array initialiseAliens() {
+        var Array updateAliens;
+        var int updateY;
+        var int updateX;
+        var int counterI;
+        var int index;
+
+        let updateY = 40;
+        let updateX = 0;
+        let counterI = 0;
+        let index = 0;
+        let updateAliens = Array.new(this.rowsCount * ((512 - 80) / 30));             // Calculate num of aliens, - 80 to account for margins, / 30 for 30 aliens per row
+
+        // Add new correctly positioned alien object
+        while (counterI < this.rowsCount) {
+            let updateX = 40;
+            while (updateX < 512 - 40) {
+                let updateAliens[index] = Alien.new(updateX, updateY);
+                let updateX = updateX + 30;                                           // Increment by 30 to place next alien 30 pixels to the right of previous one                                    
+                let index = index + 1;
+            }
+            let updateY = updateY + 40;                                               // Increment by 40 to place next row of aliens 40 pixels below previous row
+            let counterI = counterI + 1;
+        }
+        return updateAliens;
+    }
 }
