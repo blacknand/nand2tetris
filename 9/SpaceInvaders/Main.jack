@@ -1,0 +1,7 @@
+// Basic Space Invaders implementation written in Jack for the Hack computer
+
+class Main {
+    function void main() {
+        return;
+    }
+}

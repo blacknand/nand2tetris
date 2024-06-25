@@ -1,0 +1,26 @@
+class Alien {
+	field int x, y;
+
+	// Draw the invader sprite
+	constructor AlienConstruct new(int posX, int posY) {
+		let x = posX;
+		let y = posY;
+		return this;				// Return reference to new obj
+	}
+
+	// Draw sprite at current position
+	method void draw(int) {
+		var int memAddress; 
+		let memAddress = 16384 + y + 32 * x / 16;
+		// column 0
+		do Memory.poke(memAddress, 132);
+		do Memory.poke(memAddress +32, 72);
+		do Memory.poke(memAddress +64, 252);
+		do Memory.poke(memAddress +96, 438);
+		do Memory.poke(memAddress +128, 1023);
+		do Memory.poke(memAddress +160, 765);
+		do Memory.poke(memAddress +192, 645);
+		do Memory.poke(memAddress +224, 72);
+		return;
+	}
+}
