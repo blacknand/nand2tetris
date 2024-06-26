@@ -3,6 +3,17 @@ class Invaders {
     field Array aliens, bullets;
     field boolean direction;
 
+    // for the player sprite
+    // method void draw(int location) {
+    //     var int memAddress; 
+    //     let memAddress = 16384+location;
+    //     // column 0
+    //     do Memory.poke(memAddress, 8);
+    //     do Memory.poke(memAddress +32, 62);
+    //     do Memory.poke(memAddress +64, 127);
+    //     do Memory.poke(memAddress +96, 127);
+    //     return;
+    // }
 
     constructor InvadersConstruct new(int rows) {
         let this.rowsCount = rows;
@@ -21,12 +32,12 @@ class Invaders {
         let updateCounter = 0;
 
         while (updateCounter < this.arrCounter) {
-            if (this.direction = true) { let this.aliens[updateCounter].x = this.aliens[updateCounter] + this.speed; }
-            else { let this.aliens[updateCounter].x = this.aliens[updateCounter] - this.speed; }
+            if (this.direction = true) { let this.aliens[updateCounter].x = this.aliens[updateCounter].x + this.speed; }              // Move right along X-axis
+            else { let this.aliens[updateCounter].x = this.aliens[updateCounter].x - this.speed; }                                    // Move left along X-axis
             let updateCounter = updateCounter + 1;
         }
 
-        let boolean hasChanged = this.hasChangedDirection();
+        let hasChanged = this.hasChangedDirection();
         if (hasChanged = true) { do this.moveAlienDown(); }
     }
 
@@ -92,5 +103,50 @@ class Invaders {
             do this.aliens[updateCounter].draw();
             let updateCounter = updateCounter + 1;
         }
+    }
+
+
+    method boolean checkCollision(int x, int y) {
+        var int decrementCounter;
+        var Alien currentAlien;
+        var int alienX, alienY;
+        var int distanceSquared;
+        var int dx, dy;
+        let decrementCounter = this.arrCouunter - 1;
+
+        while ((decrementCounter > 0) | (decrementCounter = 0)) {
+            let currentAlien = this.aliens[decrementCounter];
+            let alienX = currentAlien.x + 11;                                   // Offset for center of alien obj
+            let alienY = currentAlien.y + 8;                                    // Offset for center of alien obj
+            let dx = alienX - x;
+            let dy = alienY - y;
+            let distanceSquared = dx * dx + dy * dy;                            // sqrt(((x2 - x1) ** 2 ) + ((y2 - y1) ** 2))
+
+            // if distanceSquare < 10 ** 2, collision detected
+            if (distanceSquared < 100) {
+                var int i;
+                let i = decrementCounter;
+
+                // this.aliens.splice(i, 1)
+                while (i < this.arrCounter - 1) {
+                    let this.aliens[i] = this.aliens[i + 1];
+                    let i = i + 1;
+                }
+
+                // Collision detected
+                let this.arrCounter = this.arrCounter - 1;
+                return true;
+            }
+        let decrementCounter = decrementCounter - 1;
+        }
+        return false;
+    }
+
+
+    method void keyboardPressed() {
+        var int key;
+        let key = Keyboard.keyPressed();
+        if (key = 68) { come back to this after creating player class }                              // D
+        if (key = 65) { come back to this after creating player class }                                  // A
     }
 }
