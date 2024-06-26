@@ -1,0 +1,25 @@
+class PlayerBullet {
+    field int x, y;
+
+    constructor PlayerBulletConstruct new(int startX, int startY) {
+        let this.x = startX;
+        let this.y = startY;
+        return this;
+    }
+
+    method void update() {
+        let this.y = this.y - 6;
+    }
+
+    method boolean isOffScreen() {
+        return (this.y < 0);
+    }
+
+    method void draw() {
+        var int location;
+        let location = this.y * 32 + this.x / 16;
+        do Memory.poke(16384 + location, 1);   // Adjust these values based on the actual sprite
+        do Memory.poke(16384 + location + 32, 1);
+        return;
+    }
+}

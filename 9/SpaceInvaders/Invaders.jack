@@ -2,27 +2,18 @@ class Invaders {
     field int rowsCount, y, speed, arrCounter, timeSinceLastBullet;
     field Array aliens, bullets;
     field boolean direction;
+    field Random random;
 
-    // for the player sprite
-    // method void draw(int location) {
-    //     var int memAddress; 
-    //     let memAddress = 16384+location;
-    //     // column 0
-    //     do Memory.poke(memAddress, 8);
-    //     do Memory.poke(memAddress +32, 62);
-    //     do Memory.poke(memAddress +64, 127);
-    //     do Memory.poke(memAddress +96, 127);
-    //     return;
-    // }
-
-    constructor InvadersConstruct new(int rows) {
+    constructor InvadersConstruct new(int rows, int randomSeed) {
         let this.rowsCount = rows;
         let this.direction = false;
         let this.y = 40;
         let this.aliens = this.initializeAliens();
         let this.speed = 1;
         let this.arrCounter = this.rowsCount * ((512 - 80) / 30);                       // Initialize arrCounter to the total number of aliens
+        let this.bullets = Array.new(50);                                               // Pre-allocate space for bullets
         let this.timeSinceLastBullet = 0;
+        let this.random = Random.new(randomSeed);
         return this;
     }
 
@@ -32,21 +23,25 @@ class Invaders {
         var boolean hasChanged;
         let updateCounter = 0;
 
+        // Move aliens horizontally
         while (updateCounter < this.arrCounter) {
             if (this.direction = true) { let this.aliens[updateCounter].x = this.aliens[updateCounter].x + this.speed; }              // Move right along X-axis
             else { let this.aliens[updateCounter].x = this.aliens[updateCounter].x - this.speed; }                                    // Move left along X-axis
             let updateCounter = updateCounter + 1;
         }
 
+        // Check if direction has changed, move aliens down
         let hasChanged = this.hasChangedDirection();
         if (hasChanged = true) { do this.moveAlienDown(); }
 
+        // If no more aliens, advance to next level
         if (this.arrCounter = 0) { do this.nextLevel(); }
 
+        // Handle alien shooting bullets
         if ((this.timeSinceLastBullet > 40) | (this.timeSinceLastBullet = 40)) {
             var Alien bottomAliens;
             let bottomAliens = this.getBottomAliens();
-            // not sure what it means by bottomAliens.length
+            if (~(bottomAliens = null)) { do this.makeABottomAlienShoot(bottomAliens); }
         }
         let this.timeSinceLastBullet = timeSinceLastBullet + 1;
 
@@ -60,7 +55,7 @@ class Invaders {
         
         while (updateCounter < this.arrCounter) {
             if ((this.aliens[updateCounter].x = 512 - 40) | (this.aliens[updateCounter].x > 512 - 40)) {
-                let this.direction = false;
+                let this.direction = false;                 // Change direction to left
                 return true;
             }
             let updateCounter = updateCounter + 1;
@@ -74,14 +69,64 @@ class Invaders {
         let updateCounter = 0;
         
         while (updateCounter < this.arrCounter) {
-            let this.aliens[updateCounter].y = this.aliens[updateCounter].y + 10;
+            let this.aliens[updateCounter].y = this.aliens[updateCounter].y + 10;               // Move down by 10 units
             let updateCounter = updateCounter + 1;
         }
     }
 
 
     method Array getBottomAliens() {
-        var 
+        var Array allXPositions;
+        var Array aliensAtTheBottom;
+        var int xPosIndex;
+        var int bestYPosition;
+        var Alien lowestAlien;
+        var int alienIndex;
+    
+        // Get all unique X positions of aliens
+        let allXPositions = this.getAllXPositions();
+        let aliensAtTheBottom = Array.new(this.rowsCount);
+        let xPosIndex = 0;
+    
+        // For each X position, find lowest alien
+        while (xPosIndex < this.rowsCount) {
+            let bestYPosition = 0;
+            let lowestAlien = null;
+            let alienIndex = 0;
+    
+            while (alienIndex < this.arrCounter) {
+                if (this.aliens[alienIndex].x = allXPositions[xPosIndex]) {
+                    if (this.aliens[alienIndex].y > bestYPosition) {
+                        let bestYPosition = this.aliens[alienIndex].y;
+                        let lowestAlien = this.aliens[alienIndex];
+                    }
+                }
+                let alienIndex = alienIndex + 1;
+            }
+    
+            if (~(lowestAlien = null)) {
+                let aliensAtTheBottom[xPosIndex] = lowestAlien;
+            }
+            let xPosIndex = xPosIndex + 1;
+        }
+    
+        return aliensAtTheBottom;
+    }
+    
+
+    method Array getAllXPositions() {
+        var Array allXPositions;
+        var int alienIndex;
+
+        let allXPositions = Array.new(this.arrCounter);
+        let alienIndex = 0;
+
+        while (alienIndex < this.arrCounter) {
+            let allXPositions[alienIndex] = this.aliens[alienIndex].x;
+            let alienIndex = alienIndex + 1;
+        }
+
+        return allXPositions;
     }
 
 
@@ -116,6 +161,16 @@ class Invaders {
         var int updateCounter;
         let updateCounter = 0;
         
+        // Draw bullets to appear underneath aliens first
+        while (updateCounter < this.timeSinceLastBullet) {
+            if (~(this.bullets[updateCounter] = null)) {
+                do this.bullets[updateCounter].draw();
+            }
+            let updateCounter = updateCounter + 1;
+        }
+
+        // Draw the aliens
+        let updateCounter = 0;
         while (updateCounter < this.arrCounter) {
             do this.aliens[updateCounter].draw();
             let updateCounter = updateCounter + 1;
@@ -131,6 +186,7 @@ class Invaders {
         var int dx, dy;
         let decrementCounter = this.arrCounter - 1;
 
+        // Check collision with aliens
         while ((decrementCounter > 0) | (decrementCounter = 0)) {
             let currentAlien = this.aliens[decrementCounter];
             let alienX = currentAlien.x + 11;                                   // Offset for center of alien obj
@@ -144,7 +200,7 @@ class Invaders {
                 var int i;
                 let i = decrementCounter;
 
-                // this.aliens.splice(i, 1)
+                // Remove aliens by shifting elements
                 while (i < this.arrCounter - 1) {
                     let this.aliens[i] = this.aliens[i + 1];
                     let i = i + 1;
@@ -154,11 +210,34 @@ class Invaders {
                 let this.arrCounter = this.arrCounter - 1;
                 return true;
             }
-        let decrementCounter = decrementCounter - 1;
+            let decrementCounter = decrementCounter - 1;
         }
         return false;
     }
 
+    method void makeABottomAlienShoot(Array bottomAliens) {
+        var int randomIndex;
+        var Alien shootingAlien;
+        var AlienBullet newBullet;
+        var int bottomAliensCount;
+
+        // Calculate the length of bottomAliens
+        let bottomAliensCount = 0;
+        while (bottomAliensCount < this.rowsCount) {
+            if (~(bottomAliens[bottomAliensCount] = null)) {
+                let bottomAliensCount = bottomAliensCount + 1;
+            } else {
+                let bottomAliensCount = this.rowsCount;
+            }
+        }
+
+        // Generate a random index
+        let randomIndex = this.random.nextInt(bottomAliensCount);
+        let shootingAlien = bottomAliens[randomIndex];                                          // Get the shooting alien
+        let newBullet = AlienBullet.new(shootingAlien.x + 10, shootingAlien.y + 10);  
+        let this.bullets[this.timeSinceLastBullet] = newBullet;                                 // Add the new bullet to the bullets array
+        let this.timeSinceLastBullet = 0;                                                       // Reset the bullet timer
+    }
 
     method void keyboardPressed() {
         var int key;
