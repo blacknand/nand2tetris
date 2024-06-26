@@ -1,0 +1,16 @@
+class AlienBullet {
+    field Bullet bullet;
+
+    constructor AlienBulletConstruct new(int argX, int argY) {
+        let this.bullet = Bullet.new(argX, argY);
+        return this;
+    }
+
+    method void update() {
+        let this.bullet.y = this.bullet.y + 2;
+    }
+
+    method void draw() {
+        do this.bullet.draw();
+    }
+}

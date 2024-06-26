@@ -1,5 +1,5 @@
 class Invaders {
-    field int rowsCount, y, speed, arrCounter;
+    field int rowsCount, y, speed, arrCounter, timeSinceLastBullet;
     field Array aliens, bullets;
     field boolean direction;
 
@@ -22,6 +22,7 @@ class Invaders {
         let this.aliens = this.initializeAliens();
         let this.speed = 1;
         let this.arrCounter = this.rowsCount * ((512 - 80) / 30);                       // Initialize arrCounter to the total number of aliens
+        let this.timeSinceLastBullet = 0;
         return this;
     }
 
@@ -39,6 +40,17 @@ class Invaders {
 
         let hasChanged = this.hasChangedDirection();
         if (hasChanged = true) { do this.moveAlienDown(); }
+
+        if (this.arrCounter = 0) { do this.nextLevel(); }
+
+        if ((this.timeSinceLastBullet > 40) | (this.timeSinceLastBullet = 40)) {
+            var Alien bottomAliens;
+            let bottomAliens = this.getBottomAliens();
+            // not sure what it means by bottomAliens.length
+        }
+        let this.timeSinceLastBullet = timeSinceLastBullet + 1;
+
+        do this.updateBullets();
     }
 
 
@@ -65,6 +77,11 @@ class Invaders {
             let this.aliens[updateCounter].y = this.aliens[updateCounter].y + 10;
             let updateCounter = updateCounter + 1;
         }
+    }
+
+
+    method Array getBottomAliens() {
+        var 
     }
 
 
@@ -112,7 +129,7 @@ class Invaders {
         var int alienX, alienY;
         var int distanceSquared;
         var int dx, dy;
-        let decrementCounter = this.arrCouunter - 1;
+        let decrementCounter = this.arrCounter - 1;
 
         while ((decrementCounter > 0) | (decrementCounter = 0)) {
             let currentAlien = this.aliens[decrementCounter];
