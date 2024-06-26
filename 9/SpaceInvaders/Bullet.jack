@@ -15,4 +15,9 @@ class Bullet {
         do Memory.poke(memAddress +32, 1);
         return;
     }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
 }

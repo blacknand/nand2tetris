@@ -148,4 +148,9 @@ class Player {
             let i = i + 1;
         }
     }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
 }

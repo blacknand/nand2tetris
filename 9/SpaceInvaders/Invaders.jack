@@ -245,4 +245,9 @@ class Invaders {
         if (key = 68) { come back to this after creating player class }                              // D
         if (key = 65) { come back to this after creating player class }                                  // A
     }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
 }

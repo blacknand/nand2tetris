@@ -23,4 +23,9 @@ class Alien {
 		do Memory.poke(memAddress +224, 72);
 		return;
 	}
+
+	method void dispose() {
+		do Memory.deAlloc(this);
+		return;
+	}
 }

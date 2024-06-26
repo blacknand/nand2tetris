@@ -1,3 +1,40 @@
-class Alien {
-    constructor AlienConstructor new()
+class SpaceInvadersGame {
+    field Invaders invaders;
+    field Random random;
+    field PlayerBullet playerBullet;
+    field Player player;
+    field Bullet bullet;
+    field AlienBullet alienBullet;
+    field Alien alien;
+
+    // Initialise all objects
+    constructor SpaceInvadersConstructor new() {
+        let this.invaders = Invaders.new(256, 10);                       // TODO: Random seed
+        let this.random = Random.new(10);                                // TODO: Same here
+        let this.playerBullet = PlayerBullet.new(0, 0);                  // TODO: Find correct coordinates
+        let this.player = Player.new(10, 10);                            // TODO: Find correct heighs
+        let this.bullet = Bullet.new(0, 0);                              // TODO: Find correct X and Y values
+        let this.alienBullet = AlienBullet.new(0, 0);                    // TODO: Find correct X and Y values
+        let this.alien = Alien.new();                                    // TODO: Find correct X and Y values 
+    }
+
+    // Dispose all objects
+    method void dispose() {
+        do this.invaders.dispose();
+        do this.random.dispose();
+        do this.playerBullet.dispose();
+        do this.player.dispose();
+        do this.bullet.dispose();
+        do this.alientBullet.dispose();
+        do this.alien.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    // TODO: Would probably make more sense if movement controls went here
+
+    // TODO: Run game method
+    method void run() {
+
+    }
 }

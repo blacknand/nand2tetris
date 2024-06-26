@@ -18,8 +18,13 @@ class PlayerBullet {
     method void draw() {
         var int location;
         let location = this.y * 32 + this.x / 16;
-        do Memory.poke(16384 + location, 1);   // Adjust these values based on the actual sprite
+        do Memory.poke(16384 + location, 1);   
         do Memory.poke(16384 + location + 32, 1);
+        return;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
         return;
     }
 }

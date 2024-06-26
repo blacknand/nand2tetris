@@ -18,4 +18,9 @@ class Random {
         while ((result > max) | (result = max)) { let result = result - max; }
         return result;
     }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
 }

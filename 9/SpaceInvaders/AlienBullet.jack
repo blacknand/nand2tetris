@@ -13,4 +13,9 @@ class AlienBullet {
     method void draw() {
         do this.bullet.draw();
     }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
 }
