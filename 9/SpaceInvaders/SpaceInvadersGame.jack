@@ -65,7 +65,7 @@ class SpaceInvadersGame {
             do draw();
             do Sys.wait(1);
         }
-        dispose();
+        do dispose();
         return;
     }
 }
