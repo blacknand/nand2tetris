@@ -1,0 +1,149 @@
+function SpaceInvadersGame.new 0
+push constant 7
+call Memory.alloc 1
+pop pointer 0
+push constant 5
+push constant 10
+call Invaders.new 2
+pop this 0
+push constant 10
+call Random.new 1
+pop this 1
+push constant 0
+push constant 0
+call PlayerBullet.new 2
+pop this 2
+push constant 20
+push constant 20
+call Player.new 2
+pop this 3
+push constant 0
+push constant 0
+call Bullet.new 2
+pop this 4
+push constant 0
+push constant 0
+call AlienBullet.new 2
+pop this 5
+push constant 0
+push constant 0
+call Alien.new 2
+pop this 6
+push pointer 0
+return
+function SpaceInvadersGame.dispose 0
+push argument 0
+pop pointer 0
+push this 0
+call Invaders.dispose 1
+pop temp 0
+push this 1
+call Random.dispose 1
+pop temp 0
+push this 2
+call PlayerBullet.dispose 1
+pop temp 0
+push this 3
+call Player.dispose 1
+pop temp 0
+push this 4
+call Bullet.dispose 1
+pop temp 0
+call alientBullet.dispose 0
+pop temp 0
+push this 6
+call Alien.dispose 1
+pop temp 0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+push constant 0
+return
+function SpaceInvadersGame.draw 0
+push argument 0
+pop pointer 0
+push this 3
+call Player.draw 1
+pop temp 0
+push this 0
+call Invaders.draw 1
+pop temp 0
+push constant 0
+return
+function SpaceInvadersGame.update 0
+push argument 0
+pop pointer 0
+push this 3
+call Player.update 1
+pop temp 0
+push this 0
+call Invaders.update 1
+pop temp 0
+push constant 0
+return
+function SpaceInvadersGame.handleKeyPresses 1
+push argument 0
+pop pointer 0
+call Keyboard.keyPressed 0
+pop local 0
+push local 0
+push constant 262
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push this 3
+call Player.moveRight 1
+pop temp 0
+label IF_FALSE0
+push local 0
+push constant 263
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push this 3
+call Player.moveLeft 1
+pop temp 0
+label IF_FALSE1
+push local 0
+push constant 32
+eq
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push this 3
+call Player.shoot 1
+pop temp 0
+label IF_FALSE2
+push constant 0
+return
+function SpaceInvadersGame.run 0
+push argument 0
+pop pointer 0
+label WHILE_EXP0
+push constant 0
+not
+not
+if-goto WHILE_END0
+push pointer 0
+call SpaceInvadersGame.handleKeyPresses 1
+pop temp 0
+push pointer 0
+call SpaceInvadersGame.update 1
+pop temp 0
+call Screen.clear 0
+pop temp 0
+push pointer 0
+call SpaceInvadersGame.draw 1
+pop temp 0
+push constant 1
+call Sys.wait 1
+pop temp 0
+goto WHILE_EXP0
+label WHILE_END0
+push pointer 0
+call SpaceInvadersGame.dispose 1
+pop temp 0
+push constant 0
+return

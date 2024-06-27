@@ -71,7 +71,7 @@ class Player {
         let bulletX = bullet.getX();
         let bulletY = bullet.getY();
         let invader = Invaders.new(5, 10);
-        let returnVar = invaders.checkCollision(bulletX, bulletY);
+        let returnVar = invader.checkCollision(bulletX, bulletY);
         return returnVar;
     }
 

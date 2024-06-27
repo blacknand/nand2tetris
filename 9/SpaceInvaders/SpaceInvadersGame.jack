@@ -61,7 +61,7 @@ class SpaceInvadersGame {
         while (true) {
             do handleKeyPresses();
             do update();
-            do Screen.clear();
+            do Screen.clearScreen();
             do draw();
             do Sys.wait(1);
         }
