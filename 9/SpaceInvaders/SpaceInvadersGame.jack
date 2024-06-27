@@ -8,33 +8,64 @@ class SpaceInvadersGame {
     field Alien alien;
 
     // Initialise all objects
-    constructor SpaceInvadersConstructor new() {
-        let this.invaders = Invaders.new(256, 10);                       // TODO: Random seed
-        let this.random = Random.new(10);                                // TODO: Same here
-        let this.playerBullet = PlayerBullet.new(0, 0);                  // TODO: Find correct coordinates
-        let this.player = Player.new(10, 10);                            // TODO: Find correct heighs
-        let this.bullet = Bullet.new(0, 0);                              // TODO: Find correct X and Y values
-        let this.alienBullet = AlienBullet.new(0, 0);                    // TODO: Find correct X and Y values
-        let this.alien = Alien.new();                                    // TODO: Find correct X and Y values 
+    constructor SpaceInvadersGame new() {
+        let invaders = Invaders.new(5, 10);                        
+        let random = Random.new(10);                                    
+        let playerBullet = PlayerBullet.new(0, 0);                     
+        let player = Player.new(20, 20);                                
+        let bullet = Bullet.new(0, 0);                                  
+        let alienBullet = AlienBullet.new(0, 0);                        
+        let alien = Alien.new(0, 0);                                     
+        return this;
     }
 
     // Dispose all objects
     method void dispose() {
-        do this.invaders.dispose();
-        do this.random.dispose();
-        do this.playerBullet.dispose();
-        do this.player.dispose();
-        do this.bullet.dispose();
-        do this.alientBullet.dispose();
-        do this.alien.dispose();
+        do invaders.dispose();
+        do random.dispose();
+        do playerBullet.dispose();
+        do player.dispose();
+        do bullet.dispose();
+        do alientBullet.dispose();
+        do alien.dispose();
         do Memory.deAlloc(this);
         return;
     }
 
-    // TODO: Would probably make more sense if movement controls went here
+    method void draw() {
+        do player.draw();
+        do invaders.draw();
+        return;
+    }
 
-    // TODO: Run game method
+
+    method void update() {
+        do player.update();
+        do invaders.update();
+        return;
+    }
+
+    // Handle keyboard input
+    method void handleKeyPresses() {
+        var int key;
+        let key = Keyboard.keyPressed();
+
+        if (key = 262) { do player.moveRight(); }
+        if (key = 263) { do player.moveLeft(); }
+        if (key = 32) { do player.shoot(); }
+        return;
+    }
+
+    // Main game method
     method void run() {
-
+        while (true) {
+            do handleKeyPresses();
+            do update();
+            do Screen.clear();
+            do draw();
+            do Sys.wait(1);
+        }
+        dispose();
+        return;
     }
 }

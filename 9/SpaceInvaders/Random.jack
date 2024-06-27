@@ -1,9 +1,8 @@
-// Simple linear congruential generator as a pseudo-random number generator helper function
 class Random {
     field int seed;
 
-    constructor RandomConstructor new(int initialSeed) {
-        let this.seed = initialSeed;
+    constructor Random new(int initialSeed) {
+        let seed = initialSeed;
         return this;
     }
 
@@ -11,11 +10,12 @@ class Random {
         var int result;
 
         // Update seed using simple linear congruential formula
-        let this.seed = ((this.seed * 1664525) + 1013904223 & 0x7FFFFFF);
-        
+        let seed = (seed * 25173 + 13849) & 32767;                                              // 32767 is 0x7FFF, the largest 15-bit integer        
         // Perform modulo operation using subtraction
-        let result = this.seed;
-        while ((result > max) | (result = max)) { let result = result - max; }
+        let result = seed;
+        while ((result > max) | (result = max)) {
+            let result = result - max;
+        }
         return result;
     }
 

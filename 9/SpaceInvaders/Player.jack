@@ -4,149 +4,167 @@ class Player {
     field Array bullets;
 
     constructor Player new(int shooterImageWidth, int shooterImageHeight) {
-        // Initialize player's position, movement flags, and bullet array
-        let this.x = 256;                           // Centered horizontally
-        let this.y = 230;                           // Near the bottom
-        let this.isMovingLeft = false;
-        let this.isMovingRight = false;
-        let this.bullets = Array.new(50);           // Pre-allocate space for bullets
-        let this.lives = 3;                         // Initial number of lives
-        let this.score = 0;                         // Initial score
-        let this.imageWidth = shooterImageWidth / 20;
-        let this.imageHeight = shooterImageHeight / 20;
+        let x = 256;
+        let y = 230;
+        let isMovingLeft = false;
+        let isMovingRight = false;
+        let bullets = Array.new(50);
+        let lives = 3;
+        let score = 0;
+        let imageWidth = shooterImageWidth / 20;
+        let imageHeight = shooterImageHeight / 20;
         return this;
     }
 
-
     method void update() {
-        // Move player based on movement flags
-        if (this.isMovingRight) { let this.x = this.x + 1; }
-        if (this.isMovingLeft) { let this.x = this.x - 1; }
-        do this.constrain();
-        do this.updateBullets();
+        if (isMovingRight) { let x = x + 1; }
+        if (isMovingLeft) { let x = x - 1; }
+        do constrain();
+        do updateBullets();
+        return;
     }
-
 
     method void updateBullets() {
         var int i;
         var int newSize;
+        var boolean hasHitAlienResult;
+        var PlayerBullet bullet;
+        var boolean offScreen;
         let newSize = 0;
-
-        // Iterate through bullets array and update each bullet
         let i = 0;
+    
+        // Iterate through bullets array and update each bullet
         while (i < 50) {
-            if (~(this.bullets[i] = null)) {
-                do this.bullets[i].udpate();
-
+            let bullet = bullets[i];
+            if (~(bullet = null)) {
+                do bullet.update();
+    
                 // Check for collision or if bullet is off-screen
-                if (do this.hasHitAlien(this.bullets[i]) | do this.bullets[i].isOffScreen()) { let this.bullets[i] = null; }
-                else {
-                    let this.bullets[newSize] = this.bullets[i];
-                    let newSize = newSize + 1;
+                let hasHitAlienResult = hasHitAlien(bullet);
+                if (hasHitAlienResult) {
+                    let bullets[i] = null;
+                } else {
+                    let offScreen = bullet.isOffScreen();
+                    if (offScreen) {
+                        let bullets[i] = null;
+                    } else {
+                        let bullets[newSize] = bullets[i];
+                        let newSize = newSize + 1;
+                    }
                 }
             }
             let i = i + 1;
         }
-
+    
         while (newSize < 50) {
-            let this.bullets[newSize] = null;
+            let bullets[newSize] = null;
             let newSize = newSize + 1;
         }
+        return;
     }
-
-    method boolean hasHitAlien(Bullet bullet) {
-        return invaders.checkCollision(bullet.x, bullet.y);
+    
+    method boolean hasHitAlien(PlayerBullet bullet) {
+        var Invaders invader;
+        var int bulletX;
+        var int bulletY;
+        var boolean returnVar;
+        let bulletX = bullet.getX();
+        let bulletY = bullet.getY();
+        let invader = Invaders.new(5, 10);
+        let returnVar = invaders.checkCollision(bulletX, bulletY);
+        return returnVar;
     }
-
 
     method void constrain() {
-        if (this.x < 0) {
-            let this.x = 0;
+        if (x < 0) {
+            let x = 0;
         }
-        if (this.x > 512 - this.imageWidth) { // Assuming width is 512
-            let this.x = 512 - this.imageWidth;
+        if (x > 512 - imageWidth) {
+            let x = 512 - imageWidth;
         }
+        return;
     }
-
 
     method void draw() {
         var int location;
-        let location = this.y * 32 + this.x / 16;
+        let location = y * 32 + x / 16;
         do Memory.poke(16384 + location, 8);
         do Memory.poke(16384 + location + 32, 62);
         do Memory.poke(16384 + location + 64, 127);
         do Memory.poke(16384 + location + 96, 127);
 
-        do this.drawBullets();
+        do drawBullets();
+        return;
     }
-
 
     method void drawBullets() {
         var int i;
+        var PlayerBullet bullet;
         let i = 0;
         while (i < 50) {
-            if (~(this.bullets[i] = null)) {
-                do this.bullets[i].draw();
+            if (~(bullets[i] = null)) {
+                let bullet = bullets[i];
+                do bullet.draw();
             }
             let i = i + 1;
         }
+        return;
     }
 
-
     method void drawLives() {
-        // Set cursor position and print "LIVES"
+        var int i;
+        var int location;
+
         do Output.moveCursor(1, 25);
         do Output.printString("LIVES");
-        
-        var int i;
         let i = 0;
 
-        while (i < this.lives) {
-            var int location;
-            let location = 10 * 32 + (300 + i * 30) / 16;
-            do Memory.poke(16384 + location, 8);                                
+        while (i < lives) {
+            let location = (10 * 32) + ((300 + (i * 30)) / 16);
+            do Memory.poke(16384 + location, 8);
             do Memory.poke(16384 + location + 32, 62);
             do Memory.poke(16384 + location + 64, 127);
             do Memory.poke(16384 + location + 96, 127);
             let i = i + 1;
         }
+        return;
     }
 
     method void drawScore() {
-        // Set cursor position and print "SCORE"
         do Output.moveCursor(1, 5);
         do Output.printString("SCORE");
-
-        // Move cursor to the position where the score will be printed
         do Output.moveCursor(1, 11);
-        do Output.printInt(this.score); // Print the score as an integer
+        do Output.printInt(score);
+        return;
     }
 
-
     method void moveLeft() {
-        let this.isMovingRight = false;
-        let this.isMovingLeft = true;
+        let isMovingRight = false;
+        let isMovingLeft = true;
+        return;
     }
 
     method void moveRight() {
-        let this.isMovingLeft = false;
-        let this.isMovingRight = true;
+        let isMovingLeft = false;
+        let isMovingRight = true;
+        return;
     }
 
     method void shoot() {
-        var Bullet newBullet;
-        let newBullet = Bullet.new(this.x + 12, this.y);
-
-        // Find empty slot in bullets array
+        var PlayerBullet newBullet;
         var int i;
+
+        let newBullet = PlayerBullet.new(x + 12, y);
         let i = 0;
+
         while (i < 50) {
-            if (this.bullets[i] = null) {
-                let this.bullets[i] = newBullet;
+            if (bullets[i] = null) {
+                let bullets[i] = newBullet;
                 return;
             }
             let i = i + 1;
         }
+        return;
     }
 
     method void dispose() {

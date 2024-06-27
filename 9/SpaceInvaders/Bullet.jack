@@ -1,18 +1,42 @@
 class Bullet { 
     field int x, y;
 
-    constructor BulletConstructor new(int argX, int argY) {
-        this.x = argX;
-        this.y = argY;
+    constructor Bullet new(int argX, int argY) {
+        let x = argX;
+        let y = argY;
         return this;
+    }
+
+    method void update() {
+        // Default implementation (does nothing)
+        return;
     }
 
     method void draw() {
         var int memAddress; 
-        let memAddress = 16384 + this.y * 32 + this.x / 16;
+        let memAddress = 16384 + y * 32 + x / 16;
         // column 0
         do Memory.poke(memAddress, 1);
         do Memory.poke(memAddress +32, 1);
+        return;
+    }
+
+    method int getX() {
+        return x;
+    }
+
+    method int getY() {
+        return y;
+    }
+
+
+    method void setX(int newX) {
+        let x = newX;
+        return;
+    }
+
+    method void setY(int newY) {
+        let y = newY;
         return;
     }
 
@@ -21,3 +45,4 @@ class Bullet {
         return;
     }
 }
+

@@ -1,17 +1,46 @@
 class AlienBullet {
-    field Bullet bullet;
+    field int x, y;
 
-    constructor AlienBulletConstruct new(int argX, int argY) {
-        let this.bullet = Bullet.new(argX, argY);
+    constructor AlienBullet new(int argX, int argY) {
+        let x = argX;
+        let y = argY;
         return this;
     }
 
     method void update() {
-        let this.bullet.y = this.bullet.y + 2;
+        let y = y + 2;
+        return;
+    }
+
+    method boolean isOffScreen() {
+        return y > 256; // Assuming screen height is 256
     }
 
     method void draw() {
-        do this.bullet.draw();
+        var int memAddress;
+        let memAddress = 16384 + y * 32 + x / 16;
+        do Memory.poke(memAddress, 1);
+        do Memory.poke(memAddress + 32, 1);
+        return;
+    }
+
+    method int getX() {
+        return x;
+    }
+
+    method int getY() {
+        return y;
+    }
+
+
+    method void setX(int newX) {
+        let x = newX;
+        return;
+    }
+
+    method void setY(int newY) {
+        let y = newY;
+        return;
     }
 
     method void dispose() {
