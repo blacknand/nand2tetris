@@ -3,18 +3,14 @@
 #include <string>
 #include "FileOpp.h"
 
-// using regular method
-std::ios_base::openmode FileWriting::hasBeenOpened( std::string fileName ) {
-    // Test if the key is present
+std::map<std::string, bool> WriteToFile::record;
+
+WriteToFile::hasBeenOpened(std::string fileName) {
     if (record.find(fileName) == record.end()) {
-        record[ fileName ] = true;
+        record[fileName] = true;
         return std::ofstream::trunc;
     } else
         return std::ofstream::app;
 }
 
-std::ofstream FileWriting::writeFile( const char * filename ) {
-    return std::ofstream(filename, hasBeenOpened(std::string(filename)));
-}
-
-std::map< std::string, bool > FileWriting::record;
+WriteToFile::WriteToFile(const char *fileName) : std::ofstream(fileName, hasBeenOpened(std::string(fileName))) {}
