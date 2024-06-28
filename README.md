@@ -46,7 +46,7 @@ The high-level language Jack is introduced, providing a more abstract and user-f
 + Sample Programs: Example Jack programs demonstrating language features
 ## 10. Compiler I
 The first part of the Jack compiler translates Jack high-level language into VM code.
-+ Syntax Analysis: Parsing Jack code into an abstract syntax tree (AST)
++ Syntax Analysis: Parsing Jack code into an deriveration tree (recursive descent parsing)
 + Code Generation: Translating the AST into VM code
 + Error Handling: Detecting and reporting syntax and semantic errors
 ## 11. Compiler II
