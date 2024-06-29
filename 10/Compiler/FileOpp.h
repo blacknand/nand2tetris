@@ -11,6 +11,6 @@ class WriteToFile: public std::ofstream {
     static std::ios_base::openmode hasBeenOpened(std::string fileName);
 public:
     WriteToFile(const char *fileName);
-}
+};
 
 #endif  // WRITE_TO_FILE_HPP

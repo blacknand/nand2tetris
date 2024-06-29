@@ -6,7 +6,7 @@
 
 class JackTokenizer {
     private:
-        std::vector<std::vector<std::string>> lineVect;
+        static std::vector<std::vector<std::string>> tokenizedVec;
     public:
         void initializer(std::string inputFile);
         bool hasMoreTokens();
@@ -17,6 +17,10 @@ class JackTokenizer {
         std::string identifier();
         int intVal();
         std::string stringVal();
-}
+        const std::vector<std::vector<std::string>> &getTokenizedVec() {
+            return tokenizedVec;
+        };
+
+};
 
 #endif      // JACK_TOKENIZER

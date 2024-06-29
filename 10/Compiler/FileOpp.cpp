@@ -5,7 +5,7 @@
 
 std::map<std::string, bool> WriteToFile::record;
 
-WriteToFile::hasBeenOpened(std::string fileName) {
+std::ios_base::openmode WriteToFile::hasBeenOpened(std::string fileName) {
     if (record.find(fileName) == record.end()) {
         record[fileName] = true;
         return std::ofstream::trunc;
