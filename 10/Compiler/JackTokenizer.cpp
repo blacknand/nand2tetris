@@ -83,9 +83,8 @@ bool JackTokenizer::hasMoreTokens() {
 
 
 void JackTokenizer::advance() {
-    currentIndex++;
     currentToken = tokens[currentIndex].token;
-    std::cout << currentToken << std::endl;
+    currentIndex++;
 }
 
 
