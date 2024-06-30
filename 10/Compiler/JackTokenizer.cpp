@@ -3,16 +3,30 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <regex>
+#include <unordered_map>
 #include <boost/algorithm/string/trim.hpp>
 #include "JackTokenizer.h"
 
 
 // Define static class members to be allocated
-// std::vector<std::vector<std::string>> JackTokenizer::tokenizedVec;
-// int JackTokenizer::currentLine = 0;
-// int JackTokenizer::currentToken = 0;
-// std::string JackTokenizer::currentToken;
-// JackTokenizer::currentIndex = 0;
+const std::unordered_map<std::string, JackTokenizer::TokenElements> JackTokenizer::keywordMap = {
+    {"class", TokenElements::KEYWORD}, {"constructor", TokenElements::KEYWORD}, {"function", TokenElements::KEYWORD},
+    {"method", TokenElements::KEYWORD}, {"field", TokenElements::KEYWORD}, {"static", TokenElements::KEYWORD},
+    {"var", TokenElements::KEYWORD}, {"int", TokenElements::KEYWORD}, {"char", TokenElements::KEYWORD},
+    {"boolean", TokenElements::KEYWORD}, {"void", TokenElements::KEYWORD}, {"true", TokenElements::KEYWORD},
+    {"false", TokenElements::KEYWORD}, {"null", TokenElements::KEYWORD}, {"this", TokenElements::KEYWORD},
+    {"let", TokenElements::KEYWORD}, {"do", TokenElements::KEYWORD}, {"if", TokenElements::KEYWORD},
+    {"else", TokenElements::KEYWORD}, {"while", TokenElements::KEYWORD}, {"return", TokenElements::KEYWORD}
+};
+
+const std::unordered_map<char, JackTokenizer::TokenElements> JackTokenizer::symbolMap = {
+    {'{', TokenElements::SYMBOL}, {'}', TokenElements::SYMBOL}, {'(', TokenElements::SYMBOL}, {')', TokenElements::SYMBOL},
+    {'[', TokenElements::SYMBOL}, {']', TokenElements::SYMBOL}, {'.', TokenElements::SYMBOL}, {',', TokenElements::SYMBOL},
+    {';', TokenElements::SYMBOL}, {'+', TokenElements::SYMBOL}, {'-', TokenElements::SYMBOL}, {'*', TokenElements::SYMBOL},
+    {'/', TokenElements::SYMBOL}, {'&', TokenElements::SYMBOL}, {'|', TokenElements::SYMBOL}, {'<', TokenElements::SYMBOL},
+    {'>', TokenElements::SYMBOL}, {'=', TokenElements::SYMBOL}, {'~', TokenElements::SYMBOL}
+};
 
 
 void JackTokenizer::initializer(std::string inputFile) {
@@ -84,7 +98,24 @@ bool JackTokenizer::hasMoreTokens() {
 
 void JackTokenizer::advance() {
     currentToken = tokens[currentIndex].token;
+    std::cout << currentToken << std::endl;
     currentIndex++;
+}
+
+
+const JackTokenizer::TokenElements JackTokenizer::tokenType() {
+    std::unordered_map<std::string, TokenElements>::const_iterator keywordCode = keywordMap.find(currentToken);
+    std::unordered_map<char, TokenElements>::const_iterator symbolCode = symbolMap.find(currentToken[0]);
+    if (keywordCode != keywordMap.end())
+        return keywordCode->second;
+    else if (symbolCode != symbolMap.end())
+        return symbolCode->second;
+    else if (std::regex_match(currentToken, std::regex("[a-zA-Z_][a-zA-Z0-9_]*")))
+        return TokenElements::IDENTIFIER;
+    else if (std::regex_match(currentToken, std::regex("[0-9]+")))
+        return TokenElements::INT_CONST;
+    else if (std::regex_match(currentToken, std::regex("\".*\"")))
+        return TokenElements::STR_CONST;
 }
 
 

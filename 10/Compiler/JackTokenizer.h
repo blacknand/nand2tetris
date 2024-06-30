@@ -1,5 +1,7 @@
 #include <iostream>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #ifndef JACK_TOKENIZER
 #define JACK_TOKENIZER
@@ -11,26 +13,30 @@ class JackTokenizer {
             int lineIndex;
             int tokenIndex;
         };
+        enum TokenElements {
+            KEYWORD = 1,
+            SYMBOL,
+            INT_CONST,
+            STR_CONST,
+            IDENTIFIER
+        };
     private:
         std::vector<Token> tokens;
-        // std::vector<std::vector<std::string>> tokenizedVec;
-        // int currentLine;
-        // int currentToken;
         int currentIndex = 0;
         std::string currentToken;
+        static const std::unordered_map<std::string, TokenElements> keywordMap;
+        static const std::unordered_map<char, TokenElements> symbolMap;
     public:
         void initializer(std::string inputFile);
         bool hasMoreTokens();
         void advance();
-        const std::string &tokenType();
+        const TokenElements tokenType();
+        const std::string &tokenElements();
         const std::string &keyWord();
         char symbol();
         std::string identifier();
         int intVal();
         std::string stringVal();
-        // const std::vector<std::vector<std::string>> &getTokenizedVec() {
-        //     return tokenizedVec;
-        // };
         const std::vector<Token>& getTokens() const;
 };
 
