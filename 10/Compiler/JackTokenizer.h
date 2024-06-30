@@ -20,19 +20,42 @@ class JackTokenizer {
             STR_CONST,
             IDENTIFIER
         };
+        enum KeywordElements {
+            CLASS = 1,
+            METHOD,
+            FUNCTION,
+            CONSTRUCTOR,
+            INT,
+            BOOLEAN,
+            CHAR,
+            VOID,
+            VAR,
+            STATIC,
+            FIELD,
+            LET,
+            DO,
+            IF,
+            ELSE,
+            WHILE,
+            RETURN,
+            TRUE,
+            FALSE,
+            JACK_NULL,
+            THIS
+        };
     private:
         std::vector<Token> tokens;
         int currentIndex = 0;
         std::string currentToken;
         static const std::unordered_map<std::string, TokenElements> keywordMap;
         static const std::unordered_map<char, TokenElements> symbolMap;
+        static const std::unordered_map<std::string, KeywordElements> tokenKeywordMap;
     public:
         void initializer(std::string inputFile);
         bool hasMoreTokens();
         void advance();
         const TokenElements tokenType();
-        const std::string &tokenElements();
-        const std::string &keyWord();
+        const KeywordElements keyWord();
         char symbol();
         std::string identifier();
         int intVal();

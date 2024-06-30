@@ -28,6 +28,15 @@ const std::unordered_map<char, JackTokenizer::TokenElements> JackTokenizer::symb
     {'>', TokenElements::SYMBOL}, {'=', TokenElements::SYMBOL}, {'~', TokenElements::SYMBOL}
 };
 
+const std::unordered_map<std::string, JackTokenizer::KeywordElements> JackTokenizer::tokenKeywordMap = {
+    {"class", KeywordElements::CLASS}, {"constructor", KeywordElements::CONSTRUCTOR}, {"function", KeywordElements::FUNCTION},
+    {"method", KeywordElements::METHOD}, {"field", KeywordElements::FIELD}, {"static", KeywordElements::STATIC},
+    {"var", KeywordElements::VAR}, {"int", KeywordElements::INT}, {"char", KeywordElements::CHAR},
+    {"boolean", KeywordElements::BOOLEAN}, {"void", KeywordElements::VOID}, {"true", KeywordElements::TRUE},
+    {"false", KeywordElements::FALSE}, {"null", KeywordElements::JACK_NULL}, {"this", KeywordElements::THIS},
+    {"let", KeywordElements::LET}, {"do", KeywordElements::DO}, {"if", KeywordElements::IF}, 
+    {"else", KeywordElements::ELSE}, {"while", KeywordElements::WHILE}, {"return", KeywordElements::RETURN}
+};
 
 void JackTokenizer::initializer(std::string inputFile) {
     // Tokenizes input file and adds tokens to 2d vector
@@ -110,7 +119,7 @@ bool JackTokenizer::hasMoreTokens() {
 
 void JackTokenizer::advance() {
     currentToken = tokens[currentIndex].token;
-    std::cout << currentToken << std::endl;
+    std::cout << "currentToken: " << currentToken << std::endl;
     currentIndex++;
 }
 
@@ -128,6 +137,13 @@ const JackTokenizer::TokenElements JackTokenizer::tokenType() {
         return TokenElements::INT_CONST;
     else if (std::regex_match(currentToken, std::regex("\".*\"")))
         return TokenElements::STR_CONST;
+}
+
+
+const JackTokenizer::KeywordElements JackTokenizer::keyWord() {
+    std::unordered_map<std::string, KeywordElements>::const_iterator keywordCode = tokenKeywordMap.find(currentToken);
+    if (keywordCode != tokenKeywordMap.end())
+        return keywordCode->second;
 }
 
 
