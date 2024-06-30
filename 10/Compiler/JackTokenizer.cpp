@@ -63,28 +63,40 @@ void JackTokenizer::initializer(std::string inputFile) {
                         continue;
                 } 
 
-                if (!flag) {
-                    std::string token;
-                    tokenIndex = 0;                             // Reset token index for new valid line
-                    // Tokenize
-                    for (char c : line) {
-                        if (!isspace(c))
-                            token += c;
-                        else if (!token.empty()) {
+                std::size_t inlineCommentPos = line.find("//");
+                if (inlineCommentPos != std::string::npos)
+                    line.erase(inlineCommentPos);
+
+                std::string token;
+                tokenIndex = 0;                             // Reset token index for new valid line
+
+                for (std::size_t i = 0; i < line.length(); i++) {
+                    char c = line[i];
+                    if (isspace(c)) {
+                        if (!token.empty()) {
                             tokens.push_back({token, lineIndex, tokenIndex});
                             token.clear();
                             tokenIndex++;
                         }
-                    }
-
-                    // Edge case to ensure last token is added
-                    if (!token.empty()) {
-                        tokens.push_back({token, lineIndex, tokenIndex});
+                    } else if (ispunct(c)) {
+                        if (!token.empty()) {
+                            tokens.push_back({token, lineIndex, tokenIndex});
+                            token.clear();
+                            tokenIndex++;
+                        }
+                        tokens.push_back({std::string(1, c), lineIndex, tokenIndex});
                         tokenIndex++;
-                    }
-
-                    lineIndex++;
+                    } else
+                        token += c;
                 }
+
+                // Edge case to ensure last token is added
+                if (!token.empty()) {
+                    tokens.push_back({token, lineIndex, tokenIndex});
+                    tokenIndex++;
+                }
+
+                lineIndex++;
             }
         }
     }
