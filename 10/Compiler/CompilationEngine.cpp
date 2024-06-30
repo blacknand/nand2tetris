@@ -7,14 +7,12 @@ int main(int argc, char **argv) {
     JackTokenizer testObj;
     testObj.initializer(argv[1]);
 
-    const std::vector<std::vector<std::string>> &tokenizedVec = testObj.getTokenizedVec();
+    const std::vector<JackTokenizer::Token>& tokens = testObj.getTokens();
 
-    for (int i = 0; i < tokenizedVec.size(); i++) {
-        for (int j = 0; j < tokenizedVec[i].size(); j++) {
-            std::cout << tokenizedVec[i][j] << std::endl;
-        }
+    while (testObj.hasMoreTokens()) {
+        std::cout << "hasMoreTokens: true" << std::endl;
+        testObj.advance();
     }
 
-    std::cout << "compiles" << std::endl;
     return 0;
 }
