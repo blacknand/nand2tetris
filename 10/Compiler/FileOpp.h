@@ -10,7 +10,7 @@ class WriteToFile: public std::ofstream {
     static std::map<std::string, bool> record;
     static std::ios_base::openmode hasBeenOpened(std::string fileName);
 public:
-    WriteToFile(const char *fileName);
+    std::ofstream fileWriter(const char *fileName);
 };
 
 #endif  // WRITE_TO_FILE_HPP

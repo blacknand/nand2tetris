@@ -6,7 +6,7 @@
 #include "FileOpp.h"
 
 
-void CompilationEngine::constructor(std::string inputFile, std::string outputFileArg) {
+CompilationEngine::CompilationEngine(std::string inputFile, std::string outputFileArg) {
     std::filesystem::path inputPath(inputFile);
     std::vector<std::filesystem::path> jackFiles;
 
@@ -19,14 +19,28 @@ void CompilationEngine::constructor(std::string inputFile, std::string outputFil
     } else if (inputPath.extension() == ".jack") 
         jackFiles.push_back(inputPath);
 
-    for (const auto &jackFile: jackFiles) {
+    if (std::filesystem::is_directory(outputFileArg) || jackFiles.size() > 1) {
+        if (!std::filesystem::exists(outputFileArg)) {
+            std::filesystem::create_directories(outputFileArg);
+        }
+    }
+
+
+    for (const auto &jackFile : jackFiles) {
         std::filesystem::path filePath = jackFile;
         std::string outputFileName;
-        if (std::filesystem::is_directory(outputFileArg))
-            outputFileName = std::filesystem::path(outputFileArg) / (filePath.stem().string() + ".xml");
-        else 
+
+        if (std::filesystem::is_directory(outputFileArg)) {
+            outputFileName = (std::filesystem::path(outputFileArg) / (filePath.stem().string() + ".xml")).string();
+        } else if (jackFiles.size() == 1) {
             outputFileName = outputFileArg;
-        WriteToFile outputFile(outputFileName.c_str());
+        } else {
+            std::cerr << "When processing multiple .jack files, output must be a directory." << std::endl;
+            return;
+        }
+
+        outputFile = fileObj.fileWriter(outputFileName.c_str());
+
     }
 }
 

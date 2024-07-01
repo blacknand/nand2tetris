@@ -7,10 +7,11 @@
 
 int main(int argc, char **argv) {
     
-    CompilationEngine testObj;
-    testObj.constructor(argv[1], argv[2]);
 
+    std::string inputFile = argv[1];
+    std::string outputFile = argv[2];
 
+    CompilationEngine testObj(inputFile, outputFile);
     // std::filesystem::path inputPath(argv[1]);
     // std::vector<std::filesystem::path> jackFiles;
 

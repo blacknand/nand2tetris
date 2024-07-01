@@ -13,4 +13,6 @@ std::ios_base::openmode WriteToFile::hasBeenOpened(std::string fileName) {
         return std::ofstream::app;
 }
 
-WriteToFile::WriteToFile(const char *fileName) : std::ofstream(fileName, hasBeenOpened(std::string(fileName))) {}
+std::ofstream WriteToFile::fileWriter(const char *fileName) {
+    return std::ofstream(fileName, hasBeenOpened(std::string(fileName)));
+} 
