@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
                 currentTokenType = "int_const";
                 break;
             case 4:
-                currentTokenType = "str_const";
+                currentTokenType = "string_const";
                 break;
             case 5:
                 currentTokenType = "identifier";
@@ -33,69 +33,90 @@ int main(int argc, char **argv) {
         if (currentTokenType == "keyword") {
             switch (testObj.keyWord()) {
                 case 1:
-                    std::cout << "class" << std::endl;
+                    // std::cout << "class" << std::endl;
                     break;
                 case 2:
-                    std::cout << "method" << std::endl;
+                    // std::cout << "method" << std::endl;
                     break;
                 case 3:
-                    std::cout << "function" << std::endl;
+                    // std::cout << "function" << std::endl;
                     break;
                 case 4:
-                    std::cout << "constructor" << std::endl;
+                    // std::cout << "constructor" << std::endl;
                     break;
                 case 5:
-                    std::cout << "int" << std::endl;
+                    // std::cout << "int" << std::endl;
                     break;
                 case 6:
-                    std::cout << "boolean" << std::endl;
+                    // std::cout << "boolean" << std::endl;
                     break;
                 case 7:
-                    std::cout << "char" << std::endl;
+                    // std::cout << "char" << std::endl;
                     break;
                 case 8:
-                    std::cout << "void" << std::endl;
+                    // std::cout << "void" << std::endl;
                     break;
                 case 9:
-                    std::cout << "var" << std::endl;
+                    // std::cout << "var" << std::endl;
                     break;
                 case 10:
-                    std::cout << "static" << std::endl;
+                    // std::cout << "static" << std::endl;
                     break;
                 case 11:
-                    std::cout << "field" << std::endl;
+                    // std::cout << "field" << std::endl;
                     break;
                 case 12:
-                    std::cout << "let" << std::endl;
+                    // std::cout << "let" << std::endl;
                     break;
                 case 13:
-                    std::cout << "do" << std::endl;
+                    // std::cout << "do" << std::endl;
                     break;
                 case 14:
-                    std::cout << "if" << std::endl;
+                    // std::cout << "if" << std::endl;
                     break;
                 case 15:
-                    std::cout << "else" << std::endl;
+                    // std::cout << "else" << std::endl;
                     break;
                 case 16:
-                    std::cout << "while" << std::endl;
+                    // std::cout << "while" << std::endl;
                     break;
                 case 17:
-                    std::cout << "return" << std::endl;
+                    // std::cout << "return" << std::endl;
                     break;
                 case 18:
-                    std::cout << "true" << std::endl;
+                    // std::cout << "true" << std::endl;
                     break;
                 case 19:
-                    std::cout << "false" << std::endl;
+                    // std::cout << "false" << std::endl;
                     break;
                 case 20:
-                    std::cout << "null" << std::endl;
+                    // std::cout << "null" << std::endl;
                     break;
                 case 21:
-                    std::cout << "this" << std::endl;
+                    // std::cout << "this" << std::endl;
                     break;
             }
+        }
+
+        if (currentTokenType == "symbol") {
+            // std::cout << testObj.symbol() << std::endl;
+            ;
+
+        }
+
+        if (currentTokenType == "identifier") {
+            // std::cout << testObj.identifier() << std::endl;
+            ;
+        }
+
+        if (currentTokenType == "int_const") {
+            // std::cout << testObj.intVal() << std::endl;
+            ;
+        }
+
+        if (currentTokenType == "string_const") {
+            std::cout << testObj.stringVal() << std::endl;
+            
         }
 
     }

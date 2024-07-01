@@ -17,7 +17,7 @@ class JackTokenizer {
             KEYWORD = 1,
             SYMBOL,
             INT_CONST,
-            STR_CONST,
+            STRING_CONST,
             IDENTIFIER
         };
         enum KeywordElements {
@@ -56,10 +56,10 @@ class JackTokenizer {
         void advance();
         const TokenElements tokenType();
         const KeywordElements keyWord();
-        char symbol();
-        std::string identifier();
-        int intVal();
-        std::string stringVal();
+        const char symbol();
+        const std::string identifier();
+        const int intVal();
+        const std::string stringVal();
         const std::vector<Token>& getTokens() const;
 };
 

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <regex>
 #include <unordered_map>
+#include <algorithm>
 #include <boost/algorithm/string/trim.hpp>
 #include "JackTokenizer.h"
 
@@ -104,7 +105,7 @@ void JackTokenizer::initializer(std::string inputFile) {
                         }
                         if (i < line.length() && line[i] == '\"')
                             token += '\"';
-                        tokens.push_back({token.substr(1, token.size() - 2), lineIndex, tokenIndex});
+                        tokens.push_back({token, lineIndex, tokenIndex});
                         token.clear();
                         tokenIndex++;
                     } else
@@ -131,7 +132,7 @@ bool JackTokenizer::hasMoreTokens() {
 
 void JackTokenizer::advance() {
     currentToken = tokens[currentIndex].token;
-    std::cout << "currentToken: " << currentToken << std::endl;
+    // std::cout << "currentToken: " << currentToken << std::endl;
     currentIndex++;
 }
 
@@ -148,7 +149,7 @@ const JackTokenizer::TokenElements JackTokenizer::tokenType() {
     else if (std::regex_match(currentToken, std::regex("[0-9]+")))
         return TokenElements::INT_CONST;
     else if (std::regex_match(currentToken, std::regex("\".*\"")))
-        return TokenElements::STR_CONST;
+        return TokenElements::STRING_CONST;
 }
 
 
@@ -156,6 +157,27 @@ const JackTokenizer::KeywordElements JackTokenizer::keyWord() {
     std::unordered_map<std::string, KeywordElements>::const_iterator keywordCode = tokenKeywordMap.find(currentToken);
     if (keywordCode != tokenKeywordMap.end())
         return keywordCode->second;
+}
+
+
+const char JackTokenizer::symbol() {
+    return currentToken.c_str()[0];
+}
+
+
+const std::string JackTokenizer::identifier() {
+    return currentToken;
+}
+
+
+const int JackTokenizer::intVal() {
+    return std::stoi(currentToken);
+}
+
+
+const std::string JackTokenizer::stringVal() {
+    currentToken.erase(std::remove(currentToken.begin(), currentToken.end(), '\"'), currentToken.end());
+    return currentToken;
 }
 
 
