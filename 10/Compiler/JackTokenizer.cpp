@@ -87,13 +87,25 @@ void JackTokenizer::initializer(std::string inputFile) {
                             token.clear();
                             tokenIndex++;
                         }
-                    } else if (ispunct(c)) {
+                    } else if (ispunct(c) && c != '\"') {
                         if (!token.empty()) {
                             tokens.push_back({token, lineIndex, tokenIndex});
                             token.clear();
                             tokenIndex++;
                         }
                         tokens.push_back({std::string(1, c), lineIndex, tokenIndex});
+                        tokenIndex++;
+                    } else if (c == '\"') {
+                        token += c;
+                        i++;
+                        while (i < line.length() && line[i] != '\"') {
+                            token += line[i];
+                            i++;
+                        }
+                        if (i < line.length() && line[i] == '\"')
+                            token += '\"';
+                        tokens.push_back({token.substr(1, token.size() - 2), lineIndex, tokenIndex});
+                        token.clear();
                         tokenIndex++;
                     } else
                         token += c;
