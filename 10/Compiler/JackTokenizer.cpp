@@ -1,12 +1,11 @@
-#include <string>
+#include <algorithm>
 #include <cstring>
-#include <vector>
 #include <fstream>
 #include <iostream>
 #include <regex>
+#include <string>
 #include <unordered_map>
-#include <algorithm>
-#include <boost/algorithm/string/trim.hpp>
+#include <vector>
 #include "JackTokenizer.h"
 
 
@@ -132,7 +131,6 @@ bool JackTokenizer::hasMoreTokens() {
 
 void JackTokenizer::advance() {
     currentToken = tokens[currentIndex].token;
-    // std::cout << "currentToken: " << currentToken << std::endl;
     currentIndex++;
 }
 
