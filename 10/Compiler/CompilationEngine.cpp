@@ -7,6 +7,7 @@
 #include <vector>
 #include "CompilationEngine.h"
 #include "FileOpp.h"
+#include "JackAnalyzer.h"
 
 
 CompilationEngine::CompilationEngine(std::string inputFile, std::string outputFileArg) {
@@ -42,10 +43,29 @@ CompilationEngine::CompilationEngine(std::string inputFile, std::string outputFi
 
 
 void CompilationEngine::compileClass() {
-    
+    // class className { classVarDec* subroutineDec* }
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+    // std::string curToken = tokenizer.getCurrentToken();
+
+    JackTokenizer::TokenElements curTokenType = tokenizer.tokenType();
+
+    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+    tokenizer.advance();
+    *fileStream << "<identifier> " << tokenizer.getCurrentToken() << " </identifier>" << std::endl;
+    tokenizer.advance();
+    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+    tokenzier.advance();
+
+    if ()
 }
 
 
 const std::unordered_map<std::string, std::unique_ptr<std::ofstream>>& CompilationEngine::getOutputFiles() const {
     return outputFiles;
+}
+
+
+void CompilationEngine::setOutputFile(std::string fileName) {
+    currentFile = fileName;
 }

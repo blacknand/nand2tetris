@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <vector>
 #include "FileOpp.h"
+#include "JackTokenizer.h"
 
 #ifndef COMPILATION_ENGINE
 #define COMPILATION_ENGINE
@@ -13,8 +14,8 @@
 class CompilationEngine {
     private:
         std::unordered_map<std::string, std::unique_ptr<std::ofstream>> outputFiles;
-        std::ofstream outputFile;
         std::string currentFile;
+        JackTokenizer tokenizer;
     public:
         CompilationEngine(std::string inputFile, std::string outputFileArg);
         void compileClass();
@@ -31,7 +32,8 @@ class CompilationEngine {
         void compileExpression();
         void compileTerm();
         int compileExpressionList();
-    const std::unordered_map<std::string, std::unique_ptr<std::ofstream>>& getOutputFiles() const;
+        const std::unordered_map<std::string, std::unique_ptr<std::ofstream>>& getOutputFiles() const;
+        void setOutputFile(std::string fileName);
 };
 
 #endif  // COMPILATION_ENGINE

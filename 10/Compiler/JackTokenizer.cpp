@@ -38,6 +38,10 @@ const std::unordered_map<std::string, JackTokenizer::KeywordElements> JackTokeni
     {"else", KeywordElements::ELSE}, {"while", KeywordElements::WHILE}, {"return", KeywordElements::RETURN}
 };
 
+int JackTokenizer::currentIndex = 0;
+std::string JackTokenizer::currentToken;
+std::vector<JackTokenizer::Token> tokens;
+
 void JackTokenizer::initializer(std::string inputFile) {
     // Tokenizes input file and adds tokens to 2d vector
     std::string line;
@@ -181,4 +185,9 @@ const std::string JackTokenizer::stringVal() {
 
 const std::vector<JackTokenizer::Token>& JackTokenizer::getTokens() const {
     return tokens;
+}
+
+
+std::string JackTokenizer::getCurrentToken() {
+    return currentToken;
 }

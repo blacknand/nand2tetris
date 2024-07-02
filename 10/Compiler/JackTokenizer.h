@@ -44,9 +44,9 @@ class JackTokenizer {
             THIS
         };
     private:
-        std::vector<Token> tokens;
-        int currentIndex = 0;
-        std::string currentToken;
+        static std::vector<Token> tokens;
+        static int currentIndex;
+        static std::string currentToken;
         static const std::unordered_map<std::string, TokenElements> keywordMap;
         static const std::unordered_map<char, TokenElements> symbolMap;
         static const std::unordered_map<std::string, KeywordElements> tokenKeywordMap;
@@ -61,6 +61,7 @@ class JackTokenizer {
         const int intVal();
         const std::string stringVal();
         const std::vector<Token>& getTokens() const;
+        std::string getCurrentToken();
 };
 
 #endif      // JACK_TOKENIZER
