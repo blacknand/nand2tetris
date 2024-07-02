@@ -46,9 +46,6 @@ void CompilationEngine::compileClass() {
     // class className { classVarDec* subroutineDec* }
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
     const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
-    // std::string curToken = tokenizer.getCurrentToken();
-
-    JackTokenizer::TokenElements curTokenType = tokenizer.tokenType();
 
     *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
     tokenizer.advance();
@@ -57,7 +54,23 @@ void CompilationEngine::compileClass() {
     *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
     tokenzier.advance();
 
-    if ()
+    // classVarDec*
+    if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD && 
+        (tokenizer.keyWord() == JackTokenizer::KeywordElements::STATIC ||
+        tokenizer.keyWord() == JackTokenizer::KeywordElements::FIELD)) {
+            compileClassVarDec();
+    }
+
+    // subroutineDec*
+    if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD &&
+        (tokenizer.keyWord() == JackTokenizer::KeywordElements::CONSTRUCTOR ||
+        tokenizer.keyWord() == JackTokenizer::KeywordElements::FUNCTION ||
+        tokenizer.keyWord() == JackTokenizer::KeywordElements::METHOD)) {
+            compileSubroutine();
+    }
+
+    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+    tokenzier.advance();
 }
 
 
