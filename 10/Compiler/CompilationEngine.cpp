@@ -51,26 +51,26 @@ void CompilationEngine::compileClass() {
     tokenizer.advance();
     *fileStream << "<identifier> " << tokenizer.getCurrentToken() << " </identifier>" << std::endl;
     tokenizer.advance();
-    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
-    tokenzier.advance();
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
 
     // classVarDec*
-    if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD && 
-        (tokenizer.keyWord() == JackTokenizer::KeywordElements::STATIC ||
-        tokenizer.keyWord() == JackTokenizer::KeywordElements::FIELD)) {
-            compileClassVarDec();
+    while (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD && 
+           (tokenizer.keyWord() == JackTokenizer::KeywordElements::STATIC ||
+            tokenizer.keyWord() == JackTokenizer::KeywordElements::FIELD)) {
+        compileClassVarDec();
     }
 
     // subroutineDec*
-    if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD &&
-        (tokenizer.keyWord() == JackTokenizer::KeywordElements::CONSTRUCTOR ||
-        tokenizer.keyWord() == JackTokenizer::KeywordElements::FUNCTION ||
-        tokenizer.keyWord() == JackTokenizer::KeywordElements::METHOD)) {
-            compileSubroutine();
+    while (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD &&
+           (tokenizer.keyWord() == JackTokenizer::KeywordElements::CONSTRUCTOR ||
+            tokenizer.keyWord() == JackTokenizer::KeywordElements::FUNCTION ||
+            tokenizer.keyWord() == JackTokenizer::KeywordElements::METHOD)) {
+        compileSubroutine();
     }
 
-    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
-    tokenzier.advance();
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
 }
 
 
