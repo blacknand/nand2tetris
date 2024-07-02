@@ -1,5 +1,7 @@
+#include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -9,6 +11,10 @@
 #define COMPILATION_ENGINE
 
 class CompilationEngine {
+    private:
+        std::unordered_map<std::string, std::unique_ptr<std::ofstream>> outputFiles;
+        std::ofstream outputFile;
+        std::string currentFile;
     public:
         CompilationEngine(std::string inputFile, std::string outputFileArg);
         void compileClass();
@@ -25,9 +31,7 @@ class CompilationEngine {
         void compileExpression();
         void compileTerm();
         int compileExpressionList();
-    private:
-        WriteToFile fileObj;
-        std::ofstream outputFile;
+    const std::unordered_map<std::string, std::unique_ptr<std::ofstream>>& getOutputFiles() const;
 };
 
 #endif  // COMPILATION_ENGINE

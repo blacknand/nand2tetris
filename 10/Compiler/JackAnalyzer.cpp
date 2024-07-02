@@ -148,5 +148,25 @@ int main(int argc, char **argv) {
 
     // }
 
+
+    /*
+    i could loop through all the files created by compilation engine - constructor
+        then call each method on the current file
+    */
+
+    const auto &outputFiles = testObj.getOutputFiles();
+
+    for (const auto &pair : outputFiles) {
+        const std::string &fileName = pair.first;
+        const std::unique_ptr<std::ofstream> &fileStream = pair.second;
+
+        std::cout << "File: " << fileName << std::endl;
+
+        if (fileStream && fileStream->is_open()) {
+            std::cout << "File stream is open for " << fileName << std::endl;
+        } else {
+            std::cout << "File stream is not open for " << fileName << std::endl;
+        }
+    }
     return 0;
 }
