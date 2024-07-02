@@ -74,6 +74,38 @@ void CompilationEngine::compileClass() {
 }
 
 
+void CompilationEngine::compileClassVarDec() {
+    // ('static'|'field') type varName (',' varName)* ';'
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    // ('static'|'field')
+    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+    tokenizer.advance();
+
+    // type
+    if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD)
+        *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+    else
+        *fileStream << "<identifier> " << tokenizer.getCurrentToken() << " </identifier>" << std::endl;
+    tokenizer.advance();
+
+    // varName
+    *fileStream << "<identifier> " << tokenizer.getCurrentToken() << " </identifier>" << std::endl;
+    tokenizer.advance();
+
+    // (',' varName)*
+    while (tokenizer.getCurrentToken() == ",") {
+        *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+        tokenizer.advance();
+        *fileStream << "<identifier> " << tokenizer.getCurrentToken() << " </identifier>" << std::endl;
+        tokenizer.advance();
+    }
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;                                 // ;
+    tokenizer.advance();
+}
+
+
 const std::unordered_map<std::string, std::unique_ptr<std::ofstream>>& CompilationEngine::getOutputFiles() const {
     return outputFiles;
 }
