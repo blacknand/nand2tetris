@@ -101,7 +101,46 @@ void CompilationEngine::compileClassVarDec() {
         *fileStream << "<identifier> " << tokenizer.getCurrentToken() << " </identifier>" << std::endl;
         tokenizer.advance();
     }
-    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;                                 // ;
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
+}
+
+
+void CompilationEngine::compileSubroutine() {
+    // ('constructor'|'function'|'method') ('void'|type) subroutineName '('paramaterList')' subroutineBody
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    // ('constructor'|'function'|'method')
+    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+    tokenizer.advance();
+
+    // (void|type)
+    if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD)
+        *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+    else
+        *fileStream << "<identifier> " << tokenizer.getCurrentToken() << " </identifier>" << std::endl;
+    tokenizer.advance();
+
+    // subroutineName
+    *fileStream << "<identifier> " << tokenizer.getCurrentToken() << " </identifier>" << std::endl;
+    tokenizer.advance();
+
+    // '('paramaterList')'
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
+    compileParamaterList();
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+    // subroutineBody '{' varDec* statements '}'
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
+    while (tokenizer.getCurrentToken() == "var") {
+        compileVarDec();
+    }
+    compileStatements();
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
     tokenizer.advance();
 }
 
