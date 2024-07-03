@@ -421,6 +421,36 @@ void CompilationEngine::compileReturn() {
 }
 
 
+void CompilationEngine::compileExpression() {
+    // term (op term)*
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    // term
+    compileTerm();
+
+    // (op term)*
+    while (tokenizer.getCurrentToken() == "+" ||
+            tokenizer.getCurrentToken() == "-" || 
+            tokenizer.getCurrentToken() == "*" ||
+            tokenizer.getCurrentToken() == "/" ||
+            tokenizer.getCurrentToken() == "&" ||
+            tokenizer.getCurrentToken() == "|" ||
+            tokenizer.getCurrentToken() == "<" ||
+            tokenizer.getCurrentToken() == ">" ||
+            tokenizer.getCurrentToken() == "=") {
+                *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+                tokenizer.advance();
+                compileTerm();
+            }
+}
+
+
+void CompilationEngine::compileTerm() {
+
+}
+
+
 const std::unordered_map<std::string, std::unique_ptr<std::ofstream>>& CompilationEngine::getOutputFiles() const {
     return outputFiles;
 }
