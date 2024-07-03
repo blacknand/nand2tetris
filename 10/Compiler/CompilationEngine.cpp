@@ -216,6 +216,26 @@ void CompilationEngine::compileVarDec() {
 }
 
 
+void CompilationEngine::compileStatements() {
+    // statment*
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    while (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD) {
+        if (tokenizer.keyWord() == JackTokenizer::KeywordElements::LET)
+            compileLet();
+        else if (tokenizer.keyWord == JackTokenizer::KeywordElements::IF)
+            compileIf();
+        else if (tokenizer.keyWord == JackTokenizer::KeywordElements::WHILE)
+            compileWhile();
+        else if (tokenizer.keyWord == JackTokenizer::KeywordElements::DO)
+            compileDo();
+        else if (tokenizer.keyWord == JackTokenizer::KeywordElements::RETURN)
+            compileReturn();
+    }
+}
+
+
 const std::unordered_map<std::string, std::unique_ptr<std::ofstream>>& CompilationEngine::getOutputFiles() const {
     return outputFiles;
 }
