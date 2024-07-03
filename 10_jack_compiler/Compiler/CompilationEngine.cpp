@@ -331,8 +331,16 @@ void CompilationEngine::compileWhile() {
     *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
     tokenizer.advance();
 
-    // '(' expression ')'
+    // '('
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+    // expression
     compileExpression();
+
+    // ')'
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
 
     // '{'
     *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
@@ -342,6 +350,47 @@ void CompilationEngine::compileWhile() {
     compileStatements();
 
     // '}'
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
+}
+
+
+void compileDo() {
+    // 'do' subroutineCall ';'
+    // subroutineName '(' expressionList ')' | (className|varName) '.' subroutineName '(' expressionList ')'
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    // do
+    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+    tokenizer.advance();
+
+    // subroutineName
+    *fileStream << "<identifier> " << tokenizer.getCurrentToken() << " </identifier>" << std::endl;
+    tokenizer.advance();
+
+    if (tokenizer.getCurrentToken() == ".") {
+        // .
+        *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+        tokenizer.advance();
+
+        // subroutineName
+        *fileStream << "<identifier> " << tokenizer.getCurrentToken() << " </identifier>" << std::endl;
+        tokenizer.advance();
+    }
+
+    // (
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+    // expressionList
+    compileExpressionList();
+
+    // )
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+    // ';'
     *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
     tokenizer.advance();
 }
