@@ -236,6 +236,41 @@ void CompilationEngine::compileStatements() {
 }
 
 
+void CompilationEngine::compileLet() {
+    // 'let' varName ('[' expression ']')? '=' expression ';'
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    // let
+    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+    tokenizer.advance();
+
+    // varName
+    *fileStream << "<identifier> " << tokenizer.getCurrentToken() << " </identifier>" << std::endl;
+    tokenizer.advance();
+
+    // '[' expression ']'
+    if (tokenizer.getCurrentToken() == "[") {
+        *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+        tokenizer.advance();
+        compileExpression();
+        *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+        tokenizer.advance();
+    }
+
+    // '='
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+    // expression
+    compileExpression();
+
+    // ';'
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
+}
+
+
 const std::unordered_map<std::string, std::unique_ptr<std::ofstream>>& CompilationEngine::getOutputFiles() const {
     return outputFiles;
 }
