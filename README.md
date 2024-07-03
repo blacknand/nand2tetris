@@ -1,5 +1,5 @@
-# A 16 bit computer, built completely from the ground up capable of running Tetris
-all hardware and software components are built completely from scratch to fully learn and understand how computers work. The ultimate goal is to create a fully functional 16-bit computer capable of running Tetris.
+# A 16 bit computer, built completely from the ground up that is capable of running Tetris
+All hardware and software components are built completely from scratch to fully learn and understand how computers work. The ultimate goal is to create a fully functional 16-bit computer capable of running Tetris. This computer can be ran on an FPGA (with all HDL code refactored into Verilog/SystemVerilog or VHDL) or a series of breadboards and wires to make a custom computer.
 ## 1. Logic Gates/Boolean Logic
 The foundation of any computer system is built on logic gates and boolean logic. In this phase, we construct a large collection of 1-bit and 16-bit logic gates from scratch.
 + Basic Gates: AND, OR, NOT, NAND, NOR, XOR, XNOR
@@ -47,7 +47,7 @@ The high-level language Jack is introduced, providing a more abstract and user-f
 ## 10. Compiler I
 The first part of the Jack compiler translates Jack high-level language into VM code.
 + Syntax Analysis: Parsing Jack code into an deriveration tree (recursive descent parsing)
-+ Code Generation: Translating the AST into VM code
++ Code Generation: Translating the deriviration tree into VM code
 + Error Handling: Detecting and reporting syntax and semantic errors
 ## 11. Compiler II
 The second part of the Jack compiler focuses on optimizing and finalizing the translation process from Jack to VM code.
