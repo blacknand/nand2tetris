@@ -145,6 +145,34 @@ void CompilationEngine::compileSubroutine() {
 }
 
 
+void CompilationEngine::compileParamaterList() {
+    // ((type varName) (',' type varName)*)?
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    while (tokenzier.tokenType() == JackTokenizer::TokenElements::KEYWORD ||
+            tokenizer.tokenType() == JackTokenizer::TokenElements::IDENTIFIER) {
+                // type
+                if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD)
+                    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+                else
+                    *fileStream << "<identifier> " << tokenizer.getCurrentToken() << " </identifier>" << std::endl;
+                tokenizer.advance();
+
+                // varName
+                *fileStream << "<identifier> " << tokenizer.getCurrentToken() << " </identifier>" << std::endl;
+                tokenizer.advance();
+
+                // ','
+                if (tokenizer.getCurrentToken() == ",") {
+                    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+                    tokenizer.advance();
+                } else
+                    break;
+    }
+}
+
+
 const std::unordered_map<std::string, std::unique_ptr<std::ofstream>>& CompilationEngine::getOutputFiles() const {
     return outputFiles;
 }
