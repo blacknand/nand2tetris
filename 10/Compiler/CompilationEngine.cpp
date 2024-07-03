@@ -168,12 +168,49 @@ void CompilationEngine::compileParamaterList() {
 
 void CompilationEngine::compileSubroutineBody() {
     // '{' varDec* statements '}'
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
     *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
     tokenizer.advance();
     while (tokenizer.getCurrentToken() == "var") {
         compileVarDec();
     }
     compileStatements();
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
+}
+
+
+void CompilationEngine::compileVarDec() {
+    // 'var' type varName (',' varName)* ';'
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    // 'var'
+    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+    tokenizer.advance();
+
+    // type
+    if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD)
+        *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+    else
+        *fileStream << "<identifier> " << tokenizer.getCurrentToken() << " </identifier>" << std::endl;
+    tokenizer.advance();
+
+    // varName
+    *fileStream << "<identifier> " << tokenizer.getCurrentToken() << " </identifier>" << std::endl;
+    tokenizer.advance();
+
+    // ',' varName
+    while (tokenizer.getCurrentToken() == ",") {
+        *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+        tokenizer.advance();
+        *fileStream << "<identifier> " << tokenizer.getCurrentToken() << " </identifier>" << std::endl;
+        tokenizer.advance();
+    }
+
+    // ';'
     *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
     tokenizer.advance();
 }
