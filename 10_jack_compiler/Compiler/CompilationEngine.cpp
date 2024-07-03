@@ -355,7 +355,7 @@ void CompilationEngine::compileWhile() {
 }
 
 
-void compileDo() {
+void CompilationEngine::compileDo() {
     // 'do' subroutineCall ';'
     // subroutineName '(' expressionList ')' | (className|varName) '.' subroutineName '(' expressionList ')'
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
@@ -389,6 +389,31 @@ void compileDo() {
     // )
     *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
     tokenizer.advance();
+
+    // ';'
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
+}
+
+
+void CompilationEngine::compileReturn() {
+    // 'return' expression? ';'
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    // return
+    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+    tokenizer.advance();
+
+    // expression?
+    if (tokenizer.tokenType() == JackTokenizer::TokenElements::INT_CONST ||
+        tokeizer.tokenType() == JackTokenizer::TokenElements::STRING_CONST ||
+        tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD ||
+        tokenizer.tokenType() == JackTokenizer::TokenElements::IDENTIFIER ||
+        tokenizer.getCurrentToken() == "(" ||
+        tokenizer.getCurrentToken() == "-" ||
+        tokenizer.getCurrentToken() == "~")
+            compileExpression();
 
     // ';'
     *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
