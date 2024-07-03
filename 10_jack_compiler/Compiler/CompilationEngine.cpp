@@ -447,7 +447,66 @@ void CompilationEngine::compileExpression() {
 
 
 void CompilationEngine::compileTerm() {
+    // integerConstant | stringConstant | keywordConstant | varName | varName'[' expression ']' | '(' expression ')' |
+    // (unaryOp term) | subroutineCall
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
 
+    switch (tokenizer.tokenType()) {
+        case JackTokenizer::TokenElements::INT_CONST:
+            *fileStream << "<intConst> " << tokenizer.getCurrentToken() << " </intConst>" << std::endl;
+            tokenizer.advance();
+            break;
+        case JackTokenizer::TokenElements::STRING_CONST:
+            *fileStream << "<stringConst> " << tokenizer.getCurrentToken() << " </stringConst>" << std::endl;
+            tokenizer.advance();
+            break;
+        case JackTokenizer::TokenElements::KEYWORD:
+            *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+            tokenizer.advance();
+            break;
+        case JackTokenizer::TokenElements::IDENTIFIER:
+            // varName
+            *fileStream << "<identifier> " << tokenizer.getCurrentToken() << " </identifier>" << std::endl;
+            tokenizer.advance();
+            if (tokenizer.getCurrentToken() == "[") {
+                // varName '[' expression ']'
+                *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+                tokenizer.advance();
+                compileExpression();
+                *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+                tokenizer.advance();
+            } else if (tokenizer.getCurrentToken() == "(" || tokenizer.getCurrentToken() == ".") {
+                // subroutineCall
+                if (tokenizer.getCurrentToken() == ".") {
+                    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+                    tokenizer.advance();
+                    *fileStream << "<identifier> " << tokenizer.getCurrentToken() << " </identifier>" << std::endl;
+                    tokenizer.advance();
+                }
+                *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+                tokenizer.advance();
+                compileExpressionList();
+                *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+                tokenizer.advance();
+            }
+            break;
+        case JackTokenizer::TokenElements::SYMBOL:
+            if (tokenizer.getCurrentToken() == "(") {
+                // '(' expression ')'
+                *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+                tokenizer.advance();
+                compileExpression();
+                *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+                tokenizer.advance();
+            } else if (tokenizer.getCurrentToken() == "-" || tokenizer.getCurrentToken() == "~") {
+                // unaryOp term
+                *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+                tokenizer.advance();
+                compileTerm();
+            } 
+            break;
+    }
 }
 
 
