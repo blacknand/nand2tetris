@@ -510,6 +510,35 @@ void CompilationEngine::compileTerm() {
 }
 
 
+int CompilationEngine::compileExpressionList() {
+    // (expression (',' expression)*)?
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+    int returnInt = 0;
+
+    if (tokenizer.tokenType() == JackTokenizer::TokenElements::INT_CONST ||
+        tokeizer.tokenType() == JackTokenizer::TokenElements::STRING_CONST ||
+        tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD ||
+        tokenizer.tokenType() == JackTokenizer::TokenElements::IDENTIFIER ||
+        tokenizer.getCurrentToken() == "(" ||
+        tokenizer.getCurrentToken() == "-" ||
+        tokenizer.getCurrentToken() == "~") {
+            
+        compileExpression();
+        returnInt++;
+        
+        while (tokenizer.getCurrentToken() == ",") {
+            *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+            tokenizer.advance();
+            compileExpression();
+            returnInt++;
+        }
+    }
+
+    return returnInt;
+}
+
+
 const std::unordered_map<std::string, std::unique_ptr<std::ofstream>>& CompilationEngine::getOutputFiles() const {
     return outputFiles;
 }
