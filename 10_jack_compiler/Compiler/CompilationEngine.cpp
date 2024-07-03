@@ -143,7 +143,7 @@ void CompilationEngine::compileParamaterList() {
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
     const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
 
-    while (tokenzier.tokenType() == JackTokenizer::TokenElements::KEYWORD ||
+    while (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD ||
             tokenizer.tokenType() == JackTokenizer::TokenElements::IDENTIFIER) {
                 // type
                 if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD)
@@ -224,13 +224,13 @@ void CompilationEngine::compileStatements() {
     while (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD) {
         if (tokenizer.keyWord() == JackTokenizer::KeywordElements::LET)
             compileLet();
-        else if (tokenizer.keyWord == JackTokenizer::KeywordElements::IF)
+        else if (tokenizer.keyWord() == JackTokenizer::KeywordElements::IF)
             compileIf();
-        else if (tokenizer.keyWord == JackTokenizer::KeywordElements::WHILE)
+        else if (tokenizer.keyWord() == JackTokenizer::KeywordElements::WHILE)
             compileWhile();
-        else if (tokenizer.keyWord == JackTokenizer::KeywordElements::DO)
+        else if (tokenizer.keyWord() == JackTokenizer::KeywordElements::DO)
             compileDo();
-        else if (tokenizer.keyWord == JackTokenizer::KeywordElements::RETURN)
+        else if (tokenizer.keyWord() == JackTokenizer::KeywordElements::RETURN)
             compileReturn();
     }
 }
@@ -297,7 +297,7 @@ void CompilationEngine::compileIf() {
     tokenizer.advance();
 
     // statements
-    compileStatement();
+    compileStatements();
 
     // }
     *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
@@ -407,7 +407,7 @@ void CompilationEngine::compileReturn() {
 
     // expression?
     if (tokenizer.tokenType() == JackTokenizer::TokenElements::INT_CONST ||
-        tokeizer.tokenType() == JackTokenizer::TokenElements::STRING_CONST ||
+        tokenizer.tokenType() == JackTokenizer::TokenElements::STRING_CONST ||
         tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD ||
         tokenizer.tokenType() == JackTokenizer::TokenElements::IDENTIFIER ||
         tokenizer.getCurrentToken() == "(" ||
@@ -517,13 +517,13 @@ int CompilationEngine::compileExpressionList() {
     int returnInt = 0;
 
     if (tokenizer.tokenType() == JackTokenizer::TokenElements::INT_CONST ||
-        tokeizer.tokenType() == JackTokenizer::TokenElements::STRING_CONST ||
+        tokenizer.tokenType() == JackTokenizer::TokenElements::STRING_CONST ||
         tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD ||
         tokenizer.tokenType() == JackTokenizer::TokenElements::IDENTIFIER ||
         tokenizer.getCurrentToken() == "(" ||
         tokenizer.getCurrentToken() == "-" ||
         tokenizer.getCurrentToken() == "~") {
-            
+
         compileExpression();
         returnInt++;
         

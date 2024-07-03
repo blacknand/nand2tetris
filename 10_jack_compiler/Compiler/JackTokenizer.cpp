@@ -40,7 +40,7 @@ const std::unordered_map<std::string, JackTokenizer::KeywordElements> JackTokeni
 
 int JackTokenizer::currentIndex = 0;
 std::string JackTokenizer::currentToken;
-std::vector<JackTokenizer::Token> tokens;
+std::vector<JackTokenizer::Token> JackTokenizer::tokens;
 
 void JackTokenizer::initializer(std::string inputFile) {
     // Tokenizes input file and adds tokens to 2d vector
