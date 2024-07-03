@@ -323,7 +323,27 @@ void CompilationEngine::compileIf() {
 
 
 void CompilationEngine::compileWhile() {
-    
+    // while '(' expression ')' '{' statements '}'
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    // while
+    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+    tokenizer.advance();
+
+    // '(' expression ')'
+    compileExpression();
+
+    // '{'
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+    // statements
+    compileStatements();
+
+    // '}'
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
 }
 
 
