@@ -134,14 +134,7 @@ void CompilationEngine::compileSubroutine() {
     tokenizer.advance();
 
     // subroutineBody '{' varDec* statements '}'
-    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
-    tokenizer.advance();
-    while (tokenizer.getCurrentToken() == "var") {
-        compileVarDec();
-    }
-    compileStatements();
-    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
-    tokenizer.advance();
+    compileSubroutineBody();
 }
 
 
@@ -170,6 +163,19 @@ void CompilationEngine::compileParamaterList() {
                 } else
                     break;
     }
+}
+
+
+void CompilationEngine::compileSubroutineBody() {
+    // '{' varDec* statements '}'
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
+    while (tokenizer.getCurrentToken() == "var") {
+        compileVarDec();
+    }
+    compileStatements();
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
 }
 
 
