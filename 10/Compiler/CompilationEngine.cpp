@@ -271,6 +271,62 @@ void CompilationEngine::compileLet() {
 }
 
 
+void CompilationEngine::compileIf() {
+    // 'if' '(' expression ')' '{' statements '}' ('else' '{'statements'}')?
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    // if
+    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+    tokenizer.advance();
+
+    // '('
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+
+    // (expression)
+    compileExpression();
+
+    // ')'
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+    // {
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+    // statements
+    compileStatement();
+
+    // }
+    *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+    // 'else' '{'statements'}'
+    if (tokenizer.getCurrentToken() == "else") {
+        *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+        tokenizer.advance();
+
+        // '{'
+        *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+        tokenizer.advance();
+
+        // statements
+        compileStatements();
+
+        // '}'
+        *fileStream << "<symbol> " << tokenizer.getCurrentToken() << " </symbol>" << std::endl;
+        tokenizer.advance();
+    }
+}
+
+
+void CompilationEngine::compileWhile() {
+    
+}
+
+
 const std::unordered_map<std::string, std::unique_ptr<std::ofstream>>& CompilationEngine::getOutputFiles() const {
     return outputFiles;
 }
