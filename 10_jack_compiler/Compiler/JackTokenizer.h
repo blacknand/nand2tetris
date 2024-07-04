@@ -56,13 +56,14 @@ class JackTokenizer {
         void advance();
         const TokenElements tokenType();
         const KeywordElements keyWord();
-        const char symbol();
+        const std::string symbol();
         const std::string identifier();
         const int intVal();
         const std::string stringVal();
         const std::vector<Token>& getTokens() const;
         std::string getCurrentToken();
         void resetToken();
+        void clearTokens();
 };
 
 #endif      // JACK_TOKENIZER

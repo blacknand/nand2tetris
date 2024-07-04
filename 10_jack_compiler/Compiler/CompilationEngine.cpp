@@ -45,10 +45,9 @@ CompilationEngine::CompilationEngine(std::string inputFile, std::string outputFi
 void CompilationEngine::compileClass() {
     // class className { classVarDec* subroutineDec* }
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
-    const std::string &fileStreamName = currentFileObj->first;
     const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
 
-    // NEEDS TO BE RESET
+    *fileStream << "<class>" << std::endl;
 
     tokenizer.advance();                                                                                        // Get initial token
     *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
@@ -75,6 +74,8 @@ void CompilationEngine::compileClass() {
 
     *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
     tokenizer.advance();
+
+    *fileStream << "</class>" << std::endl;
 }
 
 
@@ -82,6 +83,8 @@ void CompilationEngine::compileClassVarDec() {
     // ('static'|'field') type varName (',' varName)* ';'
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
     const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<classVarDec>" << std::endl; 
 
     // ('static'|'field')
     *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
@@ -107,6 +110,8 @@ void CompilationEngine::compileClassVarDec() {
     }
     *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
     tokenizer.advance();
+
+    *fileStream << "</classVarDec>" << std::endl; 
 }
 
 
@@ -114,6 +119,8 @@ void CompilationEngine::compileSubroutine() {
     // ('constructor'|'function'|'method') ('void'|type) subroutineName '('paramaterList')' subroutineBody
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
     const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<subroutineDec>" << std::endl;
 
     // ('constructor'|'function'|'method')
     *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
@@ -139,6 +146,8 @@ void CompilationEngine::compileSubroutine() {
 
     // subroutineBody '{' varDec* statements '}'
     compileSubroutineBody();
+
+    *fileStream << "</subroutineDec>" << std::endl;
 }
 
 
@@ -146,6 +155,8 @@ void CompilationEngine::compileParamaterList() {
     // ((type varName) (',' type varName)*)?
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
     const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<parameterList>" << std::endl;
 
     while (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD ||
             tokenizer.tokenType() == JackTokenizer::TokenElements::IDENTIFIER) {
@@ -167,6 +178,8 @@ void CompilationEngine::compileParamaterList() {
                 } else
                     break;
     }
+
+    *fileStream << "</parameterList>" << std::endl;
 }
 
 
@@ -174,6 +187,8 @@ void CompilationEngine::compileSubroutineBody() {
     // '{' varDec* statements '}'
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
     const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<subroutineBody>" << std::endl;
 
     *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
     tokenizer.advance();
@@ -183,6 +198,8 @@ void CompilationEngine::compileSubroutineBody() {
     compileStatements();
     *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
     tokenizer.advance();
+
+    *fileStream << "</subroutineBody>" << std::endl;
 }
 
 
@@ -190,6 +207,8 @@ void CompilationEngine::compileVarDec() {
     // 'var' type varName (',' varName)* ';'
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
     const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<varDec>" << std::endl;
 
     // 'var'
     *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
@@ -217,6 +236,8 @@ void CompilationEngine::compileVarDec() {
     // ';'
     *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
     tokenizer.advance();
+
+    *fileStream << "</varDec>" << std::endl;
 }
 
 
@@ -224,6 +245,8 @@ void CompilationEngine::compileStatements() {
     // statment*
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
     const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<statements>" << std::endl;
 
     while (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD) {
         if (tokenizer.keyWord() == JackTokenizer::KeywordElements::LET)
@@ -237,6 +260,8 @@ void CompilationEngine::compileStatements() {
         else if (tokenizer.keyWord() == JackTokenizer::KeywordElements::RETURN)
             compileReturn();
     }
+
+    *fileStream << "</statements>" << std::endl;
 }
 
 
@@ -244,6 +269,8 @@ void CompilationEngine::compileLet() {
     // 'let' varName ('[' expression ']')? '=' expression ';'
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
     const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<letStatement>" << std::endl;
 
     // let
     *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
@@ -272,6 +299,8 @@ void CompilationEngine::compileLet() {
     // ';'
     *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
     tokenizer.advance();
+
+    *fileStream << "</letStatement>" << std::endl;
 }
 
 
@@ -279,6 +308,8 @@ void CompilationEngine::compileIf() {
     // 'if' '(' expression ')' '{' statements '}' ('else' '{'statements'}')?
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
     const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<ifStatement>" << std::endl;
 
     // if
     *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
@@ -323,6 +354,8 @@ void CompilationEngine::compileIf() {
         *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
         tokenizer.advance();
     }
+
+    *fileStream << "</ifStatement>" << std::endl;
 }
 
 
@@ -330,6 +363,8 @@ void CompilationEngine::compileWhile() {
     // while '(' expression ')' '{' statements '}'
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
     const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<whileStatement>" << std::endl;
 
     // while
     *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
@@ -356,6 +391,8 @@ void CompilationEngine::compileWhile() {
     // '}'
     *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
     tokenizer.advance();
+
+    *fileStream << "</whileStatement>" << std::endl;
 }
 
 
@@ -364,6 +401,8 @@ void CompilationEngine::compileDo() {
     // subroutineName '(' expressionList ')' | (className|varName) '.' subroutineName '(' expressionList ')'
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
     const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<doStatement>" << std::endl;
 
     // do
     *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
@@ -397,6 +436,8 @@ void CompilationEngine::compileDo() {
     // ';'
     *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
     tokenizer.advance();
+
+    *fileStream << "</doStatement>" << std::endl;
 }
 
 
@@ -404,6 +445,8 @@ void CompilationEngine::compileReturn() {
     // 'return' expression? ';'
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
     const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<returnStatement>" << std::endl;
 
     // return
     *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
@@ -422,6 +465,8 @@ void CompilationEngine::compileReturn() {
     // ';'
     *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
     tokenizer.advance();
+
+    *fileStream << "</returnStatement>" << std::endl;
 }
 
 
@@ -429,6 +474,8 @@ void CompilationEngine::compileExpression() {
     // term (op term)*
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
     const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<expression>" << std::endl;
 
     // term
     compileTerm();
@@ -447,6 +494,8 @@ void CompilationEngine::compileExpression() {
                 tokenizer.advance();
                 compileTerm();
             }
+
+    *fileStream << "</expression>" << std::endl;
 }
 
 
@@ -456,13 +505,15 @@ void CompilationEngine::compileTerm() {
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
     const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
 
+    *fileStream << "<term>" << std::endl;
+
     switch (tokenizer.tokenType()) {
         case JackTokenizer::TokenElements::INT_CONST:
-            *fileStream << "<intConst> " << tokenizer.intVal() << " </intConst>" << std::endl;
+            *fileStream << "<integerConstant> " << tokenizer.intVal() << " </integerConstant>" << std::endl;
             tokenizer.advance();
             break;
         case JackTokenizer::TokenElements::STRING_CONST:
-            *fileStream << "<stringConst> " << tokenizer.stringVal() << " </stringConst>" << std::endl;
+            *fileStream << "<stringConstant> " << tokenizer.stringVal() << " </stringConstant>" << std::endl;
             tokenizer.advance();
             break;
         case JackTokenizer::TokenElements::KEYWORD:
@@ -511,6 +562,8 @@ void CompilationEngine::compileTerm() {
             } 
             break;
     }
+
+    *fileStream << "</term>" << std::endl;
 }
 
 
@@ -519,6 +572,8 @@ int CompilationEngine::compileExpressionList() {
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
     const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
     int returnInt = 0;
+
+    *fileStream << "<expressionList>" << std::endl;
 
     if (tokenizer.tokenType() == JackTokenizer::TokenElements::INT_CONST ||
         tokenizer.tokenType() == JackTokenizer::TokenElements::STRING_CONST ||
@@ -538,6 +593,8 @@ int CompilationEngine::compileExpressionList() {
             returnInt++;
         }
     }
+
+    *fileStream << "</expressionList>" << std::endl;
 
     return returnInt;
 }

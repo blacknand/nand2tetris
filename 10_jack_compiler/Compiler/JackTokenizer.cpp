@@ -97,7 +97,25 @@ void JackTokenizer::initializer(std::string inputFile) {
                             token.clear();
                             tokenIndex++;
                         }
-                        tokens.push_back({std::string(1, c), lineIndex, tokenIndex});
+
+                        // Format XML codes
+                        switch(c) {
+                            case '<':
+                                tokens.push_back({"&lt;", lineIndex, tokenIndex});
+                                break;
+                            case '>':
+                                tokens.push_back({"&gt;", lineIndex, tokenIndex});
+                                break;
+                            case '&':
+                                tokens.push_back({"&amp;", lineIndex, tokenIndex});
+                                break;
+                            case '\"':
+                                tokens.push_back({"&quot;", lineIndex, tokenIndex});
+                                break;
+                            default:
+                                tokens.push_back({std::string(1, c), lineIndex, tokenIndex});
+                                break;
+                        }
                         tokenIndex++;
                     } else if (c == '\"') {
                         token += c;
@@ -162,8 +180,13 @@ const JackTokenizer::KeywordElements JackTokenizer::keyWord() {
 }
 
 
-const char JackTokenizer::symbol() {
-    return currentToken.c_str()[0];
+const std::string JackTokenizer::symbol() {
+    if (currentToken == "&lt;" || currentToken == "&gt;" ||
+        currentToken == "&amp;" || currentToken == "&quot;") {
+        return currentToken;
+    }
+    
+    return std::string(1, currentToken[0]);
 }
 
 
@@ -195,4 +218,9 @@ std::string JackTokenizer::getCurrentToken() {
 
 void JackTokenizer::resetToken() {
     currentIndex = 0;
+}
+
+
+void JackTokenizer::clearTokens() {
+    tokens.clear();
 }
