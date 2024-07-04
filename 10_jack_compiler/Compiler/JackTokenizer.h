@@ -62,6 +62,7 @@ class JackTokenizer {
         const std::string stringVal();
         const std::vector<Token>& getTokens() const;
         std::string getCurrentToken();
+        void resetToken();
 };
 
 #endif      // JACK_TOKENIZER

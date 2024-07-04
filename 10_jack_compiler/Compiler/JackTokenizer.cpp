@@ -191,3 +191,8 @@ const std::vector<JackTokenizer::Token>& JackTokenizer::getTokens() const {
 std::string JackTokenizer::getCurrentToken() {
     return currentToken;
 }
+
+
+void JackTokenizer::resetToken() {
+    currentIndex = 0;
+}
