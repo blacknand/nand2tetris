@@ -485,10 +485,10 @@ void CompilationEngine::compileExpression() {
             tokenizer.getCurrentToken() == "-" || 
             tokenizer.getCurrentToken() == "*" ||
             tokenizer.getCurrentToken() == "/" ||
-            tokenizer.getCurrentToken() == "&" ||
+            tokenizer.getCurrentToken() == "&amp;" ||
             tokenizer.getCurrentToken() == "|" ||
-            tokenizer.getCurrentToken() == "<" ||
-            tokenizer.getCurrentToken() == ">" ||
+            tokenizer.getCurrentToken() == "&lt;" ||
+            tokenizer.getCurrentToken() == "&gt;" ||
             tokenizer.getCurrentToken() == "=") {
                 *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
                 tokenizer.advance();
