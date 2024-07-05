@@ -1,5 +1,5 @@
 # A 16 bit computer, built completely from the ground up that is capable of running Tetris
-All hardware and software components are built completely from scratch to fully learn and understand how computers work. The ultimate goal is to create a fully functional 16-bit computer capable of running Tetris. This computer can be ran on an FPGA (with all HDL code refactored into Verilog/SystemVerilog or VHDL) or a series of breadboards and wires to make a custom computer.
+All hardware and software components are built completely from scratch to fully learn and understand how computers work. The ultimate goal is to create a fully functional 16-bit computer capable of running Tetris. This computer can be ran on an FPGA (with all HDL code refactored into Verilog/SystemVerilog or VHDL) or a series of breadboards and wires to make a custom computer. Read about the [Hack computer](https://en.wikipedia.org/wiki/Hack_computer)
 ## 1. Logic Gates/Boolean Logic
 The foundation of any computer system is built on logic gates and boolean logic. In this phase, we construct a large collection of 1-bit and 16-bit logic gates from scratch.
 + Basic Gates: AND, OR, NOT, NAND, NOR, XOR, XNOR
@@ -45,13 +45,12 @@ The high-level language Jack is introduced, providing a more abstract and user-f
 + Standard Library: Basic standard library functions for string manipulation, I/O, and mathematics
 + Sample Programs: Example Jack programs demonstrating language features
 ## 10. Compiler I
-The first part of the Jack compiler translates Jack high-level language into VM code.
-+ Syntax Analysis: Parsing Jack code into an deriveration tree (recursive descent parsing)
-+ Code Generation: Translating the deriviration tree into VM code
-+ Error Handling: Detecting and reporting syntax and semantic errors
+The first part of the Jack compiler translates Jack high-level language into VM code. Broken up into a Parsing module and a Syntax Analysis module.
++ Syntax analysis: Tokenizing the Jack code for parsing
++ Recursive descent parsing: Parsing Jack code into an deriveration tree, expressed in XML tags
 ## 11. Compiler II
 The second part of the Jack compiler focuses on optimizing and finalizing the translation process from Jack to VM code.
-+ Optimization: Improving the efficiency of the generated VM code
++ Code Generation: Translating the deriviration tree into VM code
 + Advanced Code Generation: Handling complex language constructs and features
 + Comprehensive Testing: Extensive testing to ensure correctness and performance
 ## 12. Operating System
