@@ -7,6 +7,7 @@
 #include <vector>
 #include "FileOpp.h"
 #include "JackTokenizer.h"
+#include "SymbolTable.h"
 
 #ifndef COMPILATION_ENGINE
 #define COMPILATION_ENGINE

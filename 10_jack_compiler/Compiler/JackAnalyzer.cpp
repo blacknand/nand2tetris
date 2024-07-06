@@ -5,6 +5,7 @@
 #include "CompilationEngine.h"
 #include "JackTokenizer.h"
 #include "FileOpp.h"
+#include "SymbolTable.h"
 
 
 int main(int argc, char **argv) {
