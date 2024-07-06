@@ -49,10 +49,18 @@ void CompilationEngine::compileClass() {
 
     *fileStream << "<class>" << std::endl;
 
-    tokenizer.advance();                                                                                        // Get initial token
+    tokenizer.advance();    // Initial token                                                                              // Get initial token
     *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
     tokenizer.advance();
-    *fileStream << "<identifier> " << tokenizer.identifier() << " </identifier>" << std::endl;
+    *fileStream << "<identifier>" << std::endl;
+    
+    // symbol table test
+    *fileStream << "<name>" << tokenizer.identifier() << "</name>" << std::endl;
+    *fileStream << "<category>class</category>" << std::endl;
+    *fileStream << "<index>NULL</index>" << std::endl;
+    *fileStream << "<usage>declared</usage>" << std::endl;
+
+    *fileStream << " </identifier>" << std::endl;
     tokenizer.advance();
     *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
     tokenizer.advance();

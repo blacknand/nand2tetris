@@ -4,7 +4,6 @@
 #include "SymbolTable.h"
 
 
-
 SymbolTable::SymbolTable()
     : staticIndex(0), fieldIndex(0), argIndex(0), varIndex(0) {}
 

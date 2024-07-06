@@ -16,6 +16,7 @@ class CompilationEngine {
         std::unordered_map<std::string, std::unique_ptr<std::ofstream>> outputFiles;
         std::string currentFile;
         JackTokenizer tokenizer;
+        SymbolTable symbolTable;
     public:
         CompilationEngine(std::string inputFile, std::string outputFileArg);
         void compileClass();
