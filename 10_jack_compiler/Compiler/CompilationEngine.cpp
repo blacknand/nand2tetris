@@ -255,22 +255,32 @@ void CompilationEngine::compileVarDec() {
     tokenizer.advance();
 
     // type
-    if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD)
+    std::string typeDec;
+    if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD) {
         *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
-    else
+        typeDec = tokenizer.getCurrentToken();
+    } else {
         *fileStream << "<identifier> " << tokenizer.identifier() << " </identifier>" << std::endl;
+        typeDec = tokenizer.identifier();
+    }
     tokenizer.advance();
 
-    // varName
-    *fileStream << "<identifier> " << tokenizer.identifier() << " </identifier>" << std::endl;
-    tokenizer.advance();
+    // varname (',' varName)*
+    while (true) {
+        symbolTable.define(tokenizer.identifier(), typeDec, "VAR");
+        *fileStream << "<identifier>" << std::endl;
+        *fileStream << "<name>" << tokenizer.identifier() << "</name>" << std::endl;
+        *fileStream << "<category>" << symbolTable.kindOf(tokenizer.identifier()) << "</category>" << std::endl;
+        *fileStream << "<index>" << symbolTable.indexOf(tokenizer.identifier()) << "</index>" << std::endl;
+        *fileStream << "<usage>declared</usage>" << std::endl;
+        *fileStream << "</identifier>" << std::endl;
+        tokenizer.advance();
 
-    // ',' varName
-    while (tokenizer.getCurrentToken() == ",") {
-        *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
-        tokenizer.advance();
-        *fileStream << "<identifier> " << tokenizer.identifier() << " </identifier>" << std::endl;
-        tokenizer.advance();
+        if (tokenizer.getCurrentToken() == ",") {
+            *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+            tokenizer.advance();
+        } else
+            break;
     }
 
     // ';'
@@ -562,7 +572,12 @@ void CompilationEngine::compileTerm() {
             break;
         case JackTokenizer::TokenElements::IDENTIFIER:
             // varName
-            *fileStream << "<identifier> " << tokenizer.identifier() << " </identifier>" << std::endl;
+            *fileStream << "<identifier>" << std::endl;
+            *fileStream << "<name>" << tokenizer.identifier() << "</name>" << std::endl;
+            *fileStream << "<category>" << symbolTable.kindOf(tokenizer.identifier()) << "</category>" << std::endl;
+            *fileStream << "<index>" << symbolTable.indexOf(tokenizer.identifier()) << "</index>" << std::endl;
+            *fileStream << "<usage>used</usage>" << std::endl;
+            *fileStream << "</identifier>" << std::endl;
             tokenizer.advance();
             if (tokenizer.getCurrentToken() == "[") {
                 // varName '[' expression ']'
@@ -576,7 +591,13 @@ void CompilationEngine::compileTerm() {
                 if (tokenizer.getCurrentToken() == ".") {
                     *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
                     tokenizer.advance();
-                    *fileStream << "<identifier> " << tokenizer.identifier() << " </identifier>" << std::endl;
+                    // *fileStream << "<identifier> " << tokenizer.identifier() << " </identifier>" << std::endl;
+                    *fileStream << "<identifier>" << std::endl;
+                    *fileStream << "<name>" << tokenizer.identifier() << "</name>" << std::endl; 
+                    *fileStream << "<category>subroutine</category>" << std::endl;
+                    *fileStream << "<index>NULL</index>" << std::endl;
+                    *fileStream << "<usage>used</usage>" << std::endl; 
+                    *fileStream << "</identifier>" << std::endl;
                     tokenizer.advance();
                 }
                 *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;

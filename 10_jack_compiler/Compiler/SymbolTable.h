@@ -9,8 +9,8 @@ class SymbolTable {
             int index;
         };
         int staticIndex, fieldIndex, argIndex, varIndex;
-        std::unordered_map<std::string, SymbolTable::Symbol> symbolTableClass;
-        std::unordered_map<std::string, SymbolTable::Symbol> symbolTableSubroutine;
+        std::unordered_map<std::string, SymbolTable::Symbol> symbolTable;
+        // std::unordered_map<std::string, SymbolTable::Symbol> symbolTableSubroutine;
     public:
         SymbolTable();
         void reset();
