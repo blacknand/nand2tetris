@@ -30,7 +30,6 @@ CompilationEngine::CompilationEngine(std::string inputFile, std::string outputFi
             std::filesystem::create_directories(outputFileArg);
     }
 
-
     for (const auto &jackFile : jackFiles) {
         std::filesystem::path filePath = jackFile;
         std::string outputFileName;

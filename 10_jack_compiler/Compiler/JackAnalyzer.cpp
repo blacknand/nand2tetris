@@ -6,6 +6,7 @@
 #include "JackTokenizer.h"
 #include "FileOpp.h"
 #include "SymbolTable.h"
+#include "VMWriter.h"
 
 
 int main(int argc, char **argv) {
@@ -24,6 +25,8 @@ int main(int argc, char **argv) {
         curFileTokenizer.resetToken();
         curFileTokenizer.clearTokens();
     }
+
+    VMWriter vmWriterTest;
 
     return 0;
 }
