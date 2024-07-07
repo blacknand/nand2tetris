@@ -17,16 +17,15 @@ int main(int argc, char **argv) {
     for (const auto &filePair: outputFiles) {
         JackTokenizer curFileTokenizer;
 
-        const std::string &curFileName = filePair.first;
-        const std::unique_ptr<std::ofstream> &curFileStream = filePair.second;
-        curFileTokenizer.initializer(curFileName);
-        initialFileObj.setOutputFile(curFileName);
+        // const std::string &curFileName = filePair.first;
+        // const std::unique_ptr<std::ofstream> &curFileStream = filePair.second;
+        std::string curJackFile = filePair.first;
+        std::string curVMFile = filePair.second;
+        curFileTokenizer.initializer(curJackFile);
+        initialFileObj.setOutputFile(curVMMFile);
         initialFileObj.compileClass();
         curFileTokenizer.resetToken();
         curFileTokenizer.clearTokens();
     }
-
-    VMWriter vmWriterTest;
-
     return 0;
 }

@@ -14,7 +14,7 @@
 
 class CompilationEngine {
     private:
-        std::unordered_map<std::string, std::unique_ptr<std::ofstream>> outputFiles;
+        std::unordered_map<std::string, std::string> outputFiles;
         std::string currentFile;
         JackTokenizer tokenizer;
         SymbolTable symbolTable;
@@ -35,7 +35,7 @@ class CompilationEngine {
         void compileExpression();
         void compileTerm();
         int compileExpressionList();
-        const std::unordered_map<std::string, std::unique_ptr<std::ofstream>>& getOutputFiles() const;
+        const std::unordered_map<std::string, std::string>& getOutputFiles() const;
         void setOutputFile(std::string fileName);
 };
 
