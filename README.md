@@ -47,7 +47,7 @@ The high-level language Jack is introduced, providing a more abstract and user-f
 ## 10. Compiler I
 The first part of the Jack compiler translates Jack high-level language into VM code. Broken up into a Parsing module and a Syntax Analysis module.
 + Syntax analysis: Tokenizing the Jack code for parsing
-+ Recursive descent parsing: Parsing Jack code into an deriveration tree, expressed in XML tags
++ Recursive descent parsing: Parsing Jack code into an recursive deriveration tree, expressed in XML tags
 ## 11. Compiler II
 The second part of the Jack compiler focuses on optimizing and finalizing the translation process from Jack to VM code.
 + Code Generation: Translating the deriviration tree into VM code
