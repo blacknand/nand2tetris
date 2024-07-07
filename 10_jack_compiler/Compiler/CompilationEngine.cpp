@@ -143,6 +143,8 @@ void CompilationEngine::compileSubroutine() {
     std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
     const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
 
+    symbolTable.reset();
+
     *fileStream << "<subroutineDec>" << std::endl;
 
     // ('constructor'|'function'|'method')
@@ -157,7 +159,12 @@ void CompilationEngine::compileSubroutine() {
     tokenizer.advance();
 
     // subroutineName
-    *fileStream << "<identifier> " << tokenizer.identifier() << " </identifier>" << std::endl;
+    *fileStream << "<identifier>" << std::endl;
+    *fileStream << "<name>" << tokenizer.identifier() << "</name>" << std::endl; 
+    *fileStream << "<category>subroutine</category>" << std::endl;
+    *fileStream << "<index>NULL</index>" << std::endl;
+    *fileStream << "<usage>declared</usage>" << std::endl; 
+    *fileStream << "</identifier>" << std::endl;
     tokenizer.advance();
 
     // '('paramaterList')'
@@ -184,14 +191,24 @@ void CompilationEngine::compileParamaterList() {
     while (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD ||
             tokenizer.tokenType() == JackTokenizer::TokenElements::IDENTIFIER) {
                 // type
-                if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD)
+                std::string typeDec;
+                if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD) {
                     *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
-                else
+                    typeDec = tokenizer.getCurrentToken();
+                } else {
                     *fileStream << "<identifier> " << tokenizer.identifier() << " </identifier>" << std::endl;
+                    typeDec = tokenizer.identifier();
+                }
                 tokenizer.advance();
 
                 // varName
-                *fileStream << "<identifier> " << tokenizer.identifier() << " </identifier>" << std::endl;
+                symbolTable.define(tokenizer.identifier(), typeDec, "ARG");
+                *fileStream << "<identifier>" << std::endl;
+                *fileStream << "<name>" << tokenizer.identifier() << "</name>" << std::endl;
+                *fileStream << "<category>" << symbolTable.kindOf(tokenizer.identifier()) << "</category>" << std::endl;
+                *fileStream << "<index>" << symbolTable.indexOf(tokenizer.identifier()) << "</index>" << std::endl;
+                *fileStream << "<usage>declared</usage>" << std::endl;
+                *fileStream << "</identifier>" << std::endl;
                 tokenizer.advance();
 
                 // ','
