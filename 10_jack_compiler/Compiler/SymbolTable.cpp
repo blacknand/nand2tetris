@@ -10,7 +10,6 @@ SymbolTable::SymbolTable()
 
 void SymbolTable::reset() {
     symbolTable.clear();
-    // symbolTableSubroutine.clear();
     staticIndex = 0, fieldIndex = 0, argIndex = 0, varIndex = 0;
 }
 
@@ -43,32 +42,23 @@ int SymbolTable::varCount(const std::string &kind) const {
 
 std::string SymbolTable::kindOf(const std::string &name) const {
     std::unordered_map<std::string, SymbolTable::Symbol>::const_iterator tableCode = symbolTable.find(name);
-    // std::unordered_map<std::string, SymbolTable::Symbol>::const_iterator subroutineTableCode = symbolTableSubroutine.find(name);
     if (tableCode != symbolTable.end())
         return tableCode->second.kind;
-    // if (classTableCode != symbolTableClass.end())
-    //     return classTableCode->second.kind;
     return "NONE";
 }
 
 
 std::string SymbolTable::typeOf(const std::string &name) const {
     std::unordered_map<std::string, SymbolTable::Symbol>::const_iterator tableCode = symbolTable.find(name);
-    // std::unordered_map<std::string, SymbolTable::Symbol>::const_iterator subroutineTableCode = symbolTableSubroutine.find(name);
     if (tableCode != symbolTable.end())
         return tableCode->second.type;
-    // if (classTableCode != symbolTableClass.end())
-    //     return classTableCode->second.type;
     return "NONE";
 }
 
 
 int SymbolTable::indexOf(const std::string &name) const {
     std::unordered_map<std::string, SymbolTable::Symbol>::const_iterator tableCode = symbolTable.find(name);
-    // std::unordered_map<std::string, SymbolTable::Symbol>::const_iterator subroutineTableCode = symbolTableSubroutine.find(name);
     if (tableCode != symbolTable.end())
         return tableCode->second.index;
-    // if (classTableCode != symbolTableClass.end())
-    //     return classTableCode->second.index;
     return -1;
 }
