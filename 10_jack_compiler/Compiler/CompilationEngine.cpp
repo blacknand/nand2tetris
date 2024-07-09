@@ -13,6 +13,26 @@
 #include "SymbolTable.h"
 
 
+const std::unordered_map<char, int> CompilationEngine::hackCharacterMap = {
+    {' ', 32}, {'!', 33}, {'"', 34}, {'#', 35}, {'$', 36}, {'%', 37}, 
+    {'&', 38}, {'\'', 39}, {'(', 40}, {')', 41}, {'*', 42}, {'+', 43}, 
+    {',', 44}, {'-', 45}, {'.', 46}, {'/', 47}, {'0', 48}, {'1', 49}, 
+    {'2', 50}, {'3', 51}, {'4', 52}, {'5', 53}, {'6', 54}, {'7', 55}, 
+    {'8', 56}, {'9', 57}, {':', 58}, {';', 59}, {'<', 60}, {'=', 61}, 
+    {'>', 62}, {'?', 63}, {'@', 64}, {'A', 65}, {'B', 66}, {'C', 67}, 
+    {'D', 68}, {'E', 69}, {'F', 70}, {'G', 71}, {'H', 72}, {'I', 73}, 
+    {'J', 74}, {'K', 75}, {'L', 76}, {'M', 77}, {'N', 78}, {'O', 79}, 
+    {'P', 80}, {'Q', 81}, {'R', 82}, {'S', 83}, {'T', 84}, {'U', 85}, 
+    {'V', 86}, {'W', 87}, {'X', 88}, {'Y', 89}, {'Z', 90}, {'[', 91}, 
+    {'\\', 92}, {']', 93}, {'^', 94}, {'_', 95}, {'`', 96}, {'a', 97}, 
+    {'b', 98}, {'c', 99}, {'d', 100}, {'e', 101}, {'f', 102}, {'g', 103}, 
+    {'h', 104}, {'i', 105}, {'j', 106}, {'k', 107}, {'l', 108}, {'m', 109}, 
+    {'n', 110}, {'o', 111}, {'p', 112}, {'q', 113}, {'r', 114}, {'s', 115}, 
+    {'t', 116}, {'u', 117}, {'v', 118}, {'w', 119}, {'x', 120}, {'y', 121}, 
+    {'z', 122}, {'{', 123}, {'|', 124}, {'}', 125}, {'~', 126}
+};
+
+
 CompilationEngine::CompilationEngine(std::string inputFile, std::string outputFileArg) {
     std::filesystem::path inputPath(inputFile);
     std::vector<std::filesystem::path> jackFiles;
@@ -46,14 +66,15 @@ CompilationEngine::CompilationEngine(std::string inputFile, std::string outputFi
 
 void CompilationEngine::compileClass() {
     // class className { classVarDec* subroutineDec* }
-    VMWriter vmWriter(currentFile);     // Set current VM file to write to
+    vmWriter.initializer(currentFile);
     symbolTableClass.reset();
 
     tokenizer.advance();    // Initial token                                                                           
     tokenizer.advance();    // Identifier
-    tokenizer.advance();    // Class name
-    currentFunction = tokenizer.identifier();
+    // tokenizer.advance();    // Class name
+    currentClass = tokenizer.identifier();
     tokenizer.advance();    // {
+    tokenizer.advance();
 
     // classVarDec*
     while (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD && 
@@ -109,7 +130,7 @@ void CompilationEngine::compileSubroutine() {
     symbolTableSubroutine.reset();
 
     // ('constructor'|'function'|'method')
-    std::string subroutineType = tokenizer.keyWord();
+    std::string subroutineType = tokenizer.identifier();
     tokenizer.advance();
 
     // (void|type)
@@ -126,25 +147,21 @@ void CompilationEngine::compileSubroutine() {
     compileParamaterList();
     tokenizer.advance();        // )
 
-    // subroutineBody '{' varDec* statements '}'
-    compileSubroutineBody();
-
-    int subroutineLocalVars = symbolTableClass.varCount("VAR");
-    vmWriter.writeFunction(currentClass + "." + subroutineName, subroutineLocalVars);
-
     if (subroutineType == "method") {
-        symbolTableSubroutine.define((currentClass + "." + subroutineName), "this", "ARG");
-        // Align virtual mem segment w base address of object of which the method was called
+        vmWriter.writeFunction(currentClass + "." + subroutineName, symbolTableSubroutine.varCount("VAR"));
         vmWriter.writePush("argument", 0);
         vmWriter.writePop("pointer", 0);
     } else if (subroutineType == "constructor") {
         int nFields = symbolTableClass.varCount("FIELD");
+        vmWriter.writeFunction(currentClass + "." + subroutineName, symbolTableSubroutine.varCount("VAR"));
         vmWriter.writePush("constant", nFields);
         vmWriter.writeCall("Memory.alloc", 1);
-        vmWriter.writePop("pointer", 1);
-        vmWriter.writePush("pointer", 0);
-        vmWriter.writeReturn();
-    }
+        vmWriter.writePop("pointer", 0);            // THIS = base address returned by alloc
+    } else
+        vmWriter.writeFunction(currentClass + "." + subroutineName, symbolTableSubroutine.varCount("VAR"));
+    
+    // subroutineBody '{' varDec* statements '}'
+    compileSubroutineBody();
 }
 
 
@@ -232,108 +249,116 @@ void CompilationEngine::compileStatements() {
 void CompilationEngine::compileLet() {
     // 'let' varName ('[' expression ']')? '=' expression ';'
     tokenizer.advance();    // let
-
-    tokenizer.advance();    // varName
+    std::string varName = tokenizer.identifier();    // varName
+    tokenizer.advance();
 
     // '[' expression ']'
     if (tokenizer.getCurrentToken() == "[") {
+        // Array access: let varName[expression1] = expression2;
         tokenizer.advance();    // [
+        vmWriter.writePush(symbolTableSubroutine.kindOf(varName), symbolTableSubroutine.indexOf(varName));
         compileExpression();
         tokenizer.advance();    // ]
+        vmWriter.writeArithmetic("add");
+        tokenizer.advance();    // =
+        compileExpression();
+        vmWriter.writePop("temp", 0);       // temp 0 = expression 2
+        vmWriter.writePop("pointer", 1);    // pointer 1 = *(arr + expression 1)
+        vmWriter.writePush("temp", 0);      // push expression 2 onto stack
+        vmWriter.writePop("that", 0);       // *(arr + expression 1) = expression 2
+
+    } else {
+        tokenizer.advance();    // =
+        compileExpression();
+        vmWriter.writePop(symbolTableSubroutine.kindOf(varName), symbolTableSubroutine.indexOf(varName));
     }
-
-    tokenizer.advance();    // =
-
-    // expression
-    compileExpression();
-
     tokenizer.advance();    // ;
 }
 
 
 void CompilationEngine::compileIf() {
-    // 'if' '(' expression ')' '{' statements '}' ('else' '{'statements'}')?
-    tokenizer.advance();    // if
-    tokenizer.advance();    // (
-    compileExpression();
-    tokenizer.advance();    // )
-    tokenizer.advance();    // {
-    compileStatements();
-    tokenizer.advance();    // }
+    static int ifLabelInt = 0;
+    int currentIfLabelInt = ifLabelInt++;   // Use a separate variable to ensure unique labels within the function
+    std::string labelTrue = "IF_TRUE" + std::to_string(currentIfLabelInt);
+    std::string labelFalse = "IF_FALSE" + std::to_string(currentIfLabelInt);
+    std::string labelEnd = "IF_END" + std::to_string(currentIfLabelInt);
 
-    // 'else' '{'statements'}'
+    // 'if' '(' expression ')' '{' statements '}' ('else' '{'statements'}')?
+    tokenizer.advance();    // 'if'
+    tokenizer.advance();    // '('
+    compileExpression();    
+    tokenizer.advance();    // ')'
+    
+    vmWriter.writeArithmetic("not");
+    vmWriter.writeIf(labelFalse);
+    
+    tokenizer.advance();    // '{'
+    compileStatements();    
+    tokenizer.advance();    // '}'
+
+    vmWriter.writeGoto(labelEnd);       // goto L2 (end)
+    vmWriter.writeLabel(labelFalse);    // label L1 (false label)
+
+    // 'else' '{' statements '}'
     if (tokenizer.getCurrentToken() == "else") {
-        tokenizer.advance();    // else
-        tokenizer.advance();    // {
-        compileStatements();
-        tokenizer.advance();    // }
+        tokenizer.advance();    // 'else'
+        tokenizer.advance();    // '{'
+        compileStatements();    
+        tokenizer.advance();    // '}'
     }
+
+    vmWriter.writeLabel(labelEnd); 
 }
+
 
 
 void CompilationEngine::compileWhile() {
-    // while '(' expression ')' '{' statements '}'
-    tokenizer.advance();    // while
-    tokenizer.advance();    // (
-    compileExpression();
-    tokenizer.advance();    // )
-    tokenizer.advance();    // {
-    compileStatements();
-    tokenizer.advance();    // }
+    static int whileLabelInt = 0;
+    int currentWhileLabelInt = whileLabelInt++;     // Use a separate variable to ensure unique labels within the function
+
+    std::string labelStart = "WHILE_EXP" + std::to_string(currentWhileLabelInt);
+    std::string labelEnd = "WHILE_END" + std::to_string(currentWhileLabelInt);
+
+    // 'while' '(' expression ')' '{' statements '}'
+    tokenizer.advance();    // 'while'
+    tokenizer.advance();    // '('
+
+    vmWriter.writeLabel(labelStart);    // label L1
+    compileExpression(); 
+    tokenizer.advance();                // ')'
+
+    vmWriter.writeArithmetic("not");
+    vmWriter.writeIf(labelEnd);         // if-goto L2
+
+    tokenizer.advance();    // '{'
+    compileStatements(); 
+    tokenizer.advance();    // '}'
+
+    vmWriter.writeGoto(labelStart);     // goto L1
+    vmWriter.writeLabel(labelEnd);      // label L2
 }
+
 
 
 void CompilationEngine::compileDo() {
     // 'do' subroutineCall ';'
     // subroutineName '(' expressionList ')' | (className|varName) '.' subroutineName '(' expressionList ')'
-
-    // do
-    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
-    tokenizer.advance();
-
-    // subroutineName
-    *fileStream << "<identifier> " << tokenizer.identifier() << " </identifier>" << std::endl;
-    tokenizer.advance();
-
+    tokenizer.advance();    // do
+    tokenizer.advance();    // subroutineName
     if (tokenizer.getCurrentToken() == ".") {
-        // .
-        *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
-        tokenizer.advance();
-
-        // subroutineName
-        *fileStream << "<identifier> " << tokenizer.identifier() << " </identifier>" << std::endl;
-        tokenizer.advance();
+        tokenizer.advance();    // .
+        tokenizer.advance();    // subroutineName
     }
-
-    // (
-    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
-    tokenizer.advance();
-
-    // expressionList
+    tokenizer.advance();    // (
     compileExpressionList();
-
-    // )
-    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
-    tokenizer.advance();
-
-    // ';'
-    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
-    tokenizer.advance();
-
-    *fileStream << "</doStatement>" << std::endl;
+    tokenizer.advance();    // )
+    tokenizer.advance();    // ;
 }
 
 
 void CompilationEngine::compileReturn() {
     // 'return' expression? ';'
-    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
-    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
-
-    *fileStream << "<returnStatement>" << std::endl;
-
-    // return
-    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
-    tokenizer.advance();
+    tokenizer.advance();    // return
 
     // expression?
     if (tokenizer.tokenType() == JackTokenizer::TokenElements::INT_CONST ||
@@ -345,11 +370,8 @@ void CompilationEngine::compileReturn() {
         tokenizer.getCurrentToken() == "~")
             compileExpression();
 
-    // ';'
-    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
-    tokenizer.advance();
-
-    *fileStream << "</returnStatement>" << std::endl;
+    vmWriter.writeReturn();
+    tokenizer.advance();    // ;
 }
 
 
@@ -380,82 +402,120 @@ void CompilationEngine::compileTerm() {
     // (unaryOp term) | subroutineCall
 
     switch (tokenizer.tokenType()) {
-        case JackTokenizer::TokenElements::INT_CONST:
-            *fileStream << "<integerConstant> " << tokenizer.intVal() << " </integerConstant>" << std::endl;
+        case JackTokenizer::TokenElements::INT_CONST: {
+            vmWriter.writePush("constant", tokenizer.intVal());
             tokenizer.advance();
             break;
-        case JackTokenizer::TokenElements::STRING_CONST:
-            *fileStream << "<stringConstant> " << tokenizer.stringVal() << " </stringConstant>" << std::endl;
+        }
+        case JackTokenizer::TokenElements::STRING_CONST: {
+            int strLength = tokenizer.stringVal().length();
+            vmWriter.writePush("constant", strLength);
+            vmWriter.writeCall("String.new", 1);
+            for (auto c: tokenizer.stringVal()) {
+                int asciiVal = hackCharacterMap.at(c);
+                vmWriter.writePush("constant", asciiVal);
+                vmWriter.writeCall("String.appendChar", 1);
+            }
             tokenizer.advance();
             break;
-        case JackTokenizer::TokenElements::KEYWORD:
-            *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+        }
+        case JackTokenizer::TokenElements::KEYWORD: {
+            // *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+            std::string keyword = tokenizer.identifier();
+            if (keyword == "null" || keyword == "false")
+                vmWriter.writePush("constant", 0);
+            else if (keyword == "true") {
+                vmWriter.writePush("constant", 1);
+                vmWriter.writeArithmetic("neg");
+            } else if (keyword == "this")
+                vmWriter.writePush("pointer", 0);
             tokenizer.advance();
             break;
-        case JackTokenizer::TokenElements::IDENTIFIER:
-            // varName
-            *fileStream << "<identifier>" << std::endl;
-            *fileStream << "<name>" << tokenizer.identifier() << "</name>" << std::endl;
-            *fileStream << "<category>" << symbolTableClass.kindOf(tokenizer.identifier()) << "</category>" << std::endl;
-            *fileStream << "<index>" << symbolTableClass.indexOf(tokenizer.identifier()) << "</index>" << std::endl;
-            *fileStream << "<usage>used</usage>" << std::endl;
-            *fileStream << "</identifier>" << std::endl;
+        }
+        case JackTokenizer::TokenElements::IDENTIFIER: {
+            std::string curIdentifier = tokenizer.identifier();     // varName
             tokenizer.advance();
             if (tokenizer.getCurrentToken() == "[") {
                 // varName '[' expression ']'
-                *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+                // arr[i] - array indexing
+                vmWriter.writePush(symbolTableSubroutine.kindOf(curIdentifier), symbolTableSubroutine.indexOf(curIdentifier));
                 tokenizer.advance();
                 compileExpression();
-                *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
                 tokenizer.advance();
-            } else if (tokenizer.getCurrentToken() == "(" || tokenizer.getCurrentToken() == ".") {
-                // subroutineCall
-                if (tokenizer.getCurrentToken() == ".") {
-                    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
-                    tokenizer.advance();
-                    // *fileStream << "<identifier> " << tokenizer.identifier() << " </identifier>" << std::endl;
-                    *fileStream << "<identifier>" << std::endl;
-                    *fileStream << "<name>" << tokenizer.identifier() << "</name>" << std::endl; 
-                    *fileStream << "<category>subroutine</category>" << std::endl;
-                    *fileStream << "<index>NULL</index>" << std::endl;
-                    *fileStream << "<usage>used</usage>" << std::endl; 
-                    *fileStream << "</identifier>" << std::endl;
-                    tokenizer.advance();
+                vmWriter.writeArithmetic("add");
+            } else if (tokenizer.getCurrentToken() == "(") {
+                // Method call on current object
+                std::string subroutineName = currentClass + "." + curIdentifier;
+                vmWriter.writePush("pointer", 0);
+                tokenizer.advance();
+                int nArgs = compileExpressionList() + 1;
+                tokenizer.advance();
+                vmWriter.writeCall(subroutineName, nArgs);
+            } else if (tokenizer.getCurrentToken() == ".") {
+                // External method or function call
+                tokenizer.advance();
+                std::string methodName = tokenizer.identifier();
+                tokenizer.advance();
+                tokenizer.advance();
+                std::string subroutineName;
+                int nArgs = 0;
+
+                if (symbolTableSubroutine.kindOf(curIdentifier) != "NONE") {
+                    // Method call on other object
+                    vmWriter.writePush(symbolTableSubroutine.kindOf(curIdentifier), symbolTableSubroutine.indexOf(curIdentifier));
+                    subroutineName = symbolTableSubroutine.typeOf(curIdentifier) + "." + methodName;
+                    nArgs = compileExpressionList() + 1;
+                } else if (symbolTableClass.kindOf(curIdentifier) != "NONE") {
+                    // Method call on other object
+                    vmWriter.writePush(symbolTableClass.kindOf(curIdentifier), symbolTableClass.indexOf(curIdentifier));
+                    subroutineName = symbolTableClass.typeOf(curIdentifier) + "." + methodName;
+                    nArgs = compileExpressionList() + 1;
+                } else {
+                    // Regular function call
+                    subroutineName = curIdentifier + "." + methodName;
+                    nArgs = compileExpressionList();
                 }
-                *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
                 tokenizer.advance();
-                compileExpressionList();
-                *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
-                tokenizer.advance();
+                vmWriter.writeCall(subroutineName, nArgs);
+            } else {
+                // Attribute access
+                std::string curKind = symbolTableSubroutine.kindOf(curIdentifier);
+                int curIndex = symbolTableSubroutine.indexOf(curIdentifier);
+                if (curKind == "NONE") {
+                    curKind = symbolTableClass.kindOf(curIdentifier);
+                    curIndex = symbolTableClass.indexOf(curIdentifier);
+                }
+                if (curKind != "NONE") 
+                    vmWriter.writePush(curKind, curIndex);
+                vmWriter.writePush(symbolTableSubroutine.kindOf(curIdentifier), symbolTableSubroutine.indexOf(curIdentifier));
             }
             break;
-        case JackTokenizer::TokenElements::SYMBOL:
+        }
+        case JackTokenizer::TokenElements::SYMBOL: {
             if (tokenizer.getCurrentToken() == "(") {
                 // '(' expression ')'
-                *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
                 tokenizer.advance();
                 compileExpression();
-                *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
                 tokenizer.advance();
             } else if (tokenizer.getCurrentToken() == "-" || tokenizer.getCurrentToken() == "~") {
                 // unaryOp term
-                *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+                std::string op = tokenizer.getCurrentToken();
                 tokenizer.advance();
                 compileTerm();
+                if (op == "-")
+                    vmWriter.writeArithmetic("neg");
+                else if (op == "~")
+                    vmWriter.writeArithmetic("not");
             } 
             break;
+        }
     }
 }
 
 
 int CompilationEngine::compileExpressionList() {
     // (expression (',' expression)*)?
-    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
-    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
     int returnInt = 0;
-
-    *fileStream << "<expressionList>" << std::endl;
-
     if (tokenizer.tokenType() == JackTokenizer::TokenElements::INT_CONST ||
         tokenizer.tokenType() == JackTokenizer::TokenElements::STRING_CONST ||
         tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD ||
@@ -468,20 +528,16 @@ int CompilationEngine::compileExpressionList() {
         returnInt++;
         
         while (tokenizer.getCurrentToken() == ",") {
-            *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
-            tokenizer.advance();
+            tokenizer.advance();    // ,
             compileExpression();
             returnInt++;
         }
     }
-
-    *fileStream << "</expressionList>" << std::endl;
-
     return returnInt;
 }
 
 
-const std::unordered_map<std::string, std::unique_ptr<std::ofstream>>& CompilationEngine::getOutputFiles() const {
+const std::unordered_map<std::string, std::string> &CompilationEngine::getOutputFiles() const {
     return outputFiles;
 }
 

@@ -7,8 +7,12 @@
 #include "VMWriter.h"
 
 
-VMWriter::VMWriter(const std::string &outputFile) :
-    vmFile(outputFile.c_str()) {};
+
+void VMWriter::initializer(const std::string &outputFile) {
+    if (vmFile.is_open())
+        vmFile.close();
+    vmFile.open(outputFile.c_str());
+}
 
 
 void VMWriter::writePush(const std::string &segment, const int &index) {

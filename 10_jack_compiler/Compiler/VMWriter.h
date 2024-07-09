@@ -8,7 +8,7 @@ class VMWriter {
         WriteToFile fileStream;
         std::ofstream vmFile;
     public:
-        VMWriter(const std::string &outputFile);
+        void initializer(const std::string &outputFile);
         void writePush(const std::string &segment, const int &index);
         void writePop(const std::string &segment, const int &index);
         void writeArithmetic(const std::string &command);

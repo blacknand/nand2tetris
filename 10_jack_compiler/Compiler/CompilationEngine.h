@@ -15,6 +15,7 @@
 
 class CompilationEngine {
     private:
+        static const std::unordered_map<char, int> hackCharacterMap;
         std::unordered_map<std::string, std::string> outputFiles;
         std::string currentFile;
         VMWriter vmWriter;
