@@ -112,7 +112,7 @@ void CompilationEngine::compileClassVarDec() {
 
     // varname (',' varName)*
     while (true) {
-        std::transform(cat.begin(), cat.end(), cat.begin(), ::toupper);
+        // std::transform(cat.begin(), cat.end(), cat.begin(), ::toupper);
         symbolTableClass.define(tokenizer.identifier(), typeDec, cat);
         tokenizer.advance();
         if (tokenizer.getCurrentToken() == ",")
@@ -148,17 +148,17 @@ void CompilationEngine::compileSubroutine() {
     tokenizer.advance();        // )
 
     if (subroutineType == "method") {
-        vmWriter.writeFunction(currentClass + "." + subroutineName, symbolTableSubroutine.varCount("VAR"));
+        vmWriter.writeFunction(currentClass + "." + subroutineName, symbolTableSubroutine.varCount("var"));
         vmWriter.writePush("argument", 0);
         vmWriter.writePop("pointer", 0);
     } else if (subroutineType == "constructor") {
-        int nFields = symbolTableClass.varCount("FIELD");
-        vmWriter.writeFunction(currentClass + "." + subroutineName, symbolTableSubroutine.varCount("VAR"));
+        int nFields = symbolTableClass.varCount("field");
+        vmWriter.writeFunction(currentClass + "." + subroutineName, symbolTableSubroutine.varCount("var"));
         vmWriter.writePush("constant", nFields);
         vmWriter.writeCall("Memory.alloc", 1);
         vmWriter.writePop("pointer", 0);            // THIS = base address returned by alloc
     } else
-        vmWriter.writeFunction(currentClass + "." + subroutineName, symbolTableSubroutine.varCount("VAR"));
+        vmWriter.writeFunction(currentClass + "." + subroutineName, symbolTableSubroutine.varCount("var"));
     
     // subroutineBody '{' varDec* statements '}'
     compileSubroutineBody();
@@ -178,7 +178,7 @@ void CompilationEngine::compileParamaterList() {
                 tokenizer.advance();
 
                 // varName
-                symbolTableSubroutine.define(tokenizer.identifier(), typeDec, "ARG");
+                symbolTableSubroutine.define(tokenizer.identifier(), typeDec, "argument");
                 tokenizer.advance();
 
                 // ','
@@ -216,7 +216,7 @@ void CompilationEngine::compileVarDec() {
 
     // varname (',' varName)*
     while (true) {
-        symbolTableSubroutine.define(tokenizer.identifier(), typeDec, "VAR");
+        symbolTableSubroutine.define(tokenizer.identifier(), typeDec, "var");
         tokenizer.advance();
 
         if (tokenizer.getCurrentToken() == ",")
@@ -255,8 +255,10 @@ void CompilationEngine::compileLet() {
     // '[' expression ']'
     if (tokenizer.getCurrentToken() == "[") {
         // Array access: let varName[expression1] = expression2;
-        tokenizer.advance();    // [
-        vmWriter.writePush(symbolTableSubroutine.kindOf(varName), symbolTableSubroutine.indexOf(varName));
+        // tokenizer.advance();    // [
+        auto [kind, index] = getVariableInfo(varName);
+        vmWriter.writePush(kind, index, "// compileLet, line 259: " + varName);
+        tokenizer.advance();
         compileExpression();
         tokenizer.advance();    // ]
         vmWriter.writeArithmetic("add");
@@ -270,7 +272,8 @@ void CompilationEngine::compileLet() {
     } else {
         tokenizer.advance();    // =
         compileExpression();
-        vmWriter.writePop(symbolTableSubroutine.kindOf(varName), symbolTableSubroutine.indexOf(varName));
+        auto [kind, index] = getVariableInfo(varName);
+        vmWriter.writePop(kind, index, "// compileLet, line 273: " + varName);
     }
     tokenizer.advance();    // ;
 }
@@ -437,8 +440,8 @@ void CompilationEngine::compileTerm() {
             tokenizer.advance();
             if (tokenizer.getCurrentToken() == "[") {
                 // varName '[' expression ']'
-                // arr[i] - array indexing
-                vmWriter.writePush(symbolTableSubroutine.kindOf(curIdentifier), symbolTableSubroutine.indexOf(curIdentifier));
+                auto [kind, index] = getVariableInfo(curIdentifier);
+                vmWriter.writePush(kind, index, "// compileTerm, line 441: " + curIdentifier);
                 tokenizer.advance();
                 compileExpression();
                 tokenizer.advance();
@@ -460,34 +463,24 @@ void CompilationEngine::compileTerm() {
                 std::string subroutineName;
                 int nArgs = 0;
 
-                if (symbolTableSubroutine.kindOf(curIdentifier) != "NONE") {
+                auto [kind, index] = getVariableInfo(curIdentifier);
+                if (kind != "none") {
                     // Method call on other object
-                    vmWriter.writePush(symbolTableSubroutine.kindOf(curIdentifier), symbolTableSubroutine.indexOf(curIdentifier));
+                    vmWriter.writePush(kind, index, "// compileTerm, line 465: " + curIdentifier);
                     subroutineName = symbolTableSubroutine.typeOf(curIdentifier) + "." + methodName;
                     nArgs = compileExpressionList() + 1;
-                } else if (symbolTableClass.kindOf(curIdentifier) != "NONE") {
-                    // Method call on other object
-                    vmWriter.writePush(symbolTableClass.kindOf(curIdentifier), symbolTableClass.indexOf(curIdentifier));
-                    subroutineName = symbolTableClass.typeOf(curIdentifier) + "." + methodName;
-                    nArgs = compileExpressionList() + 1;
-                } else {
+                } else  {
                     // Regular function call
                     subroutineName = curIdentifier + "." + methodName;
                     nArgs = compileExpressionList();
-                }
+                } 
                 tokenizer.advance();
                 vmWriter.writeCall(subroutineName, nArgs);
             } else {
                 // Attribute access
-                std::string curKind = symbolTableSubroutine.kindOf(curIdentifier);
-                int curIndex = symbolTableSubroutine.indexOf(curIdentifier);
-                if (curKind == "NONE") {
-                    curKind = symbolTableClass.kindOf(curIdentifier);
-                    curIndex = symbolTableClass.indexOf(curIdentifier);
-                }
-                if (curKind != "NONE") 
-                    vmWriter.writePush(curKind, curIndex);
-                vmWriter.writePush(symbolTableSubroutine.kindOf(curIdentifier), symbolTableSubroutine.indexOf(curIdentifier));
+                auto [kind, index] = getVariableInfo(curIdentifier);
+                if (kind != "none") 
+                    vmWriter.writePush(kind, index, "// compileTerm, line 490: " + curIdentifier);
             }
             break;
         }
@@ -544,4 +537,23 @@ const std::unordered_map<std::string, std::string> &CompilationEngine::getOutput
 
 void CompilationEngine::setOutputFile(std::string fileName) {
     currentFile = fileName;
+}
+
+
+std::pair<std::string, int> CompilationEngine::getVariableInfo(const std::string &varName) {
+    std::string kind = symbolTableSubroutine.kindOf(varName);
+    int index = symbolTableSubroutine.indexOf(varName);
+
+    if (kind == "none") {
+        kind = symbolTableClass.kindOf(varName);
+        index = symbolTableClass.indexOf(varName);
+    }
+
+    if (kind == "field") 
+        kind = "this";
+    else if (kind == "var")
+        kind = "local";
+
+    // std::transform(kind.begin(), kind.end(), kind.begin(), ::tolower);
+    return {kind, index};
 }
