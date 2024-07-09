@@ -71,7 +71,6 @@ void CompilationEngine::compileClass() {
 
     tokenizer.advance();    // Initial token                                                                           
     tokenizer.advance();    // Identifier
-    // tokenizer.advance();    // Class name
     currentClass = tokenizer.identifier();
     tokenizer.advance();    // {
     tokenizer.advance();
@@ -93,6 +92,7 @@ void CompilationEngine::compileClass() {
 
     tokenizer.advance();    // }
 }
+
 
 
 void CompilationEngine::compileClassVarDec() {
@@ -125,8 +125,6 @@ void CompilationEngine::compileClassVarDec() {
 
 
 void CompilationEngine::compileSubroutine() {
-    // ('constructor'|'function'|'method') ('void'|type) subroutineName '('paramaterList')' subroutineBody
-
     symbolTableSubroutine.reset();
 
     // ('constructor'|'function'|'method')
@@ -134,35 +132,38 @@ void CompilationEngine::compileSubroutine() {
     tokenizer.advance();
 
     // (void|type)
-    std::string cat = (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD) ?
-            tokenizer.getCurrentToken() : tokenizer.identifier();
+    std::string returnType = (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD) ?
+                             tokenizer.getCurrentToken() : tokenizer.identifier();
     tokenizer.advance();
 
     // subroutineName
     std::string subroutineName = tokenizer.identifier();
     tokenizer.advance();
 
-    // '('paramaterList')'
-    tokenizer.advance();        // (
+    // '(' paramaterList ')'
+    tokenizer.advance();  // (
     compileParamaterList();
-    tokenizer.advance();        // )
+    tokenizer.advance();  // )
+
+    std::string fullSubroutineName = currentClass + "." + subroutineName;
+    int nLocals = symbolTableSubroutine.varCount("var");
+
+    vmWriter.writeFunction(fullSubroutineName, nLocals);
 
     if (subroutineType == "method") {
-        vmWriter.writeFunction(currentClass + "." + subroutineName, symbolTableSubroutine.varCount("var"));
         vmWriter.writePush("argument", 0);
         vmWriter.writePop("pointer", 0);
     } else if (subroutineType == "constructor") {
         int nFields = symbolTableClass.varCount("field");
-        vmWriter.writeFunction(currentClass + "." + subroutineName, symbolTableSubroutine.varCount("var"));
         vmWriter.writePush("constant", nFields);
         vmWriter.writeCall("Memory.alloc", 1);
-        vmWriter.writePop("pointer", 0);            // THIS = base address returned by alloc
-    } else
-        vmWriter.writeFunction(currentClass + "." + subroutineName, symbolTableSubroutine.varCount("var"));
-    
+        vmWriter.writePop("pointer", 0);  // THIS = base address returned by alloc
+    }
+
     // subroutineBody '{' varDec* statements '}'
     compileSubroutineBody();
 }
+
 
 
 void CompilationEngine::compileParamaterList() {
@@ -344,19 +345,46 @@ void CompilationEngine::compileWhile() {
 
 
 void CompilationEngine::compileDo() {
-    // 'do' subroutineCall ';'
-    // subroutineName '(' expressionList ')' | (className|varName) '.' subroutineName '(' expressionList ')'
-    tokenizer.advance();    // do
-    tokenizer.advance();    // subroutineName
+    tokenizer.advance();  // 'do'
+    
+    // Handle the subroutine call directly
+    std::string identifier = tokenizer.identifier();
+    tokenizer.advance();
+
+    std::string subroutineName;
+    int nArgs = 0;
+
     if (tokenizer.getCurrentToken() == ".") {
-        tokenizer.advance();    // .
-        tokenizer.advance();    // subroutineName
+        tokenizer.advance();
+        std::string methodName = tokenizer.identifier();
+        tokenizer.advance(); // Advance past method name
+
+        auto [kind, index] = getVariableInfo(identifier);
+        if (kind != "none") {
+            // Method call on another object
+            vmWriter.writePush(kind, index);
+            subroutineName = symbolTableClass.typeOf(identifier) + "." + methodName;
+            nArgs = compileExpressionList() + 1;
+        } else {
+            // Function call
+            subroutineName = identifier + "." + methodName;
+            nArgs = compileExpressionList() + 1;
+        }
+    } else {
+        // Method call on the current object
+        subroutineName = currentClass + "." + identifier;
+        vmWriter.writePush("pointer", 0);
+        nArgs = compileExpressionList() + 1;
     }
-    tokenizer.advance();    // (
-    compileExpressionList();
-    tokenizer.advance();    // )
-    tokenizer.advance();    // ;
+
+    tokenizer.advance();  // Advance past the closing parenthesis ')'
+    vmWriter.writeCall(subroutineName, nArgs);
+    tokenizer.advance();  // Advance past ';'
+    vmWriter.writePop("temp", 0);  // Discard the return value of the call
 }
+
+
+
 
 
 void CompilationEngine::compileReturn() {
@@ -394,16 +422,33 @@ void CompilationEngine::compileExpression() {
             tokenizer.getCurrentToken() == "&lt;" ||
             tokenizer.getCurrentToken() == "&gt;" ||
             tokenizer.getCurrentToken() == "=") {
+                std::string op = tokenizer.getCurrentToken();
                 tokenizer.advance();
                 compileTerm();
+                if (op == "+") {
+                    vmWriter.writeArithmetic("add");
+                } else if (op == "-") {
+                    vmWriter.writeArithmetic("sub");
+                } else if (op == "*") {
+                    vmWriter.writeCall("Math.multiply", 2);
+                } else if (op == "/") {
+                    vmWriter.writeCall("Math.divide", 2);
+                } else if (op == "&") {
+                    vmWriter.writeArithmetic("and");
+                } else if (op == "|") {
+                    vmWriter.writeArithmetic("or");
+                } else if (op == "<") {
+                    vmWriter.writeArithmetic("lt");
+                } else if (op == ">") {
+                    vmWriter.writeArithmetic("gt");
+                } else if (op == "=") {
+                    vmWriter.writeArithmetic("eq");
+                }
             }
 }
 
 
 void CompilationEngine::compileTerm() {
-    // integerConstant | stringConstant | keywordConstant | varName | varName'[' expression ']' | '(' expression ')' |
-    // (unaryOp term) | subroutineCall
-
     switch (tokenizer.tokenType()) {
         case JackTokenizer::TokenElements::INT_CONST: {
             vmWriter.writePush("constant", tokenizer.intVal());
@@ -423,64 +468,67 @@ void CompilationEngine::compileTerm() {
             break;
         }
         case JackTokenizer::TokenElements::KEYWORD: {
-            // *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
             std::string keyword = tokenizer.identifier();
-            if (keyword == "null" || keyword == "false")
+            if (keyword == "null" || keyword == "false") {
                 vmWriter.writePush("constant", 0);
-            else if (keyword == "true") {
+            } else if (keyword == "true") {
                 vmWriter.writePush("constant", 1);
                 vmWriter.writeArithmetic("neg");
-            } else if (keyword == "this")
+            } else if (keyword == "this") {
                 vmWriter.writePush("pointer", 0);
+            }
             tokenizer.advance();
             break;
         }
         case JackTokenizer::TokenElements::IDENTIFIER: {
-            std::string curIdentifier = tokenizer.identifier();     // varName
+            std::string curIdentifier = tokenizer.identifier();
             tokenizer.advance();
             if (tokenizer.getCurrentToken() == "[") {
                 // varName '[' expression ']'
                 auto [kind, index] = getVariableInfo(curIdentifier);
                 vmWriter.writePush(kind, index, "// compileTerm, line 441: " + curIdentifier);
-                tokenizer.advance();
+                tokenizer.advance();  // Advance past '['
                 compileExpression();
-                tokenizer.advance();
+                tokenizer.advance();  // Advance past ']'
                 vmWriter.writeArithmetic("add");
-            } else if (tokenizer.getCurrentToken() == "(") {
-                // Method call on current object
-                std::string subroutineName = currentClass + "." + curIdentifier;
-                vmWriter.writePush("pointer", 0);
-                tokenizer.advance();
-                int nArgs = compileExpressionList() + 1;
-                tokenizer.advance();
-                vmWriter.writeCall(subroutineName, nArgs);
-            } else if (tokenizer.getCurrentToken() == ".") {
-                // External method or function call
-                tokenizer.advance();
-                std::string methodName = tokenizer.identifier();
-                tokenizer.advance();
-                tokenizer.advance();
+                vmWriter.writePop("pointer", 1);
+                vmWriter.writePush("that", 0);
+            } else if (tokenizer.getCurrentToken() == "(" || tokenizer.getCurrentToken() == ".") {
+                // Handle subroutine call directly within compileTerm
                 std::string subroutineName;
                 int nArgs = 0;
 
-                auto [kind, index] = getVariableInfo(curIdentifier);
-                if (kind != "none") {
-                    // Method call on other object
-                    vmWriter.writePush(kind, index, "// compileTerm, line 465: " + curIdentifier);
-                    subroutineName = symbolTableSubroutine.typeOf(curIdentifier) + "." + methodName;
+                if (tokenizer.getCurrentToken() == ".") {
+                    tokenizer.advance();
+                    std::string methodName = tokenizer.identifier();
+                    tokenizer.advance(); // Advance past method name
+
+                    auto [kind, index] = getVariableInfo(curIdentifier);
+                    if (kind != "none") {
+                        // Method call on another object
+                        vmWriter.writePush(kind, index);
+                        subroutineName = symbolTableSubroutine.typeOf(curIdentifier) + "." + methodName;
+                        nArgs = compileExpressionList() + 1;
+                    } else {
+                        // Function call
+                        subroutineName = curIdentifier + "." + methodName;
+                        nArgs = compileExpressionList();
+                    }
+                } else {
+                    // Method call on the current object
+                    subroutineName = currentClass + "." + curIdentifier;
+                    vmWriter.writePush("pointer", 0);
                     nArgs = compileExpressionList() + 1;
-                } else  {
-                    // Regular function call
-                    subroutineName = curIdentifier + "." + methodName;
-                    nArgs = compileExpressionList();
-                } 
-                tokenizer.advance();
+                }
+
+                tokenizer.advance();  // Advance past the closing parenthesis ')'
                 vmWriter.writeCall(subroutineName, nArgs);
             } else {
                 // Attribute access
                 auto [kind, index] = getVariableInfo(curIdentifier);
-                if (kind != "none") 
+                if (kind != "none") {
                     vmWriter.writePush(kind, index, "// compileTerm, line 490: " + curIdentifier);
+                }
             }
             break;
         }
@@ -499,11 +547,13 @@ void CompilationEngine::compileTerm() {
                     vmWriter.writeArithmetic("neg");
                 else if (op == "~")
                     vmWriter.writeArithmetic("not");
-            } 
+            }
             break;
         }
     }
 }
+
+
 
 
 int CompilationEngine::compileExpressionList() {
