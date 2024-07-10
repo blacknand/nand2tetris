@@ -146,6 +146,10 @@ void CompilationEngine::compileSubroutine() {
     tokenizer.advance();  // )
 
     std::string fullSubroutineName = currentClass + "." + subroutineName;
+    tokenizer.advance();  // '{'
+    while (tokenizer.getCurrentToken() == "var") {
+        compileVarDec();
+    }
     int nLocals = symbolTableSubroutine.varCount("var");
 
     vmWriter.writeFunction(fullSubroutineName, nLocals);
@@ -193,7 +197,6 @@ void CompilationEngine::compileParamaterList() {
 
 void CompilationEngine::compileSubroutineBody() {
     // '{' varDec* statements '}'
-    tokenizer.advance();    // {
 
     while (tokenizer.getCurrentToken() == "var") {
         compileVarDec();
@@ -347,7 +350,6 @@ void CompilationEngine::compileWhile() {
 void CompilationEngine::compileDo() {
     tokenizer.advance();  // 'do'
     
-    // Handle the subroutine call directly
     std::string identifier = tokenizer.identifier();
     tokenizer.advance();
 
@@ -377,9 +379,9 @@ void CompilationEngine::compileDo() {
         nArgs = compileExpressionList() + 1;
     }
 
-    tokenizer.advance();  // Advance past the closing parenthesis ')'
+    tokenizer.advance();  // )
     vmWriter.writeCall(subroutineName, nArgs);
-    tokenizer.advance();  // Advance past ';'
+    tokenizer.advance();  // ';'
     vmWriter.writePop("temp", 0);  // Discard the return value of the call
 }
 
@@ -452,7 +454,7 @@ void CompilationEngine::compileTerm() {
     switch (tokenizer.tokenType()) {
         case JackTokenizer::TokenElements::INT_CONST: {
             vmWriter.writePush("constant", tokenizer.intVal());
-            tokenizer.advance();
+            tokenizer.advance();    // might advance too much
             break;
         }
         case JackTokenizer::TokenElements::STRING_CONST: {
@@ -468,7 +470,7 @@ void CompilationEngine::compileTerm() {
             break;
         }
         case JackTokenizer::TokenElements::KEYWORD: {
-            std::string keyword = tokenizer.identifier();
+            std::string keyword = tokenizer.getCurrentToken();
             if (keyword == "null" || keyword == "false") {
                 vmWriter.writePush("constant", 0);
             } else if (keyword == "true") {
@@ -501,7 +503,7 @@ void CompilationEngine::compileTerm() {
                 if (tokenizer.getCurrentToken() == ".") {
                     tokenizer.advance();
                     std::string methodName = tokenizer.identifier();
-                    tokenizer.advance(); // Advance past method name
+                    tokenizer.advance(); 
 
                     auto [kind, index] = getVariableInfo(curIdentifier);
                     if (kind != "none") {
@@ -521,14 +523,14 @@ void CompilationEngine::compileTerm() {
                     nArgs = compileExpressionList() + 1;
                 }
 
-                tokenizer.advance();  // Advance past the closing parenthesis ')'
+                tokenizer.advance();  // ')'
                 vmWriter.writeCall(subroutineName, nArgs);
             } else {
                 // Attribute access
                 auto [kind, index] = getVariableInfo(curIdentifier);
-                if (kind != "none") {
-                    vmWriter.writePush(kind, index, "// compileTerm, line 490: " + curIdentifier);
-                }
+                // if (kind != "none") {
+                vmWriter.writePush(kind, index, "// compileTerm, line 490: " + curIdentifier);
+                // }
             }
             break;
         }
@@ -537,7 +539,7 @@ void CompilationEngine::compileTerm() {
                 // '(' expression ')'
                 tokenizer.advance();
                 compileExpression();
-                tokenizer.advance();
+                tokenizer.advance();    // FUCK
             } else if (tokenizer.getCurrentToken() == "-" || tokenizer.getCurrentToken() == "~") {
                 // unaryOp term
                 std::string op = tokenizer.getCurrentToken();
@@ -557,27 +559,24 @@ void CompilationEngine::compileTerm() {
 
 
 int CompilationEngine::compileExpressionList() {
-    // (expression (',' expression)*)?
-    int returnInt = 0;
-    if (tokenizer.tokenType() == JackTokenizer::TokenElements::INT_CONST ||
-        tokenizer.tokenType() == JackTokenizer::TokenElements::STRING_CONST ||
-        tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD ||
-        tokenizer.tokenType() == JackTokenizer::TokenElements::IDENTIFIER ||
-        tokenizer.getCurrentToken() == "(" ||
-        tokenizer.getCurrentToken() == "-" ||
-        tokenizer.getCurrentToken() == "~") {
-
+    int nArgs = 0;
+    std::cout << "Entering compileExpressionList with token: " << tokenizer.getCurrentToken() << std::endl;
+    if (tokenizer.getCurrentToken() != ")") {
         compileExpression();
-        returnInt++;
+        nArgs++;
         
+        // Continue processing expressions separated by commas
         while (tokenizer.getCurrentToken() == ",") {
-            tokenizer.advance();    // ,
+            std::cout << "Found comma, advancing..." << std::endl;
+            tokenizer.advance();  
             compileExpression();
-            returnInt++;
+            nArgs++;
         }
     }
-    return returnInt;
+    std::cout << "Leaving compileExpressionList with token: " << tokenizer.getCurrentToken() << std::endl;
+    return nArgs;
 }
+
 
 
 const std::unordered_map<std::string, std::string> &CompilationEngine::getOutputFiles() const {
