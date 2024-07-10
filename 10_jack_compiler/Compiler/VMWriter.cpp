@@ -41,12 +41,12 @@ void VMWriter::writeIf(const std::string &label) {
 }
 
 
-void VMWriter::writeCall(const std::string &label, const int &nVars) {
+void VMWriter::writeCall(const std::string &name, const int &nArgs) {
     vmFile << "call " << label << " " << nVars << std::endl;
 }
 
 
-void VMWriter::writeFunction(const std::string &label, const int &nVars) {
+void VMWriter::writeFunction(const std::string &name, const int &nVars) {
     vmFile << "function " << label << " " << nVars << std::endl;
 }
 
