@@ -8,7 +8,6 @@
 #include "FileOpp.h"
 #include "JackTokenizer.h"
 #include "SymbolTable.h"
-#include "VMWriter.h"
 
 #ifndef COMPILATION_ENGINE
 #define COMPILATION_ENGINE
@@ -17,12 +16,8 @@ class CompilationEngine {
     private:
         std::unordered_map<std::string, std::string> outputFiles;
         std::string currentFile;
-        VMWriter vmWriter;
         JackTokenizer tokenizer;
-        SymbolTable symbolTableClass;
-        SymbolTable symbolTableSubroutine;
-        std::string currentClass;
-        std::string currentFunction;
+        SymbolTable symbolTable;
     public:
         CompilationEngine(std::string inputFile, std::string outputFileArg);
         void compileClass();

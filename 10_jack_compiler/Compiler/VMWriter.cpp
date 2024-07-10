@@ -31,7 +31,7 @@ void VMWriter::writeLabel(const std::string &label) {
 }
 
 
-void VMWriter::writeGoto(const std::string &label) {
+void VMWriter::writeGOTO(const std::string &label) {
     vmFile << "goto " << label << std::endl;
 }
 
@@ -41,8 +41,8 @@ void VMWriter::writeIf(const std::string &label) {
 }
 
 
-void VMWriter::writeCall(const std::string &label, const int &nArgs) {
-    vmFile << "call " << label << " " << nArgs << std::endl;
+void VMWriter::writeCall(const std::string &label, const int &nVars) {
+    vmFile << "call " << label << " " << nVars << std::endl;
 }
 
 
@@ -59,9 +59,4 @@ void VMWriter::writeReturn() {
 void VMWriter::close() {
     if (vmFile.is_open())
         vmFile.close();
-}
-
-
-void VMWriter::write(const std::string &text) {
-    vmFile << text << std::endl;
 }

@@ -46,14 +46,25 @@ CompilationEngine::CompilationEngine(std::string inputFile, std::string outputFi
 
 void CompilationEngine::compileClass() {
     // class className { classVarDec* subroutineDec* }
-    VMWriter vmWriter(currentFile);     // Set current VM file to write to
-    symbolTableClass.reset();
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
 
-    tokenizer.advance();    // Initial token                                                                           
-    tokenizer.advance();    // Identifier
-    tokenizer.advance();    // Class name
-    currentFunction = tokenizer.identifier();
-    tokenizer.advance();    // {
+    *fileStream << "<class>" << std::endl;
+
+    tokenizer.advance();    // Initial token                                                                              // Get initial token
+    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+
+    tokenizer.advance();
+    *fileStream << "<identifier>" << std::endl;
+    *fileStream << "<name>" << tokenizer.identifier() << "</name>" << std::endl;
+    *fileStream << "<category>class</category>" << std::endl;
+    *fileStream << "<index>NULL</index>" << std::endl;
+    *fileStream << "<usage>declared</usage>" << std::endl;
+    *fileStream << " </identifier>" << std::endl;
+    tokenizer.advance();
+
+    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+    tokenizer.advance();
 
     // classVarDec*
     while (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD && 
@@ -70,149 +81,222 @@ void CompilationEngine::compileClass() {
         compileSubroutine();
     }
 
-    tokenizer.advance();    // }
+    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+    *fileStream << "</class>" << std::endl;
 }
 
 
 void CompilationEngine::compileClassVarDec() {
     // ('static'|'field') type varName (',' varName)* ';'
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<classVarDec>" << std::endl; 
 
     // ('static'|'field')
+    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
     std::string cat = tokenizer.getCurrentToken();
     tokenizer.advance();
 
     // type
     std::string typeDec;
-    if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD)
+    if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD) {
+        *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
         typeDec = tokenizer.getCurrentToken();
-    else
+    } else {
+        *fileStream << "<identifier> " << tokenizer.identifier() << " </identifier>" << std::endl;
         typeDec = tokenizer.identifier();
+    }
     tokenizer.advance();
 
     // varname (',' varName)*
     while (true) {
         std::transform(cat.begin(), cat.end(), cat.begin(), ::toupper);
-        symbolTableClass.define(tokenizer.identifier(), typeDec, cat);
+        symbolTable.define(tokenizer.identifier(), typeDec, cat);
+        *fileStream << "<identifier>" << std::endl;
+        *fileStream << "<name>" << tokenizer.identifier() << "</name>" << std::endl;
+        *fileStream << "<category>" << symbolTable.kindOf(tokenizer.identifier()) << "</category>" << std::endl;
+        *fileStream << "<index>" << symbolTable.indexOf(tokenizer.identifier()) << "</index>" << std::endl;
+        *fileStream << "<usage>declared</usage>" << std::endl;
+        *fileStream << "</identifier>" << std::endl;
         tokenizer.advance();
-        if (tokenizer.getCurrentToken() == ",")
+
+        if (tokenizer.getCurrentToken() == ",") {
+            *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
             tokenizer.advance();
-        else
+        } else
             break;
     }
+
+    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
     tokenizer.advance();
+
+    *fileStream << "</classVarDec>" << std::endl; 
 }
 
 
 void CompilationEngine::compileSubroutine() {
     // ('constructor'|'function'|'method') ('void'|type) subroutineName '('paramaterList')' subroutineBody
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
 
-    symbolTableSubroutine.reset();
+    symbolTable.reset();
+
+    *fileStream << "<subroutineDec>" << std::endl;
 
     // ('constructor'|'function'|'method')
-    std::string subroutineType = tokenizer.keyWord();
+    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
     tokenizer.advance();
 
     // (void|type)
-    std::string cat = (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD) ?
-            tokenizer.getCurrentToken() : tokenizer.identifier();
+    if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD)
+        *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+    else
+        *fileStream << "<identifier> " << tokenizer.identifier() << " </identifier>" << std::endl;
     tokenizer.advance();
 
     // subroutineName
-    std::string subroutineName = tokenizer.identifier();
+    *fileStream << "<identifier>" << std::endl;
+    *fileStream << "<name>" << tokenizer.identifier() << "</name>" << std::endl; 
+    *fileStream << "<category>subroutine</category>" << std::endl;
+    *fileStream << "<index>NULL</index>" << std::endl;
+    *fileStream << "<usage>declared</usage>" << std::endl; 
+    *fileStream << "</identifier>" << std::endl;
     tokenizer.advance();
 
     // '('paramaterList')'
-    tokenizer.advance();        // (
+    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+    tokenizer.advance();
     compileParamaterList();
-    tokenizer.advance();        // )
+    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+    tokenizer.advance();
 
     // subroutineBody '{' varDec* statements '}'
     compileSubroutineBody();
 
-    int subroutineLocalVars = symbolTableClass.varCount("VAR");
-    vmWriter.writeFunction(currentClass + "." + subroutineName, subroutineLocalVars);
-
-    if (subroutineType == "method") {
-        symbolTableSubroutine.define((currentClass + "." + subroutineName), "this", "ARG");
-        // Align virtual mem segment w base address of object of which the method was called
-        vmWriter.writePush("argument", 0);
-        vmWriter.writePop("pointer", 0);
-    } else if (subroutineType == "constructor") {
-        int nFields = symbolTableClass.varCount("FIELD");
-        vmWriter.writePush("constant", nFields);
-        vmWriter.writeCall("Memory.alloc", 1);
-        vmWriter.writePop("pointer", 1);
-        vmWriter.writePush("pointer", 0);
-        vmWriter.writeReturn();
-    }
+    *fileStream << "</subroutineDec>" << std::endl;
 }
 
 
 void CompilationEngine::compileParamaterList() {
     // ((type varName) (',' type varName)*)?
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<parameterList>" << std::endl;
+
     while (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD ||
             tokenizer.tokenType() == JackTokenizer::TokenElements::IDENTIFIER) {
                 // type
                 std::string typeDec;
-                if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD)
+                if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD) {
+                    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
                     typeDec = tokenizer.getCurrentToken();
-                else
+                } else {
+                    *fileStream << "<identifier> " << tokenizer.identifier() << " </identifier>" << std::endl;
                     typeDec = tokenizer.identifier();
+                }
                 tokenizer.advance();
 
                 // varName
-                symbolTableSubroutine.define(tokenizer.identifier(), typeDec, "ARG");
+                symbolTable.define(tokenizer.identifier(), typeDec, "ARG");
+                *fileStream << "<identifier>" << std::endl;
+                *fileStream << "<name>" << tokenizer.identifier() << "</name>" << std::endl;
+                *fileStream << "<category>" << symbolTable.kindOf(tokenizer.identifier()) << "</category>" << std::endl;
+                *fileStream << "<index>" << symbolTable.indexOf(tokenizer.identifier()) << "</index>" << std::endl;
+                *fileStream << "<usage>declared</usage>" << std::endl;
+                *fileStream << "</identifier>" << std::endl;
                 tokenizer.advance();
 
                 // ','
-                if (tokenizer.getCurrentToken() == ",")
+                if (tokenizer.getCurrentToken() == ",") {
+                    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
                     tokenizer.advance();
-                else
+                } else
                     break;
     }
+
+    *fileStream << "</parameterList>" << std::endl;
 }
 
 
 void CompilationEngine::compileSubroutineBody() {
     // '{' varDec* statements '}'
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
 
+    *fileStream << "<subroutineBody>" << std::endl;
+
+    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+    tokenizer.advance();
     while (tokenizer.getCurrentToken() == "var") {
         compileVarDec();
     }
     compileStatements();
-    tokenizer.advance();    // }
+    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+    *fileStream << "</subroutineBody>" << std::endl;
 }
 
 
 void CompilationEngine::compileVarDec() {
     // 'var' type varName (',' varName)* ';'
-    tokenizer.advance();    // var
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<varDec>" << std::endl;
+
+    // 'var'
+    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+    tokenizer.advance();
 
     // type
     std::string typeDec;
-    if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD) 
+    if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD) {
+        *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
         typeDec = tokenizer.getCurrentToken();
-    else
+    } else {
+        *fileStream << "<identifier> " << tokenizer.identifier() << " </identifier>" << std::endl;
         typeDec = tokenizer.identifier();
+    }
     tokenizer.advance();
 
     // varname (',' varName)*
     while (true) {
-        symbolTableSubroutine.define(tokenizer.identifier(), typeDec, "VAR");
+        symbolTable.define(tokenizer.identifier(), typeDec, "VAR");
+        *fileStream << "<identifier>" << std::endl;
+        *fileStream << "<name>" << tokenizer.identifier() << "</name>" << std::endl;
+        *fileStream << "<category>" << symbolTable.kindOf(tokenizer.identifier()) << "</category>" << std::endl;
+        *fileStream << "<index>" << symbolTable.indexOf(tokenizer.identifier()) << "</index>" << std::endl;
+        *fileStream << "<usage>declared</usage>" << std::endl;
+        *fileStream << "</identifier>" << std::endl;
         tokenizer.advance();
 
-        if (tokenizer.getCurrentToken() == ",")
+        if (tokenizer.getCurrentToken() == ",") {
+            *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
             tokenizer.advance();
-        else
+        } else
             break;
     }
 
-    tokenizer.advance();    // ;
+    // ';'
+    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+    *fileStream << "</varDec>" << std::endl;
 }
 
 
 void CompilationEngine::compileStatements() {
     // statment*
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<statements>" << std::endl;
+
     while (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD) {
         if (tokenizer.keyWord() == JackTokenizer::KeywordElements::LET)
             compileLet();
@@ -225,66 +309,149 @@ void CompilationEngine::compileStatements() {
         else if (tokenizer.keyWord() == JackTokenizer::KeywordElements::RETURN)
             compileReturn();
     }
+
+    *fileStream << "</statements>" << std::endl;
 }
 
 
 void CompilationEngine::compileLet() {
     // 'let' varName ('[' expression ']')? '=' expression ';'
-    tokenizer.advance();    // let
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
 
-    tokenizer.advance();    // varName
+    *fileStream << "<letStatement>" << std::endl;
+
+    // let
+    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+    tokenizer.advance();
+
+    // varName
+    *fileStream << "<identifier> " << tokenizer.identifier() << " </identifier>" << std::endl;
+    tokenizer.advance();
 
     // '[' expression ']'
     if (tokenizer.getCurrentToken() == "[") {
-        tokenizer.advance();    // [
+        *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+        tokenizer.advance();
         compileExpression();
-        tokenizer.advance();    // ]
+        *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+        tokenizer.advance();
     }
 
-    tokenizer.advance();    // =
+    // '='
+    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+    tokenizer.advance();
 
     // expression
     compileExpression();
 
-    tokenizer.advance();    // ;
+    // ';'
+    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+    *fileStream << "</letStatement>" << std::endl;
 }
 
 
 void CompilationEngine::compileIf() {
     // 'if' '(' expression ')' '{' statements '}' ('else' '{'statements'}')?
-    tokenizer.advance();    // if
-    tokenizer.advance();    // (
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<ifStatement>" << std::endl;
+
+    // if
+    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+    tokenizer.advance();
+
+    // '('
+    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+
+    // (expression)
     compileExpression();
-    tokenizer.advance();    // )
-    tokenizer.advance();    // {
+
+    // ')'
+    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+    // {
+    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+    // statements
     compileStatements();
-    tokenizer.advance();    // }
+
+    // }
+    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+    tokenizer.advance();
 
     // 'else' '{'statements'}'
     if (tokenizer.getCurrentToken() == "else") {
-        tokenizer.advance();    // else
-        tokenizer.advance();    // {
+        *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+        tokenizer.advance();
+
+        // '{'
+        *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+        tokenizer.advance();
+
+        // statements
         compileStatements();
-        tokenizer.advance();    // }
+
+        // '}'
+        *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+        tokenizer.advance();
     }
+
+    *fileStream << "</ifStatement>" << std::endl;
 }
 
 
 void CompilationEngine::compileWhile() {
     // while '(' expression ')' '{' statements '}'
-    tokenizer.advance();    // while
-    tokenizer.advance();    // (
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<whileStatement>" << std::endl;
+
+    // while
+    *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
+    tokenizer.advance();
+
+    // '('
+    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+    // expression
     compileExpression();
-    tokenizer.advance();    // )
-    tokenizer.advance();    // {
+
+    // ')'
+    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+    // '{'
+    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+    // statements
     compileStatements();
-    tokenizer.advance();    // }
+
+    // '}'
+    *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
+    tokenizer.advance();
+
+    *fileStream << "</whileStatement>" << std::endl;
 }
 
 
 void CompilationEngine::compileDo() {
     // 'do' subroutineCall ';'
     // subroutineName '(' expressionList ')' | (className|varName) '.' subroutineName '(' expressionList ')'
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<doStatement>" << std::endl;
 
     // do
     *fileStream << "<keyword> " << tokenizer.getCurrentToken() << " </keyword>" << std::endl;
@@ -354,6 +521,10 @@ void CompilationEngine::compileReturn() {
 
 void CompilationEngine::compileExpression() {
     // term (op term)*
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<expression>" << std::endl;
 
     // term
     compileTerm();
@@ -368,15 +539,22 @@ void CompilationEngine::compileExpression() {
             tokenizer.getCurrentToken() == "&lt;" ||
             tokenizer.getCurrentToken() == "&gt;" ||
             tokenizer.getCurrentToken() == "=") {
+                *fileStream << "<symbol> " << tokenizer.symbol() << " </symbol>" << std::endl;
                 tokenizer.advance();
                 compileTerm();
             }
+
+    *fileStream << "</expression>" << std::endl;
 }
 
 
 void CompilationEngine::compileTerm() {
     // integerConstant | stringConstant | keywordConstant | varName | varName'[' expression ']' | '(' expression ')' |
     // (unaryOp term) | subroutineCall
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>>::const_iterator currentFileObj = outputFiles.find(currentFile);
+    const std::unique_ptr<std::ofstream> &fileStream = currentFileObj->second;
+
+    *fileStream << "<term>" << std::endl;
 
     switch (tokenizer.tokenType()) {
         case JackTokenizer::TokenElements::INT_CONST:
@@ -395,8 +573,8 @@ void CompilationEngine::compileTerm() {
             // varName
             *fileStream << "<identifier>" << std::endl;
             *fileStream << "<name>" << tokenizer.identifier() << "</name>" << std::endl;
-            *fileStream << "<category>" << symbolTableClass.kindOf(tokenizer.identifier()) << "</category>" << std::endl;
-            *fileStream << "<index>" << symbolTableClass.indexOf(tokenizer.identifier()) << "</index>" << std::endl;
+            *fileStream << "<category>" << symbolTable.kindOf(tokenizer.identifier()) << "</category>" << std::endl;
+            *fileStream << "<index>" << symbolTable.indexOf(tokenizer.identifier()) << "</index>" << std::endl;
             *fileStream << "<usage>used</usage>" << std::endl;
             *fileStream << "</identifier>" << std::endl;
             tokenizer.advance();
@@ -444,6 +622,8 @@ void CompilationEngine::compileTerm() {
             } 
             break;
     }
+
+    *fileStream << "</term>" << std::endl;
 }
 
 
