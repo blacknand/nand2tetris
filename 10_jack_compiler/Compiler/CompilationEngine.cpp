@@ -35,11 +35,11 @@ CompilationEngine::CompilationEngine(std::string inputFile, std::string outputFi
         std::string outputFileName;
 
         if (std::filesystem::is_directory(outputFileArg))
-            outputFileName = (std::filesystem::path(outputFileArg) / (filePath.stem().string() + ".vm")).string();
+            outputFileName = (std::filesystem::path(outputFileArg) / (filePath.stem().string() + ".xml")).string();
         else if (jackFiles.size() == 1)
             outputFileName = outputFileArg;
 
-        outputFiles[jackFile.string()] = outputFileName;
+        outputFiles[jackFile.string()] = std::make_unique<std::ofstream>(outputFileName.c_str());
     }
 }
 
