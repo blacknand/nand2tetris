@@ -14,10 +14,15 @@
 
 class CompilationEngine {
     private:
+        static const std::unordered_map<char, int> hackCharacterMap;
+        std::unordered_map<std::string, std::string> outputFiles;
         std::unordered_map<std::string, std::unique_ptr<std::ofstream>> outputFiles;
         std::string currentFile;
         JackTokenizer tokenizer;
-        SymbolTable symbolTable;
+        SymbolTable symbolTableClass;
+        SymbolTable symbolTableSubroutine;
+        std::string currentClass;
+        std::string currentFunction;
     public:
         CompilationEngine(std::string inputFile, std::string outputFileArg);
         void compileClass();
@@ -35,7 +40,7 @@ class CompilationEngine {
         void compileExpression();
         void compileTerm();
         int compileExpressionList();
-        const std::unordered_map<std::string, std::unique_ptr<std::ofstream>>& getOutputFiles() const;
+        const std::unordered_map<std::string, std::string>& getOutputFiles() const;
         void setOutputFile(std::string fileName);
 };
 
