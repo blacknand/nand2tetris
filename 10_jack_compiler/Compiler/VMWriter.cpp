@@ -15,33 +15,33 @@ void VMWriter::initializer(const std::string &outputFile) {
 }
 
 
-void VMWriter::writePush(const std::string &segment, const int &index, std::string comment) {
-    vmFile << "push " << segment << " " << index << "   " << comment << std::endl;
+void VMWriter::writePush(const std::string &segment, const int &index) {
+    vmFile << "push " << segment << " " << index << std::endl;
 }
 
 
-void VMWriter::writePop(const std::string &segment, const int &index, std::string comment) {
-    vmFile << "pop " << segment << " " << index << "    " << comment << std::endl;
+void VMWriter::writePop(const std::string &segment, const int &index) {
+    vmFile << "pop " << segment << " " << index << std::endl;
 }
 
 
-void VMWriter::writeArithmetic(const std::string &command, std::string comment) {
-    vmFile << command << "  " << comment << std::endl;
+void VMWriter::writeArithmetic(const std::string &command) {
+    vmFile << command << std::endl;
 }
 
 
-void VMWriter::writeLabel(const std::string &label, std::string comment) {
-    vmFile << "label " << label << "    " << comment << std::endl; 
+void VMWriter::writeLabel(const std::string &label) {
+    vmFile << "label " << label << std::endl; 
 }
 
 
-void VMWriter::writeGoto(const std::string &label, std::string comment) {
-    vmFile << "goto " << label << "     " << comment << std::endl;
+void VMWriter::writeGoto(const std::string &label) {
+    vmFile << "goto " << label << std::endl;
 }
 
 
-void VMWriter::writeIf(const std::string &label, std::string comment) {
-    vmFile << "if-goto " << label << "      " << comment << std::endl;
+void VMWriter::writeIf(const std::string &label) {
+    vmFile << "if-goto " << label << std::endl;
 }
 
 

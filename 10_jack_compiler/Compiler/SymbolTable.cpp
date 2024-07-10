@@ -15,16 +15,16 @@ void SymbolTable::reset() {
 
 
 void SymbolTable::define(const std::string &name, const std::string &type, const std::string &kind) {
-    if (kind == "static") {
+    if (kind == "STATIC") {
         symbolTable[name] = {type, kind, staticIndex};
         staticIndex++;
-    } else if (kind == "field") {
+    } else if (kind == "FIELD") {
         symbolTable[name] = {type, kind, fieldIndex} ;
         fieldIndex++;
-    } else if (kind == "argument") {
+    } else if (kind == "ARG") {
         symbolTable[name] = {type, kind, argIndex};
         argIndex++;
-    } else if (kind == "var") {
+    } else if (kind == "VAR") {
         symbolTable[name] = {type, kind, varIndex};
         varIndex++;
     }
@@ -32,10 +32,10 @@ void SymbolTable::define(const std::string &name, const std::string &type, const
 
 
 int SymbolTable::varCount(const std::string &kind) const {
-    if (kind == "static") return staticIndex;
-    if (kind == "field") return fieldIndex;
-    if (kind == "argument") return argIndex;
-    if (kind == "var") return varIndex;
+    if (kind == "STATIC") return staticIndex;
+    if (kind == "FIELD") return fieldIndex;
+    if (kind == "ARG") return argIndex;
+    if (kind == "VAR") return varIndex;
     return 0;
 }
 
@@ -44,7 +44,7 @@ std::string SymbolTable::kindOf(const std::string &name) const {
     std::unordered_map<std::string, SymbolTable::Symbol>::const_iterator tableCode = symbolTable.find(name);
     if (tableCode != symbolTable.end())
         return tableCode->second.kind;
-    return "none";
+    return "NONE";
 }
 
 
@@ -52,7 +52,7 @@ std::string SymbolTable::typeOf(const std::string &name) const {
     std::unordered_map<std::string, SymbolTable::Symbol>::const_iterator tableCode = symbolTable.find(name);
     if (tableCode != symbolTable.end())
         return tableCode->second.type;
-    return "none";
+    return "NONE";
 }
 
 

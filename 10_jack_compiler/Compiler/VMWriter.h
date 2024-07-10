@@ -9,12 +9,12 @@ class VMWriter {
         std::ofstream vmFile;
     public:
         void initializer(const std::string &outputFile);
-        void writePush(const std::string &segment, const int &index, std::string comment = "");
-        void writePop(const std::string &segment, const int &index, std::string comment = "");
-        void writeArithmetic(const std::string &command, std::string comment = "");
-        void writeLabel(const std::string &label, std::string comment = "");
-        void writeGoto(const std::string &label, std::string comment = "");
-        void writeIf(const std::string &label, std::string comment = "");
+        void writePush(const std::string &segment, const int &index);
+        void writePop(const std::string &segment, const int &index);
+        void writeArithmetic(const std::string &command);
+        void writeLabel(const std::string &label);
+        void writeGoto(const std::string &label);
+        void writeIf(const std::string &label);
         void writeCall(const std::string &label, const int &nVars);
         void writeFunction(const std::string &label, const int &nVars);
         void writeReturn();

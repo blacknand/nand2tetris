@@ -43,7 +43,6 @@ class CompilationEngine {
         int compileExpressionList();
         const std::unordered_map<std::string, std::string>& getOutputFiles() const;
         void setOutputFile(std::string fileName);
-        std::pair<std::string, int> getVariableInfo(const std::string &varName);
 };
 
 #endif  // COMPILATION_ENGINE
