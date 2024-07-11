@@ -18,9 +18,9 @@ int main(int argc, char **argv) {
         JackTokenizer curFileTokenizer;
 
         const std::string &curFileName = filePair.first;
-        const std::unique_ptr<std::ofstream> &curFileStream = filePair.second;
+        const std::string &curVMFile = filePair.second;
         curFileTokenizer.initializer(curFileName);
-        initialFileObj.setOutputFile(curFileName);
+        initialFileObj.setOutputFile(curVMFile);
         initialFileObj.compileClass();
         curFileTokenizer.resetToken();
         curFileTokenizer.clearTokens();
