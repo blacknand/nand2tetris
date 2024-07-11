@@ -101,16 +101,16 @@ void JackTokenizer::initializer(std::string inputFile) {
                         // Format XML codes
                         switch(c) {
                             case '<':
-                                tokens.push_back({"&lt;", lineIndex, tokenIndex});
+                                tokens.push_back({"<;", lineIndex, tokenIndex});
                                 break;
                             case '>':
-                                tokens.push_back({"&gt;", lineIndex, tokenIndex});
+                                tokens.push_back({">;", lineIndex, tokenIndex});
                                 break;
                             case '&':
-                                tokens.push_back({"&amp;", lineIndex, tokenIndex});
+                                tokens.push_back({"&;", lineIndex, tokenIndex});
                                 break;
                             case '\"':
-                                tokens.push_back({"&quot;", lineIndex, tokenIndex});
+                                tokens.push_back({"\";", lineIndex, tokenIndex});
                                 break;
                             default:
                                 tokens.push_back({std::string(1, c), lineIndex, tokenIndex});
@@ -181,8 +181,8 @@ const JackTokenizer::KeywordElements JackTokenizer::keyWord() {
 
 
 const std::string JackTokenizer::symbol() {
-    if (currentToken == "&lt;" || currentToken == "&gt;" ||
-        currentToken == "&amp;" || currentToken == "&quot;") {
+    if (currentToken == "<;" || currentToken == ">;" ||
+        currentToken == "&;" || currentToken == "\";") {
         return currentToken;
     }
     
