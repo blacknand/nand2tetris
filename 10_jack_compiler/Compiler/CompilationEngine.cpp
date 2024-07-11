@@ -1,5 +1,3 @@
-// note: x means tokenizer.advance() will advance so that the current token is x
-
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
@@ -142,6 +140,7 @@ void CompilationEngine::compileSubroutine() {
     tokenizer.advance();    // subroutineName
     std::string subroutineName = tokenizer.identifier();
     std::string fullSubroutineName = currentClass + "." + tokenizer.identifier();
+    tokenizer.advance();
 
     if (subroutineCat == "method")
         symbolTableSubroutine.define(currentClass + "." + tokenizer.identifier(), "this", "argument");
@@ -318,87 +317,57 @@ void CompilationEngine::compileLet() {
 
 
 void CompilationEngine::compileIf() {
-    // 'if' '(' expression ')' '{' statements '}' ('else' '{'statements'}')?
     static int labelCounter = 0;
     int currentLabel = labelCounter++;
     std::string labelTrue = "IF_TRUE" + std::to_string(currentLabel);
     std::string labelFalse = "IF_FALSE" + std::to_string(currentLabel);
+    std::string labelEnd = "IF_END" + std::to_string(currentLabel);
 
-    /*
-        compiled(expression)
-        not
-        if-goto L1
-        compiled(statements)
-        goto L2
-    Label L1
-        compiled(statements)
-    Label L2
-    */
-
-    tokenizer.advance();    // if
-    tokenizer.advance();    // (
-    compileExpression();
-    tokenizer.advance();    // )
-
+    tokenizer.advance(); // if
+    tokenizer.advance(); // (
+    compileExpression(); 
+    tokenizer.advance(); // )
     vmWriter.writeArithmetic("not");
     vmWriter.writeIf(labelFalse);
 
-    tokenizer.advance();    // {
+    tokenizer.advance(); // {
     compileStatements();
-    tokenizer.advance();    // }
+    tokenizer.advance(); // }
 
-    vmWriter.writeGoto(labelTrue);   // Skip else if condition is true
+    vmWriter.writeGoto(labelEnd);
     vmWriter.writeLabel(labelFalse);
 
-
-    // 'else' '{'statements'}'
     if (tokenizer.getCurrentToken() == "else") {
-        tokenizer.advance();    // else
-        tokenizer.advance();    // {
+        tokenizer.advance(); // else
+        tokenizer.advance(); // {
         compileStatements();
-        tokenizer.advance();    // }
+        tokenizer.advance(); // }
     }
 
-    vmWriter.writeLabel(labelTrue);
+    vmWriter.writeLabel(labelEnd);
 }
 
 
 void CompilationEngine::compileWhile() {
-    // while '(' expression ')' '{' statements '}'
-
-    /*
-    Label L1
-        compiled (expression)
-        not
-        if-goto L2
-        compiled (statements)
-        goto L1
-    Label L2
-    ...
-    */
-
-    static int labelCounter = 0;  
+    static int labelCounter = 0;
     int currentLabel = labelCounter++;
     std::string labelStart = "WHILE_EXP" + std::to_string(currentLabel);
     std::string labelEnd = "WHILE_END" + std::to_string(currentLabel);
-    
-    tokenizer.advance();    // while
-    tokenizer.advance();    // (
 
+    tokenizer.advance(); // while
+    tokenizer.advance(); // (
     vmWriter.writeLabel(labelStart);
-    
     compileExpression();
-    tokenizer.advance();    // )
+    tokenizer.advance(); // )
     vmWriter.writeArithmetic("not");
-    
     vmWriter.writeIf(labelEnd);
 
-    tokenizer.advance();    // {
+    tokenizer.advance(); // {
     compileStatements();
-    tokenizer.advance();    // }
+    tokenizer.advance(); // }
 
     vmWriter.writeGoto(labelStart);
-    vmWriter.writeGoto(labelEnd);
+    vmWriter.writeLabel(labelEnd);
 }
 
 
