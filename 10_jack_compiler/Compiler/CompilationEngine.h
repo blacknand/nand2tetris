@@ -25,6 +25,9 @@ class CompilationEngine {
         std::string currentClass;
         std::string currentFunction;
         std::string currentFullSubroutineName;
+        int labelInt = 0;
+        int whileLabelInt = 0;
+        int ifLabelInt = 0;
     public:
         CompilationEngine(std::string inputFile, std::string outputFileArg);
         void compileClass();

@@ -97,34 +97,37 @@ void CompilationEngine::compileClassVarDec() {
     // ('static'|'field') type varName (',' varName)* ';'
 
     // ('static'|'field')
-    std::string cat = tokenizer.getCurrentToken();
-    tokenizer.advance();
+    std::string kind = tokenizer.getCurrentToken(); // static or field
+    tokenizer.advance(); // Advance past 'static' or 'field'
 
     // type
-    std::string typeDec;
-    if (tokenizer.tokenType() == JackTokenizer::TokenElements::KEYWORD)
-        typeDec = tokenizer.getCurrentToken();
-    else 
-        typeDec = tokenizer.identifier();
-    tokenizer.advance();    // varName
+    std::string type = tokenizer.getCurrentToken();
+    tokenizer.advance(); // Advance past type
 
-    // varname (',' varName)*
-    while (true) {
-        symbolTableClass.define(tokenizer.identifier(), typeDec, cat);
-        tokenizer.advance();    // , or (
-        if (tokenizer.getCurrentToken() == ",")
-            tokenizer.advance();
-        else
-            break;
+    // varName
+    std::string name = tokenizer.getCurrentToken();
+    symbolTableClass.define(name, type, kind); // Define the first varName
+    tokenizer.advance(); // Advance past varName
+
+    // (',' varName)*
+    while (tokenizer.getCurrentToken() == ",") {
+        tokenizer.advance(); // Advance past ','
+        name = tokenizer.getCurrentToken();
+        symbolTableClass.define(name, type, kind); // Define subsequent varNames
+        tokenizer.advance(); // Advance past varName
     }
 
-    tokenizer.advance();    // ;
+    tokenizer.advance(); // Advance past ';'
 }
+
 
 
 void CompilationEngine::compileSubroutine() {
     // ('constructor'|'function'|'method') ('void'|type) subroutineName '('paramaterList')' subroutineBody
     symbolTableSubroutine.reset();
+    labelInt = 0;
+    whileLabelInt = 0;
+    ifLabelInt = 0;
 
     // ('constructor'|'function'|'method')
     std::string subroutineCat = tokenizer.identifier();
@@ -308,11 +311,10 @@ void CompilationEngine::compileLet() {
 
 
 void CompilationEngine::compileIf() {
-    static int labelInt = 0;
-    labelInt++;
-    std::string trueLabel = "IF_TRUE" + std::to_string(labelInt);
-    std::string falseLabel = "IF_FALSE" + std::to_string(labelInt);
-    std::string endLabel = "IF_END" + std::to_string(labelInt);
+    int currentLabel = ifLabelInt++;
+    std::string trueLabel = "IF_TRUE" + std::to_string(currentLabel);
+    std::string falseLabel = "IF_FALSE" + std::to_string(currentLabel);
+    std::string endLabel = "IF_END" + std::to_string(currentLabel);
 
     tokenizer.advance();    // if
     tokenizer.advance();    // (
@@ -332,10 +334,10 @@ void CompilationEngine::compileIf() {
 
     // else {statements}
     if (tokenizer.getCurrentToken() == "else") {
-        tokenizer.advance();
-        tokenizer.advance();
+        tokenizer.advance(); // else
+        tokenizer.advance(); // {
         compileStatements();
-        tokenizer.advance();
+        tokenizer.advance(); // }
     }
 
     vmWriter.writeLabel(endLabel);
@@ -343,23 +345,22 @@ void CompilationEngine::compileIf() {
 
 
 void CompilationEngine::compileWhile() {
-    static int labelInt = 0;
-    labelInt++;
-    std::string whileLabel = "WHILE_START" + std::to_string(labelInt);
-    std::string endLabel = "WHILE_END" + std::to_string(labelInt);
+    int currentLabel = whileLabelInt++;
+    std::string whileLabel = "WHILE_EXP" + std::to_string(currentLabel);
+    std::string endLabel = "WHILE_END" + std::to_string(currentLabel);
 
     tokenizer.advance();    // while
     tokenizer.advance();    // (
 
     vmWriter.writeLabel(whileLabel);
-    compileExpression();   
+    compileExpression();
     tokenizer.advance();    // )
 
     vmWriter.writeArithmetic("not");
     vmWriter.writeIf(endLabel);
 
     tokenizer.advance();    // {
-    compileStatements();    
+    compileStatements();
     tokenizer.advance();    // }
 
     vmWriter.writeGoto(whileLabel);
