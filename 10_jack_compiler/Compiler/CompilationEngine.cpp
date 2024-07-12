@@ -150,7 +150,7 @@ void CompilationEngine::compileSubroutine() {
     compileParamaterList();
     tokenizer.advance();    // )
 
-    vmWriter.writeFunction(fullSubroutineName, symbolTableSubroutine.varCount("local"));
+    vmWriter.writeFunction(fullSubroutineName, countNLocals());
 
     // Allign this with base address on which object was called upon
     if (subroutineCat == "method") {
@@ -159,20 +159,11 @@ void CompilationEngine::compileSubroutine() {
     } else if (subroutineCat == "constructor") {
         vmWriter.writePush("constant", symbolTableSubroutine.varCount("field"));
         vmWriter.writeCall("Memory.alloc", 1);
+        vmWriter.writePush("pointer", 0);
     }
 
     // subroutineBody '{' varDec* statements '}'
     compileSubroutineBody();
-
-    if (subroutineCat == "constructor") {
-        vmWriter.writePush("pointer", 0);
-        vmWriter.writeReturn();
-    }
-
-    if (subroutineType == "void") {
-        vmWriter.writePush("constant", 0);
-        vmWriter.writeReturn();
-    }
 }
 
 
@@ -317,57 +308,62 @@ void CompilationEngine::compileLet() {
 
 
 void CompilationEngine::compileIf() {
-    static int labelCounter = 0;
-    int currentLabel = labelCounter++;
-    std::string labelTrue = "IF_TRUE" + std::to_string(currentLabel);
-    std::string labelFalse = "IF_FALSE" + std::to_string(currentLabel);
-    std::string labelEnd = "IF_END" + std::to_string(currentLabel);
+    static int labelInt = 0;
+    labelInt++;
+    std::string trueLabel = "IF_TRUE" + std::to_string(labelInt);
+    std::string falseLabel = "IF_FALSE" + std::to_string(labelInt);
+    std::string endLabel = "IF_END" + std::to_string(labelInt);
 
-    tokenizer.advance(); // if
-    tokenizer.advance(); // (
-    compileExpression(); 
-    tokenizer.advance(); // )
-    vmWriter.writeArithmetic("not");
-    vmWriter.writeIf(labelFalse);
+    tokenizer.advance();    // if
+    tokenizer.advance();    // (
+    compileExpression();
+    tokenizer.advance();    // )
 
-    tokenizer.advance(); // {
+    vmWriter.writeIf(trueLabel);
+    vmWriter.writeGoto(falseLabel);
+    vmWriter.writeLabel(trueLabel);
+
+    tokenizer.advance();    // {
     compileStatements();
-    tokenizer.advance(); // }
+    tokenizer.advance();    // }
 
-    vmWriter.writeGoto(labelEnd);
-    vmWriter.writeLabel(labelFalse);
+    vmWriter.writeGoto(endLabel);
+    vmWriter.writeLabel(falseLabel);
 
+    // else {statements}
     if (tokenizer.getCurrentToken() == "else") {
-        tokenizer.advance(); // else
-        tokenizer.advance(); // {
+        tokenizer.advance();
+        tokenizer.advance();
         compileStatements();
-        tokenizer.advance(); // }
+        tokenizer.advance();
     }
 
-    vmWriter.writeLabel(labelEnd);
+    vmWriter.writeLabel(endLabel);
 }
 
 
 void CompilationEngine::compileWhile() {
-    static int labelCounter = 0;
-    int currentLabel = labelCounter++;
-    std::string labelStart = "WHILE_EXP" + std::to_string(currentLabel);
-    std::string labelEnd = "WHILE_END" + std::to_string(currentLabel);
+    static int labelInt = 0;
+    labelInt++;
+    std::string whileLabel = "WHILE_START" + std::to_string(labelInt);
+    std::string endLabel = "WHILE_END" + std::to_string(labelInt);
 
-    tokenizer.advance(); // while
-    tokenizer.advance(); // (
-    vmWriter.writeLabel(labelStart);
-    compileExpression();
-    tokenizer.advance(); // )
+    tokenizer.advance();    // while
+    tokenizer.advance();    // (
+
+    vmWriter.writeLabel(whileLabel);
+    compileExpression();   
+    tokenizer.advance();    // )
+
     vmWriter.writeArithmetic("not");
-    vmWriter.writeIf(labelEnd);
+    vmWriter.writeIf(endLabel);
 
-    tokenizer.advance(); // {
-    compileStatements();
-    tokenizer.advance(); // }
+    tokenizer.advance();    // {
+    compileStatements();    
+    tokenizer.advance();    // }
 
-    vmWriter.writeGoto(labelStart);
-    vmWriter.writeLabel(labelEnd);
+    vmWriter.writeGoto(whileLabel);
+    vmWriter.writeLabel(endLabel);
 }
 
 
@@ -445,6 +441,8 @@ void CompilationEngine::compileReturn() {
         tokenizer.getCurrentToken() == "-" ||
         tokenizer.getCurrentToken() == "~")
             compileExpression();
+    else
+        vmWriter.writePush("constant", 0);
 
     vmWriter.writeReturn();
     tokenizer.advance();    // ;
@@ -574,6 +572,7 @@ void CompilationEngine::compileTerm() {
                 tokenizer.advance();
                 nArgs += compileExpressionList();
                 tokenizer.advance();
+                std::string debugStr = subroutineType + "." + subroutineName;
                 vmWriter.writeCall(subroutineType + "." + subroutineName, nArgs);
             } else {
                 // Push variable onto stack
@@ -643,4 +642,27 @@ const std::unordered_map<std::string, std::string>& CompilationEngine::getOutput
 
 void CompilationEngine::setOutputFile(std::string fileName) {
     currentFile = fileName;
+}
+
+
+int CompilationEngine::countNLocals() {
+    int savedIndex = tokenizer.getCurrentIndex();
+    int nLocals = 0;
+    tokenizer.advance();
+    while (tokenizer.getCurrentToken() == "var") {
+        tokenizer.advance();
+        tokenizer.advance();
+        while (true) {
+            nLocals++;
+            tokenizer.advance();
+            if (tokenizer.getCurrentToken() == ",")
+                tokenizer.advance();
+            else
+                break;
+        }
+        tokenizer.advance();
+    }
+    tokenizer.setCurrentPos(savedIndex);
+
+    return nLocals;
 }

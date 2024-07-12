@@ -24,6 +24,7 @@ class CompilationEngine {
         VMWriter vmWriter;
         std::string currentClass;
         std::string currentFunction;
+        std::string currentFullSubroutineName;
     public:
         CompilationEngine(std::string inputFile, std::string outputFileArg);
         void compileClass();
@@ -43,6 +44,7 @@ class CompilationEngine {
         int compileExpressionList();
         const std::unordered_map<std::string, std::string>& getOutputFiles() const;
         void setOutputFile(std::string fileName);
+        int countNLocals();
 };
 
 #endif  // COMPILATION_ENGINE

@@ -25,8 +25,5 @@ int main(int argc, char **argv) {
         curFileTokenizer.resetToken();
         curFileTokenizer.clearTokens();
     }
-
-    VMWriter vmWriterTest;
-
     return 0;
 }
