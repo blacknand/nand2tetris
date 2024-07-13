@@ -153,6 +153,7 @@ void CompilationEngine::compileSubroutine() {
     compileParamaterList();
     tokenizer.advance();    // )
 
+
     vmWriter.writeFunction(fullSubroutineName, countNLocals());
 
     // Allign this with base address on which object was called upon
@@ -160,9 +161,9 @@ void CompilationEngine::compileSubroutine() {
         vmWriter.writePush("argument", 0);
         vmWriter.writePop("pointer", 0);
     } else if (subroutineCat == "constructor") {
-        vmWriter.writePush("constant", symbolTableSubroutine.varCount("field"));
+        vmWriter.writePush("constant", symbolTableClass.varCount("field"));
         vmWriter.writeCall("Memory.alloc", 1);
-        vmWriter.writePush("pointer", 0);
+        vmWriter.writePop("pointer", 0);
     }
 
     // subroutineBody '{' varDec* statements '}'
@@ -273,11 +274,16 @@ void CompilationEngine::compileLet() {
     // '[' expression ']'
     if (tokenizer.getCurrentToken() == "[") {
         tokenizer.advance();    // [
+        std::string kind;
+        int index;
         if (symbolTableSubroutine.kindOf(varName) != "none") {
-            vmWriter.writePush(symbolTableSubroutine.kindOf(varName), symbolTableSubroutine.indexOf(varName));
+            kind = symbolTableSubroutine.kindOf(varName);
+            index = symbolTableSubroutine.indexOf(varName);
         } else {
-            vmWriter.writePush(symbolTableClass.kindOf(varName), symbolTableClass.indexOf(varName));
+            kind = symbolTableClass.kindOf(varName);
+            index = symbolTableClass.indexOf(varName);
         }
+        vmWriter.writePush(symbolTableClass.segmentOf(kind), index);
         compileExpression();
         vmWriter.writeArithmetic("add");
         tokenizer.advance();    // ]
@@ -304,7 +310,7 @@ void CompilationEngine::compileLet() {
             kind = symbolTableClass.kindOf(varName);
             index = symbolTableClass.indexOf(varName);
         }
-        vmWriter.writePop(kind, index);
+        vmWriter.writePop(symbolTableClass.segmentOf(kind), index);
     }
     tokenizer.advance();    // ;
 }
@@ -329,19 +335,20 @@ void CompilationEngine::compileIf() {
     compileStatements();
     tokenizer.advance();    // }
 
-    vmWriter.writeGoto(endLabel);
-    vmWriter.writeLabel(falseLabel);
-
     // else {statements}
     if (tokenizer.getCurrentToken() == "else") {
         tokenizer.advance(); // else
         tokenizer.advance(); // {
+        vmWriter.writeGoto(endLabel); // Add this line
+        vmWriter.writeLabel(falseLabel); // Move this line
         compileStatements();
         tokenizer.advance(); // }
+        vmWriter.writeLabel(endLabel); // Add this line
+    } else {
+        vmWriter.writeLabel(falseLabel); // Add this line
     }
-
-    vmWriter.writeLabel(endLabel);
 }
+
 
 
 void CompilationEngine::compileWhile() {
@@ -366,6 +373,8 @@ void CompilationEngine::compileWhile() {
     vmWriter.writeGoto(whileLabel);
     vmWriter.writeLabel(endLabel);
 }
+
+
 
 
 void CompilationEngine::compileDo() {
@@ -399,7 +408,7 @@ void CompilationEngine::compileDo() {
 
         if (kind != "none") {
                 // Method on other object
-                vmWriter.writePush(kind, index);    // Push obj reference onto stack
+                vmWriter.writePush(symbolTableClass.segmentOf(kind), index);    // Push obj reference onto stack
 
                 if (symbolTableSubroutine.typeOf(mainIdentifier) != "none") {
                     fullSubroutineName = symbolTableSubroutine.typeOf(mainIdentifier) + "." + subroutineName;
@@ -515,8 +524,8 @@ void CompilationEngine::compileTerm() {
             if (tokenizer.getCurrentToken() == "null" || tokenizer.getCurrentToken() == "false")
                 vmWriter.writePush("constant", 0);
             else if (tokenizer.getCurrentToken() == "true") {
-                vmWriter.writePush("constant", 1);
-                vmWriter.writeArithmetic("neg");
+                vmWriter.writePush("constant", 0);
+                vmWriter.writeArithmetic("not");
             } else if (tokenizer.getCurrentToken() == "this") 
                 vmWriter.writePush("pointer", 0);
             tokenizer.advance();
@@ -533,10 +542,16 @@ void CompilationEngine::compileTerm() {
                 tokenizer.advance();
 
                 // Push base address of array
-                if (symbolTableSubroutine.kindOf(mainIdentifier) != "none")
-                    vmWriter.writePush(symbolTableSubroutine.kindOf(mainIdentifier), symbolTableSubroutine.indexOf(mainIdentifier));
-                else
-                    vmWriter.writePush(symbolTableClass.kindOf(mainIdentifier), symbolTableClass.indexOf(mainIdentifier));
+                std::string kind;
+                int index;
+                if (symbolTableSubroutine.kindOf(mainIdentifier) != "none") {
+                    kind = symbolTableSubroutine.kindOf(mainIdentifier);
+                    index = symbolTableSubroutine.indexOf(mainIdentifier);
+                } else {
+                    kind = symbolTableClass.kindOf(mainIdentifier);
+                    index = symbolTableClass.indexOf(mainIdentifier);
+                }
+                vmWriter.writePush(symbolTableClass.segmentOf(kind), index);
 
                 vmWriter.writeArithmetic("add");
                 vmWriter.writePop("pointer", 1);
@@ -553,12 +568,18 @@ void CompilationEngine::compileTerm() {
                     tokenizer.advance();    // subroutineName
 
                     // Method/constructor call on other obj
+                    std::string kind;
+                    int index;
                     if (symbolTableSubroutine.kindOf(subroutineType) != "none") {
-                        vmWriter.writePush(symbolTableSubroutine.kindOf(subroutineType), symbolTableSubroutine.indexOf(subroutineType));
+                        kind = symbolTableSubroutine.kindOf(subroutineType);
+                        index = symbolTableSubroutine.indexOf(subroutineType);
+                        vmWriter.writePush(symbolTableSubroutine.segmentOf(kind), index);
                         nArgs = 1;
                         subroutineType = symbolTableSubroutine.typeOf(subroutineType);
                     } else if (symbolTableClass.kindOf(subroutineType) != "none") {
-                        vmWriter.writePush(symbolTableClass.kindOf(subroutineType), symbolTableClass.indexOf(subroutineType));
+                        kind = symbolTableClass.kindOf(subroutineType);
+                        index = symbolTableClass.indexOf(subroutineType);
+                        vmWriter.writePush(symbolTableClass.segmentOf(kind), index);
                         nArgs = 1;
                         subroutineType = symbolTableClass.typeOf(subroutineType);
                     }
@@ -573,7 +594,6 @@ void CompilationEngine::compileTerm() {
                 tokenizer.advance();
                 nArgs += compileExpressionList();
                 tokenizer.advance();
-                std::string debugStr = subroutineType + "." + subroutineName;
                 vmWriter.writeCall(subroutineType + "." + subroutineName, nArgs);
             } else {
                 // Push variable onto stack
@@ -586,7 +606,7 @@ void CompilationEngine::compileTerm() {
                     kind = symbolTableClass.kindOf(mainIdentifier);
                     index = symbolTableClass.indexOf(mainIdentifier);
                 }
-                vmWriter.writePush(kind, index);
+                vmWriter.writePush(symbolTableClass.segmentOf(kind), index);
             }
             break;
         }
