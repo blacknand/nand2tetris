@@ -19,6 +19,7 @@ class SymbolTable {
         std::string kindOf(const std::string &name) const;
         std::string typeOf(const std::string &name) const;
         int indexOf(const std::string &name) const;
+        std::string segmentOf(const std::string &kind) const;
 };
 
 #endif  // SYMBOL_TABLE_H

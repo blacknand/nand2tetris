@@ -62,3 +62,12 @@ int SymbolTable::indexOf(const std::string &name) const {
         return tableCode->second.index;
     return -1;
 }
+
+
+std::string SymbolTable::segmentOf(const std::string &kind) const {
+    if (kind == "static") return "static";
+    if (kind == "field") return "this";
+    if (kind == "argument") return "argument";
+    if (kind == "local") return "local";
+    return "";  // Invalid kind
+}

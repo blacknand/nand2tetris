@@ -515,7 +515,7 @@ void CompilationEngine::compileTerm() {
             vmWriter.writeCall("String.new", 1);
             for (auto c: tokenizer.stringVal()) {
                 vmWriter.writePush("constant", hackCharacterMap.at(c));
-                vmWriter.writeCall("String.appendChar", 1);
+                vmWriter.writeCall("String.appendChar", 2);
             }
             tokenizer.advance();
             break;
