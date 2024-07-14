@@ -50,6 +50,7 @@ class JackTokenizer {
         static const std::unordered_map<std::string, TokenElements> keywordMap;
         static const std::unordered_map<char, TokenElements> symbolMap;
         static const std::unordered_map<std::string, KeywordElements> tokenKeywordMap;
+        static int savedIndex;
     public:
         void initializer(std::string inputFile);
         bool hasMoreTokens();
@@ -64,6 +65,9 @@ class JackTokenizer {
         std::string getCurrentToken();
         void resetToken();
         void clearTokens();
+        void setCurrentPos(int index);
+        void resetPos();
+        int getCurrentIndex();
 };
 
 #endif      // JACK_TOKENIZER

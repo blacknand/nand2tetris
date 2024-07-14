@@ -41,6 +41,7 @@ const std::unordered_map<std::string, JackTokenizer::KeywordElements> JackTokeni
 int JackTokenizer::currentIndex = 0;
 std::string JackTokenizer::currentToken;
 std::vector<JackTokenizer::Token> JackTokenizer::tokens;
+int JackTokenizer::savedIndex = 0;
 
 void JackTokenizer::initializer(std::string inputFile) {
     // Tokenizes input file and adds tokens to 2d vector
@@ -101,16 +102,16 @@ void JackTokenizer::initializer(std::string inputFile) {
                         // Format XML codes
                         switch(c) {
                             case '<':
-                                tokens.push_back({"&lt;", lineIndex, tokenIndex});
+                                tokens.push_back({"<", lineIndex, tokenIndex});
                                 break;
                             case '>':
-                                tokens.push_back({"&gt;", lineIndex, tokenIndex});
+                                tokens.push_back({">", lineIndex, tokenIndex});
                                 break;
                             case '&':
-                                tokens.push_back({"&amp;", lineIndex, tokenIndex});
+                                tokens.push_back({"&", lineIndex, tokenIndex});
                                 break;
                             case '\"':
-                                tokens.push_back({"&quot;", lineIndex, tokenIndex});
+                                tokens.push_back({"\"", lineIndex, tokenIndex});
                                 break;
                             default:
                                 tokens.push_back({std::string(1, c), lineIndex, tokenIndex});
@@ -154,6 +155,24 @@ bool JackTokenizer::hasMoreTokens() {
 void JackTokenizer::advance() {
     currentToken = tokens[currentIndex].token;
     currentIndex++;
+    savedIndex = currentIndex;
+}
+
+
+void JackTokenizer::setCurrentPos(int index) {
+    currentToken = tokens[index].token;
+    currentIndex = index;
+}
+
+
+void JackTokenizer::resetPos() {
+    currentToken = tokens[currentIndex].token;
+    currentIndex = savedIndex;
+}
+
+
+int JackTokenizer::getCurrentIndex() {
+    return currentIndex;
 }
 
 
@@ -181,8 +200,8 @@ const JackTokenizer::KeywordElements JackTokenizer::keyWord() {
 
 
 const std::string JackTokenizer::symbol() {
-    if (currentToken == "&lt;" || currentToken == "&gt;" ||
-        currentToken == "&amp;" || currentToken == "&quot;") {
+    if (currentToken == "<" || currentToken == ">" ||
+        currentToken == "&" || currentToken == "\"") {
         return currentToken;
     }
     
