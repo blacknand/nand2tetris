@@ -1,0 +1,13 @@
+class Main {
+    function void main() {
+        var String str;
+        let str = String.new(20);
+        do str.appendChar(72); // 'H'
+        do str.appendChar(101); // 'e'
+        do str.appendChar(108); // 'l'
+        do str.appendChar(108); // 'l'
+        do str.appendChar(111); // 'o'
+        do Output.printString(str);
+        return;
+    }
+}
