@@ -58,3 +58,6 @@ With the hardware and software infrastructure in place, we develop a simple oper
 + Memory Management: Handling memory allocation and deallocation
 + Process Management: Managing program execution and multitasking
 + I/O Handling: Providing input and output functionalities
++ Mathematics library: Providing the mathematical functions for the OS
++ String library: Providing string handling and functionality
++ OS system initialisation and error handling: Performing all initialisations required by the OS and providing error messages to the user
