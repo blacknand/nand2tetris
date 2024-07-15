@@ -65,13 +65,20 @@ class Math {
         var int q;
         if (y > x) { return 0; }
         let q = Math.divide(x, (2 * y));
-        if ((((x - 2) * q) * y) < y) { return 2 * q; }
+        if ((x - 2 * q * y) < y) { return 2 * q; }
         else { return (2 * q) + 1; }
     }
 
     /** Returns the integer part of the square root of x. */
     function int sqrt(int x) {
-        return 1;
+        var int y, j;
+        let y = 0;
+        let j = 7;      // 2 / 2 - 1 for 16 bit ints, n == 16
+        while (j > 0 | j = 0) {
+            if (((y + twoToThe[j]) * twoToThe[j]) < x | ((y + twoToThe[j]) * twoToThe[j]) = x) { let y = y + twoToThe[j]; }
+            let j = j - 1;
+        }
+        return y;
     }
 
     /** Returns the greater value. */
@@ -89,7 +96,8 @@ class Math {
 
     /** Returns the absolute value of x. */
     function int abs(int x) {
-        return 1;
+        if (x < 0) { return -x; }
+        else { return x; }
     }
 
     /** Returns true if i-th bit of x is 1, false otherwise
