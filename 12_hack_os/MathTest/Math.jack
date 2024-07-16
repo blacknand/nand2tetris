@@ -85,7 +85,6 @@ class Math {
     }
 
     /** Returns the integer part of the square root of x. */
-    // This function does not work at all!
     function int sqrt(int x) {
         var int y, j, approx;
         let y = 0;
