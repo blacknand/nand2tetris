@@ -10,19 +10,23 @@
  * string-oriented operations.
  */
 class String {
-    field String str;
-    field int length;
+    field Array str;
+    field int length, maxLen;
 
     /** constructs a new empty string with a maximum length of maxLength
      *  and initial length of 0. */
     constructor String new(int maxLength) {
-        let str = String.new(maxLength);
+        if (maxLength = 0) { let maxLength = 1; }
+        let str = Array.new(maxLength);
         let length = 0;
+        let maxLen = maxLength;
+        return this;
     }   
 
     /** Disposes this string. */
     method void dispose() {
-        do Memory.deAlloc(str);
+        do Array.dispose(str);
+        return;
     }
 
     /** Returns the current length of this string. */
@@ -38,67 +42,93 @@ class String {
     /** Sets the character at the j-th location of this string to c. */
     method void setCharAt(int j, char c) {
         let str[j] = c;
+        return;
     }
 
     /** Appends c to this string's end and returns this string. */
     method String appendChar(char c) {
-        var String temp;
-        var int i;
-        let temp = String.new(length + 1);
-        let i = 0;
-        while (i < length) {
-            let temp[i] = str[i];
-            let i = i + 1;
+        if (length < maxLen) {
+            let str[length] = c;
+            let length = length + 1;
         }
-        let temp[length + 1] = c;
-        let length = length + 1;
-        return temp;
+        return this;
     }
 
     /** Erases the last character from this string. */
     method void eraseLastChar() {
-        var String temp;
-        var int i;
-        let temp = String.new(length);
-        let i = 0;
-        while (i < length - 1) {
-            temp[i] = str[i];
-            let i = i - 1;
-        }
-        let str = temp;
+        if (length > 0) { let length = length - 1; }
+        return;
     }
 
     /** Returns the integer value of this string, 
      *  until a non-digit character is detected. */
     method int intValue() {
-        var int lastDigit;
-        let lastDigit = Math.divide(val);
+        var int val, i, code;
+        var boolean neg;
+        let val = 0;
+        let i = 0;
+
+        if ((length > 0) & (str[0] = 45)) {      // "-"
+            let neg = true;
+            let i = 1;
+        } else {
+            let neg = false;
+            let i = 0;
+        }
+
+        // While digit char
+        while (i < length & (~(str[i] < 48) & ~(str[i] > 57))) {
+            let code = str[i] - 48;
+            let val = (val * 10)+ code;
+            let i = i + 1;
+        }
+
+        if (neg) { return -val; }
+        else { return val; }
+    }
+
+    function char charDigit(int val) {
+        return val + 48;
     }
 
     /** Sets this string to hold a representation of the given value. */
     method void setInt(int val) {
-        var int i, val, d;
-        var char c;
-        let val = 0;
-        let i = 0;
-        while (i < length) {
-            let c = String.charAt(i);
-            let d = String.intValue(c);
-            let val = val * 10 + d;
-            let i = i + 1;
+        let length = 0;     // Clear string
+        if (val < 0) {
+            let val = -val;
+            do appendChar(45);   // "-"
         }
-        return val;
+        do doSetInt(val);
+        return;
     } 
+
+
+    method void doSetInt(int val) {
+        var int q, mod;
+        var char c;
+        let q = val / 10;
+        let mod = val - (q * 10);
+        let c = String.charDigit(mod);
+        if (val < 10) { do appendChar(c); }
+        else {
+            do doSetInt(q);
+            do appendChar(c);
+        }
+        return;
+    }
 
     /** Returns the new line character. */
     function char newLine() {
+        return 128;
     }
 
     /** Returns the backspace character. */
     function char backSpace() {
+        return 129;
     }
 
     /** Returns the double quote (") character. */
     function char doubleQuote() {
+        return 34;
     }
 }
