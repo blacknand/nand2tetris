@@ -170,9 +170,23 @@ goto WHILE_EXP0
 label WHILE_END0
 push local 0
 return
-function Math.divide 2
-push argument 1
+function Math.divide 7
 push argument 0
+push constant 0
+lt
+pop local 5
+push argument 1
+push constant 0
+lt
+pop local 6
+push argument 0
+call Math.abs 1
+pop local 0
+push argument 1
+call Math.abs 1
+pop local 1
+push local 1
+push local 0
 gt
 if-goto IF_TRUE0
 goto IF_FALSE0
@@ -180,40 +194,50 @@ label IF_TRUE0
 push constant 0
 return
 label IF_FALSE0
-push argument 0
-push argument 1
-push argument 1
+push local 0
+push local 1
+push local 1
 add
 call Math.divide 2
-pop local 0
-push local 0
-push local 0
+pop local 2
+push local 2
+push local 2
 add
-pop local 1
-push argument 0
+pop local 3
+push local 0
+push local 3
 push local 1
-sub
-push argument 1
 call Math.multiply 2
-push argument 1
+sub
+push local 1
 lt
 if-goto IF_TRUE1
 goto IF_FALSE1
 label IF_TRUE1
-push local 0
-push local 0
-add
-return
+push local 3
+pop local 4
 goto IF_END1
 label IF_FALSE1
-push local 0
-push local 0
-add
+push local 3
 push constant 1
 add
-return
+pop local 4
 label IF_END1
-function Math.sqrt 2
+push local 5
+push local 6
+eq
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push local 4
+return
+goto IF_END2
+label IF_FALSE2
+push local 4
+neg
+return
+label IF_END2
+function Math.sqrt 3
 push constant 0
 pop local 0
 push constant 7
@@ -221,11 +245,8 @@ pop local 1
 label WHILE_EXP0
 push local 1
 push constant 0
-gt
-push local 1
-or
-push constant 0
-eq
+lt
+not
 not
 if-goto WHILE_END0
 push local 0
@@ -235,40 +256,23 @@ add
 pop pointer 1
 push that 0
 add
-push local 1
-push static 2
-add
-pop pointer 1
-push that 0
+pop local 2
+push local 2
+push local 2
 call Math.multiply 2
 push argument 0
-lt
-push local 0
-push local 1
-push static 2
-add
-pop pointer 1
-push that 0
-add
-push local 1
-push static 2
-add
-pop pointer 1
-push that 0
+gt
+not
+push local 2
+push local 2
 call Math.multiply 2
-or
-push argument 0
-eq
+push constant 0
+gt
+and
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
-push local 0
-push local 1
-push static 2
-add
-pop pointer 1
-push that 0
-add
+push local 2
 pop local 0
 label IF_FALSE0
 push local 1
@@ -282,7 +286,7 @@ return
 function Math.max 0
 push argument 0
 push argument 1
-lt
+gt
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
@@ -300,11 +304,11 @@ lt
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
-push argument 1
+push argument 0
 return
 goto IF_END0
 label IF_FALSE0
-push argument 0
+push argument 1
 return
 label IF_END0
 function Math.abs 0
@@ -344,3 +348,14 @@ label IF_FALSE0
 push constant 0
 return
 label IF_END0
+function Math.mod 1
+push argument 0
+push argument 1
+call Math.divide 2
+pop local 0
+push argument 0
+push local 0
+push argument 1
+call Math.multiply 2
+sub
+return

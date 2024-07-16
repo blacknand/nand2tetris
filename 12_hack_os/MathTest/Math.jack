@@ -59,38 +59,57 @@ class Math {
      *  When a Jack compiler detects the division operator '/'
      *  an an expression, it handles it by invoking this method.
      *  Thus, x/y and Math.divide(x,y) return the same value. */
-    function int divide(int x, int y) {
-        var int q, doubleQ;
-        if (y > x) { return 0; }
-        let q = Math.divide(x, (y + y));
+     function int divide(int x, int y) {
+        var int absX, absY, q, doubleQ, result;
+        var boolean negX, negY;
+        
+        let negX = x < 0;
+        let negY = y < 0;
+        let absX = Math.abs(x);
+        let absY = Math.abs(y);
+
+        if (absY > absX) { return 0; }
+        let q = Math.divide(absX, (absY + absY));
         let doubleQ = q + q;
-        if ((x - doubleQ * y) < y) { return q + q; }
-        else { return (q + q) + 1; }
+        if (absX - (doubleQ * absY) < absY) {
+            let result = doubleQ;
+        } else {
+            let result = doubleQ + 1;
+        }
+    
+        if (negX = negY) {
+            return result;      // Positive
+        } else {
+            return -result;     // Negative
+        }
     }
 
     /** Returns the integer part of the square root of x. */
+    // This function does not work at all!
     function int sqrt(int x) {
-        var int y, j;
+        var int y, j, approx;
         let y = 0;
         let j = 7;      // 2 / 2 - 1 for 16 bit ints, n == 16
-        while (j > 0 | j = 0) {
-            if (((y + twoToThe[j]) * twoToThe[j]) < x | ((y + twoToThe[j]) * twoToThe[j]) = x) { let y = y + twoToThe[j]; }
+        while (~(j < 0)) {
+            let approx = y + twoToThe[j];
+            if (~((approx * approx) > x) & ((approx * approx) > 0)) { let y = approx; }     // Mitigate overflow
             let j = j - 1;
         }
         return y;
     }
 
+
     /** Returns the greater value. */
     function int max(int a, int b) {
-        if (a < b) { return a; }
+        if (a > b) { return a; }
         else { return b; }
 
     }
 
     /** Returns the smaller value. */
     function int min(int a, int b) {
-        if (a < b) { return b; }
-        else { return a; }
+        if (a < b) { return a; }
+        else { return b; }
     }
 
     /** Returns the absolute value of x. */
@@ -105,5 +124,13 @@ class Math {
     function boolean bit(int x, int i) {
         if (~((x & twoToThe[i]) = 0)) { return true; }
         else { return false; }
+    }
+
+    /** Returns the remainder part of x/y */
+    function int mod(int x, int y) {
+        var int q;
+        
+        let q = Math.divide(x, y);
+        return x - (q*y);
     }
 }
