@@ -10,44 +10,85 @@
  * string-oriented operations.
  */
 class String {
+    field String str;
+    field int length;
 
     /** constructs a new empty string with a maximum length of maxLength
      *  and initial length of 0. */
     constructor String new(int maxLength) {
-    }
+        let str = String.new(maxLength);
+        let length = 0;
+    }   
 
     /** Disposes this string. */
     method void dispose() {
+        do Memory.deAlloc(str);
     }
 
     /** Returns the current length of this string. */
     method int length() {
+        return length;
     }
 
     /** Returns the character at the j-th location of this string. */
     method char charAt(int j) {
+        return str[j];
     }
 
     /** Sets the character at the j-th location of this string to c. */
     method void setCharAt(int j, char c) {
+        let str[j] = c;
     }
 
     /** Appends c to this string's end and returns this string. */
     method String appendChar(char c) {
+        var String temp;
+        var int i;
+        let temp = String.new(length + 1);
+        let i = 0;
+        while (i < length) {
+            let temp[i] = str[i];
+            let i = i + 1;
+        }
+        let temp[length + 1] = c;
+        let length = length + 1;
+        return temp;
     }
 
     /** Erases the last character from this string. */
     method void eraseLastChar() {
+        var String temp;
+        var int i;
+        let temp = String.new(length);
+        let i = 0;
+        while (i < length - 1) {
+            temp[i] = str[i];
+            let i = i - 1;
+        }
+        let str = temp;
     }
 
     /** Returns the integer value of this string, 
      *  until a non-digit character is detected. */
     method int intValue() {
+        var int lastDigit;
+        let lastDigit = Math.divide(val);
     }
 
     /** Sets this string to hold a representation of the given value. */
     method void setInt(int val) {
-    }
+        var int i, val, d;
+        var char c;
+        let val = 0;
+        let i = 0;
+        while (i < length) {
+            let c = String.charAt(i);
+            let d = String.intValue(c);
+            let val = val * 10 + d;
+            let i = i + 1;
+        }
+        return val;
+    } 
 
     /** Returns the new line character. */
     function char newLine() {
