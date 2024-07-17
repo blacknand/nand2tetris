@@ -8,26 +8,92 @@
  * consists of 32,768 words, each holding a 16-bit binary number.
  */ 
 class Memory {
+    static Array memory;
+    static Array freeList;
+    static int heapBase;
 
     /** Initializes the class. */
     function void init() {
+        let memory = 0;
+        let heapBase = 2048;
+        let freeList = heapBase;        // Set to the initial heap
+        let freeList[0] = 0;            // freeList[0] == freeList.size in a language with structs
+        let freeList[1] = 0;            // freeList[1] == freeList.next
+        return;
     }
 
     /** Returns the RAM value at the given address. */
     function int peek(int address) {
+        return memory[address];
     }
 
     /** Sets the RAM value at the given address to the given value. */
     function void poke(int address, int value) {
+        let memory[address] = value;
+        return;
     }
 
     /** Finds an available RAM block of the given size and returns
      *  a reference to its base address. */
     function int alloc(int size) {
+        var int current, previous, bestFit, prevBestFit, bestFitSize, block, blockSize, remaningSize;
+        let current = freeList;     // Initialise current to point to base of heap
+        let previous = -1;
+        let bestFit = -1;
+        let prevBestFit = -1;
+        let bestFitSize = 32767;
+        let block = -1;
+        let blockSize = -1;
+
+        // Traverse freeList using best-fit 
+        while (~(current = 0)) {
+            // If best fit
+            if ((memory[current] < size | memory[current] = size) & memory[current] < bestFitSize) {
+                let bestFit = current;
+                let bestFitSize = memory[current];
+                let prevBestFit = previous;
+            }
+            let previous = current;
+            let current = memory[current + 1];
+        }
+
+        if (bestFit = -1) { return -1; }    // No suitable block found
+
+        let block = bestFit;        // Base address of found size
+        let blockSize = bestFitSize;
+
+        // Update freeList and fields of block to account for allocation
+        if (blockSize = size) {
+            // Exact block fit, remove block from freeList
+            if (prevBestFit = -1) { let freeList = memory[bestFit + 1]; }       // If block is first block in freeList, update freeList head to point to next block
+            else { let memory[prevBestFit + 1] = memory[bestFit + 1]; }         // If block is not fit block in freeList, update next pointer of previous block to skip allocated block
+        } else {
+            // Partial fit, split block
+            let memory[bestFit] = size;                                     // Update size of block to allocated request
+            let remaningSize = bestFit + size;                              // Calculate starting address of new free block
+            let memory[remaningSize] = blockSize - size;                    // Set size of new free block to remaning size after allocation
+            let memory[remaningSize + 1] = memory[bestFit + 1];             // Set next pointer of new free block to original next pointer of allocated block
+            if (prevBestFit = -1) { let freeList = remaningSize; }          // If allocated block was first block in freeList, update freeList head to point to new free block
+            else { let memory[prevBestFit + 1] = remaningSize;  }           // If allocated block was not first block, update next pointer of previous block to point to new free block
+        }
+        return block;
     }
 
     /** De-allocates the given object (cast as an array) by making
      *  it available for future allocations. */
-    function void deAlloc(Array o) {
-    }    
+     function void deAlloc(Array object) {
+        var int current;
+        let current = freeList;
+
+        // Find the end of the free list
+        while (~(memory[current + 1] = 0)) {
+            let current = memory[current + 1];
+        }
+
+        // Append the object to the end of the free list
+        let memory[current + 1] = object;
+        let memory[object + 1] = 0;
+
+        return;
+    }
 }
