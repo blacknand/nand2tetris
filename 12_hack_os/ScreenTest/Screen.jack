@@ -1,0 +1,117 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Screen.jack
+/**
+ * A library of functions for displaying graphics on the screen.
+ * The Hack physical screen consists of 512 rows (indexed 0..511, top to bottom)
+ * of 256 pixels each (indexed 0..255, left to right). The top left pixel on 
+ * the screen is indexed (0,0).
+ */
+class Screen {
+    static boolean currentColour;
+
+    /** Initializes the Screen. */
+    function void init() {
+        do Screen.clearScreen();
+        return;
+    }
+
+    /** Erases the entire screen. */
+    function void clearScreen() {
+        var int address;
+
+        // The screen memory starts at address 16384 and has 8192 words (512 * 256 / 16)
+        let address = 16384;
+        while (address < 16384 + 8192) {
+            do Memory.poke(address, 0);
+            let address = address + 1;
+        }
+        return;
+    }
+
+    /** Sets the current color, to be used for all subsequent drawXXX commands.
+     *  Black is represented by true, white by false. */
+    function void setColor(boolean b) {
+        let currentColour = b;
+        return;
+    }
+
+    /** Draws the (x,y) pixel, using the current color. */
+    function void drawPixel(int x, int y) {
+        // pixel at column 'col' and row 'row' is mapped ontol the col % 16 bit of memory location
+        // 16384 + row * 32 + col / 16
+        var int pixelLocation, locationVal, q, p, m, word, bitmask, i;
+        let pixelLocation = 16384 + y * 32 + x / 16;
+        // Since Jack has no % operator, we implement it here instead
+        let q = x / 16;
+        let p = q * 16;
+        let m = x - p;
+
+        // Bitmask with only m-th bit set to 1, realise << bitshift operator
+        let bitmask = 1;
+        let i = 0;
+        while (i < m) {
+            let bitmask = bitmask * 2;
+            let i = i + 1;
+        }
+
+        let word = Memory.peek(pixelLocation);
+        let word = word | bitmask;
+        do Memory.poke(pixelLocation, word);
+        return;
+    }
+
+    /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
+    function void drawLine(int x1, int y1, int x2, int y2) {
+        var int x, y, dx, dy, diff, a, b;
+        let x = x1;
+        let y = y1;
+        let dx = x2 - x;
+        let dy = y2 - y;
+        let a = 0;
+        let b = 0;
+        let diff = 0;
+        while ((a < dx | a = dx) & (b < dy | b = dy)) {
+            do Screen.drawPixel(x + a, y + b);
+            if (diff < 0) {
+                let a = a + 1;
+                let diff = diff + dy;
+            } else {
+                let b = b + 1;
+                let diff = diff - dx;
+            }
+        }
+        return;
+    }
+
+    /** Draws a filled rectangle whose top left corner is (x1, y1)
+     *  and bottom right corner is (x2,y2), using the current color. */
+    function void drawRectangle(int x1, int y1, int x2, int y2) {
+        var int y;
+        do Screen.drawLine(x1, y1, x2, y1);     // Top side
+        do Screen.drawLine(x1, y2, x2, y2);     // Bottom side
+        do Screen.drawLine(x1, y1, x1, y2);     // Left side
+        do Screen.drawLine(x2, y1, x2, y2);     // Right side
+
+        // Fill the rectangle
+        let y = y1 + 1;
+        while (y < y2) {
+            do Screen.drawLine(x1, y, x2, y);
+            let y = y + 1;
+        }
+        return;
+    }
+
+    /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
+    function void drawCircle(int x, int y, int r) {
+        var int dy, dx, sqrtCalc;
+        let dy = -r;
+        while (dy < r | dy = r) {
+            let sqrtCalc = Math.sqrt(r * r, dy * dy);
+            do Screen.drawLine(x - sqrtCalc, y + dy, x + sqrtCalc, y + dy);
+            let dy = dy + 1;
+        }
+        return;
+    }
+}
