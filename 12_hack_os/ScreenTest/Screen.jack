@@ -37,18 +37,16 @@ class Screen {
         return;
     }
 
-    /** Draws the (x,y) pixel, using the current color. */
+    /** Draws the (x, y) pixel, using the current color. */
     function void drawPixel(int x, int y) {
-        // pixel at column 'col' and row 'row' is mapped ontol the col % 16 bit of memory location
-        // 16384 + row * 32 + col / 16
-        var int pixelLocation, locationVal, q, p, m, word, bitmask, i;
+        var int pixelLocation, q, p, m, word, bitmask, i;
         let pixelLocation = 16384 + y * 32 + x / 16;
         // Since Jack has no % operator, we implement it here instead
         let q = x / 16;
         let p = q * 16;
         let m = x - p;
 
-        // Bitmask with only m-th bit set to 1, realise << bitshift operator
+        // Bitmask with only m-th bit set to 1, realize << bitshift operator
         let bitmask = 1;
         let i = 0;
         while (i < m) {
@@ -57,7 +55,14 @@ class Screen {
         }
 
         let word = Memory.peek(pixelLocation);
-        let word = word | bitmask;
+
+        // Set or clear the bit based on the current color
+        if (currentColour) {
+            let word = word | bitmask;
+        } else {
+            let word = word & (~bitmask);
+        }
+
         do Memory.poke(pixelLocation, word);
         return;
     }

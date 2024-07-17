@@ -31,7 +31,7 @@ push argument 0
 pop static 0
 push constant 0
 return
-function Screen.drawPixel 8
+function Screen.drawPixel 7
 push constant 16384
 push argument 1
 add
@@ -45,44 +45,60 @@ pop local 0
 push argument 0
 push constant 16
 call Math.divide 2
-pop local 2
-push local 2
+pop local 1
+push local 1
 push constant 16
 call Math.multiply 2
-pop local 3
+pop local 2
 push argument 0
-push local 3
+push local 2
 sub
-pop local 4
-push constant 1
-pop local 6
+pop local 3
+push local 3
+call Math.powerOfTwo 1
+pop local 5
 push constant 0
-pop local 7
+pop local 6
 label WHILE_EXP0
-push local 7
-push local 4
+push local 6
+push local 3
 lt
 not
 if-goto WHILE_END0
-push local 6
+push local 5
 push constant 2
 call Math.multiply 2
-pop local 6
-push local 7
+pop local 5
+push local 6
 push constant 1
 add
-pop local 7
+pop local 6
 goto WHILE_EXP0
 label WHILE_END0
 push local 0
 call Memory.peek 1
-pop local 5
+pop local 4
+push static 0
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push local 4
 push local 5
-push local 6
 or
-pop local 5
-push local 0
+pop local 4
+goto IF_END0
+label IF_FALSE0
+push local 4
+push local 4
 push local 5
+sub
+push constant 1
+sub
+and
+pop local 4
+label IF_END0
+push local 0
+push local 4
 call Memory.poke 2
 pop temp 0
 push constant 0
