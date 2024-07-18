@@ -9,23 +9,22 @@
  * the screen is indexed (0,0).
  */
 class Screen {
+    static Array screen;
     static boolean currentColour;
 
     /** Initializes the Screen. */
     function void init() {
-        do Screen.clearScreen();
+        let screen = 16384;
+        let currentColour = true;
         return;
     }
 
     /** Erases the entire screen. */
     function void clearScreen() {
-        var int address;
-
-        // The screen memory starts at address 16384 and has 8192 words (512 * 256 / 16)
-        let address = 16384;
-        while (address < 16384 + 8192) {
-            do Memory.poke(address, 0);
-            let address = address + 1;
+        var int i;
+        let i = 0;
+        while( i < 8192 ) {
+            let screen[i] = false;
         }
         return;
     }
@@ -39,53 +38,35 @@ class Screen {
 
     /** Draws the (x, y) pixel, using the current color. */
     function void drawPixel(int x, int y) {
-        var int pixelLocation, q, p, m, word, bitmask, i;
-        let pixelLocation = 16384 + y * 32 + x / 16;
-        // Since Jack has no % operator, we implement it here instead
-        let q = x / 16;
-        let p = q * 16;
-        let m = x - p;
-
-        // Bitmask with only m-th bit set to 1, realize << bitshift operator
-        let bitmask = 1;
-        let i = 0;
-        while (i < m) {
-            let bitmask = bitmask * 2;
-            let i = i + 1;
-        }
-
-        let word = Memory.peek(pixelLocation);
-
-        // Set or clear the bit based on the current color
-        if (currentColour) {
-            let word = word | bitmask;
-        } else {
-            let word = word & (~bitmask);
-        }
-
-        do Memory.poke(pixelLocation, word);
-        return;
+        var int address, mask;
+        let address = (y * 32) + (x / 16);
+        let mask = Math.powerOfTwo(x & 15);     // Isolate bit position within word to be turned off/on
+        if (currentColour) { let screen[address] = screen[address] | mask; }
+        else { let screen[address] = screen[address] & ~mask; }
+        return; 
     }
 
     /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
     function void drawLine(int x1, int y1, int x2, int y2) {
-        var int x, y, dx, dy, diff, a, b;
-        let x = x1;
-        let y = y1;
-        let dx = x2 - x;
-        let dy = y2 - y;
-        let a = 0;
-        let b = 0;
-        let diff = 0;
-        while ((a < dx | a = dx) & (b < dy | b = dy)) {
-            do Screen.drawPixel(x + a, y + b);
-            if (diff < 0) {
-                let a = a + 1;
-                let diff = diff + dy;
-            } else {
-                let b = b + 1;
-                let diff = diff - dx;
-            }
+        var int dx, dy, tmp;
+
+        // Always ensure x1 > x2 to make line draw from left to right
+        if (x1 > x2) {
+            let tmp = x1;
+            let x1 = x2;
+            let x2 = tmp;
+            let tmp = y1;
+            let y1 = y2;
+            let y2 = tmp;
+        }
+
+        let dx = x2 - x1;
+        let dy = y2 - y1;
+
+        if (dx = 0) { do Screen.drawVerticalLine(x1, y1, y2); }
+        else {
+            if (dy = 0) { do Screen.drawHorizontalLine(x1, x2, y1); }
+            else { do Screen.drawDiagonalLine(x1, y1, x2, y2, dx, dy); }
         }
         return;
     }
@@ -94,15 +75,10 @@ class Screen {
      *  and bottom right corner is (x2,y2), using the current color. */
     function void drawRectangle(int x1, int y1, int x2, int y2) {
         var int y;
-        do Screen.drawLine(x1, y1, x2, y1);     // Top side
-        do Screen.drawLine(x1, y2, x2, y2);     // Bottom side
-        do Screen.drawLine(x1, y1, x1, y2);     // Left side
-        do Screen.drawLine(x2, y1, x2, y2);     // Right side
-
-        // Fill the rectangle
-        let y = y1 + 1;
-        while (y < y2) {
-            do Screen.drawLine(x1, y, x2, y);
+        
+        let y = y1;
+        while( ~(y > y2) ) {
+            do Screen.drawHorizontalLine(x1, x2, y);
             let y = y + 1;
         }
         return;
@@ -110,13 +86,91 @@ class Screen {
 
     /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
     function void drawCircle(int x, int y, int r) {
-        var int dy, dx, sqrtCalc;
+        var int dx, dy, rSqrd;
         let dy = -r;
-        while (dy < r | dy = r) {
-            let sqrtCalc = Math.sqrt(r * r, dy * dy);
-            do Screen.drawLine(x - sqrtCalc, y + dy, x + sqrtCalc, y + dy);
+        let rSqrd = r * r;
+
+        while (~(dy > r)) {
+            let dx = Math.sqrt(rSqrd - (dy * dy));
+            do Screen.drawHorizontalLine(x - dx, x + dx, y + dy);
             let dy = dy + 1;
         }
+        return;
+    }
+
+    /** The following drawXXXline routines are not apart of the Screen API */
+    function void drawDiagonalLine(int x1, int y1, int x2, int y2, int dx, int dy) {
+        var int a, b, diff, i;
+        let a = 0;
+        let b = 0;
+        let diff = 0;
+
+        if (dy < 0) { let i = -1; }
+        else { let i = 1; }
+
+        while (~(a > dx) & (((i = 1) & ~(b > dy)) | ((i = -1) & ~(b < dy)))) {
+            do Screen.drawPixel(x1 + a, y1 + b);
+            if (diff < 0) {
+                let a = a + 1;
+                let diff = diff + (dy * i);
+            } else {
+                let b = b + i;
+                let diff = diff - dx;
+            }
+        }
+        return;
+    }
+
+    function void drawVerticalLine(int x, int y1, int y2) {
+        var int tmp;
+
+        if (y1 > y2) {
+            let tmp = y1;
+            let y1 = y2;
+            let y2 = tmp;
+        }
+
+        while (~(y1 > y2)) {
+            do Screen.drawPixel(x, y1);
+            let y1 = y1 + 1;
+        }
+
+        return;
+    }
+
+    function void drawHorizontalLine(int x1, int x2, int y) {
+        var int startAddr, endAddr, x1mod, x2mod;
+        
+        let x1mod = x1 & 15;
+        let x2mod = x2 & 15;
+        let startAddr = (y * 32) + (x1 / 16);
+        let endAddr = (y * 32) + (x2 / 16) + (x2mod = 0);
+
+        if (startAddr = endAddr) { do Screen.drawShortHorizontalLine(x1, x2, y); }      // Line starts and ends of same row
+        else {
+            if (~(x1mod = 0)) {
+                let startAddr = startAddr + 1;
+                do Screen.drawShortHorizontalLine(x1, x1 + 16 - x1mod, y);      // Start of line
+            }
+            if (~(x2mod = 0)) {
+                let endAddr = endAddr - 1;
+                do Screen.drawShortHorizontalLine(x2 - x2mod, x2, y);           // End of line
+            }
+            while (~(startAddr > endAddr)) {                                    // Middle of line
+                let screen[startAddr] = currentColour;
+                let startAddr = startAddr + 1;
+            }
+        }
+        
+        return;
+    }
+
+    function void drawShortHorizontalLine(int x1, int x2, int y) {
+        while( ~(x1 > x2) ) {
+            do Screen.drawPixel( x1, y );
+            let x1 = x1 + 1;
+        }
+    
         return;
     }
 }

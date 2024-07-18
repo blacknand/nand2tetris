@@ -134,13 +134,6 @@ class Math {
     }
 
     function int powerOfTwo(int n) {
-        var int result, i;
-        let result = 1;
-        let i = 0;
-        while (i < n) {
-            let result = result * 2;
-            let i = i + 1;
-        }
-        return result;
+        return twoToThe[n];
     }
 }
